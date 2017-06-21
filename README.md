@@ -1,15 +1,12 @@
-# RoboAssistant
----
+# Odie the RoboAssistant
+In this project i will build my first robo assistant, Odie
 
 ## Introduction
 
 ### Author
----
- 
 Andrea Balzano, AI Engineer with background in computer science and physics.
 
 ### Project goals
-------
 create a robo-assistant using Raspberry PI, it's features will be built-up step by step increasing scope and complexity as it goes.
 
 this documentation includes both hardware and software implementation.
@@ -40,7 +37,7 @@ Backend Server
 ## Software required
 
 ### Raspberry PI
-------
+
 Install Rasbian NOOBS available [here](https://www.raspberrypi.org/downloads/noobs/) and then proceed with the installation of the software required for the robot to complete it's tasks.
 
 first upgrade all components 
@@ -54,23 +51,22 @@ and reboot after firmware update
 $ sudo reboot
 ```
 install a few developer tools:
-`$ sudo apt-get install build-essential git cmake pkg-config`
-image I/O packages which allow us to load image file formats such as JPEG, PNG, TIFF, etc.. and then the video I/O packages.
-These packages allow us to load various video file formats as well as work with video streams:
+```
+$ sudo apt-get install build-essential git cmake pkg-config
+```
+Now we need image and video I/O packages to allow us to load various file formats as well as work with video streams:
 
 ```
 $ sudo apt-get install libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev
 $ sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev
 $ sudo apt-get install libxvidcore-dev libx264-dev
 ```
-We need to install the GTK development library so we can compile the `highgui`  sub-module of OpenCV, which allows us to display images to our screen and build simple GUI interfaces:
-`$ sudo apt-get install libgtk2.0-dev`
+We need to install the GTK development library so we can compile the `highgui` sub-module of OpenCV, which allows us to display images to our screen and build simple GUI interfaces:
+```
+$ sudo apt-get install libgtk2.0-dev
+```
 
-and follow the guides to connect over VNC or SSH - X11 for you desktop or laptop to control the PI remotely.
-
-follow the guides to complete this tasks
-
-TODO: add link to guide.
+follow the guides to connect over [VNC](https://www.raspberrypi.org/documentation/remote-access/vnc/) or [SSH - X11](https://www.raspberrypi.org/documentation/remote-access/) for you desktop or laptop to control the PI remotely.
 
 #### OpenCV
 ------
