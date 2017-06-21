@@ -82,7 +82,7 @@ follow the installation guide
 follow the installation guide
 [Snowboy Documentation](https://snowboy.kitt.ai/)
 
-#### Flite
+#### Pico TTS
 
 
 
@@ -114,5 +114,63 @@ in case the *text to speech* function is too expensive to run on the PI once all
 [Architecture]: https://github.com/Drea1989/Odie_robo_assistant/blob/master/architecture%20graph.jpg "Architecture"
 
 ![Architecture]
+
+
+## Components
+
+### Wake on Hotword
+
+### Audio / video streaming
+
+### Basic Computer Vision
+
+#### Boxes bindings
+
+#### image preprocessing
+
+### Text to speech
+
+### Speech Recognition
+
+#### speech to text
+
+#### Artificial Conversational Entity
+
+### Advanced Computer Vision
+
+#### object recognition
+
+#### face recognition
+
+### Interaction DB
+
+#### Users data
+
+#### common sentences
+
+### Path Planning
+
+#### face tracking
+
+#### object following
+
+### Decision Making
+
+#### motion controlling
+
+#### camera controlling
+
+#### command comprhension
+
+#### chatting
+
+#### fail safe conversations
+
+### Enhancements DB
+
+#### training examples
+
+#### failed detections
+
 
 
