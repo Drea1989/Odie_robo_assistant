@@ -40,6 +40,12 @@ Backend Server
 
 Install Rasbian NOOBS available [here](https://www.raspberrypi.org/downloads/noobs/) and then proceed with the installation of the software required for the robot to complete it's tasks.
 
+##### Connect to the PI
+
+follow the guides to connect over [VNC](https://www.raspberrypi.org/documentation/remote-access/vnc/) or [SSH - X11](https://www.raspberrypi.org/documentation/remote-access/) for you desktop or laptop to control the PI remotely.
+
+##### Install Software
+
 first upgrade all components 
 ```
 $ sudo apt-get update
@@ -66,20 +72,36 @@ We need to install the GTK development library so we can compile the `highgui` s
 $ sudo apt-get install libgtk2.0-dev
 ```
 
-follow the guides to connect over [VNC](https://www.raspberrypi.org/documentation/remote-access/vnc/) or [SSH - X11](https://www.raspberrypi.org/documentation/remote-access/) for you desktop or laptop to control the PI remotely.
-
 #### OpenCV
 ------
 follow the installation guide
 [OpenCV Documentation](http://opencv.org/)
 
-### Snowboy
+#### Snowboy
 ------
 follow the installation guide
 [Snowboy Documentation](https://snowboy.kitt.ai/)
 
+### Ubuntu Server
+
+#### anaconda Python 3
+
+TODO: Optional Intel environment
+
+TODO: create requirement.txt file for python packages
+
+#### CUDA
+
+#### TensorFlow
+
+#### Keras
+
+
 ## Architecture
 
-This project will leverage the computing power of the backend server to process the most expensive tasks and the Raspberry PI hardware for what i call *life support* functions as per graph below
+This project will leverage the computing power of the backend server to process the most expensive tasks and the Raspberry PI hardware for what i call *life support* functions,
+in case of communication drops-out with the server i will have the trained models available on the PI as well in order to provide an emergency backup for the robot to fail-safe.
 
-![alt text](C:\Users\andre\OneDrive\RoboAssistant\architecturegraph.jpg "Architecture")
+[Architecture]: https://github.com/Drea1989/Odie_robo_assistant/blob/master/architecture%20graph.jpg "Architecture"
+
+![Architecture]
