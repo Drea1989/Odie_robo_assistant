@@ -84,7 +84,7 @@ follow the installation guide
 
 #### Pico TTS
 
-
+#### Flask
 
 #### Nginx 
 
@@ -132,15 +132,18 @@ in case the *text to speech* function is too expensive to run on the PI once all
 
 ### Speech Recognition
 
-#### speech to text
-
 #### Artificial Conversational Entity
+TODO: Sequence-to-Sequence Models 
+
+#### speech to text
 
 ### Advanced Computer Vision
 
 #### object recognition
 
 #### face recognition
+
+#### optical character recognition
 
 ### Interaction DB
 
@@ -154,13 +157,21 @@ in case the *text to speech* function is too expensive to run on the PI once all
 
 #### object following
 
+#### Search
+
+### Natural Language Processing
+
+#### words embedding
+
+TODO: Skip-gram Words2Vec
+
 ### Decision Making
 
 #### motion controlling
 
 #### camera controlling
 
-#### command comprhension
+#### command comprehension
 
 #### chatting
 
