@@ -3,6 +3,8 @@ In this project i will build my first robo assistant, Odie
 
 ## Introduction
 
+This build includes Open Source products created by 3rd parties, the leverage of existing solutions makes the product more robust and speeds up the implementation, there is no need to reinvent the wheel.
+
 ### Author
 Andrea Balzano, AI Engineer with background in computer science and physics.
 
@@ -120,15 +122,30 @@ in case the *text to speech* function is too expensive to run on the PI once all
 
 ### Wake on Hotword
 
+Snowboy provided a light and effective hotword detection model, we will train it using our own word 'Odie' since it's the name of the robot.
+
 ### Audio / video streaming
+
+Python webservices will provide streaming for video and audio
 
 ### Basic Computer Vision
 
 #### Boxes bindings
 
+to avoid latency in the object and face recognition we will use the light OpenCV implementation to find bindings boxes and crop / divide the images to only the parts of interest.
+
+this will avoid to run expensive object recognition models on images without content as well as improve accuracy by subdividing the picture by object contained.
+
+
 #### image preprocessing
 
+to help navigation we need to preprocess the data by finding edges, removing background and find shapes. the OpenCV pre-built models can quickly prepare the data for DNN capable of driving the robot. this step might be moved to the backend server if the computation is too expensive. 
+
 ### Text to speech
+
+i did text multiple open source TTS platforms and voices like Flite and Espeak.
+
+Pico provided the best experience with a more clear pronunciation and less metallic sound. 
 
 ### Speech Recognition
 
@@ -137,25 +154,43 @@ TODO: Sequence-to-Sequence Models
 
 #### speech to text
 
+Mozilla DeepSpeech
+
 ### Advanced Computer Vision
 
 #### object recognition
 
+Tensorflow Inception with transfer learning to train with real life situation
+
 #### face recognition
+
+DNN architecture for face detection and expression recognition
 
 #### optical character recognition
 
+TODO: research for open source models
+
 ### Interaction DB
+
 
 #### Users data
 
+SQLScript DB
+
 #### common sentences
+
+TODO: exploring SQL or NO-SQL architecture
+
 
 ### Path Planning
 
 #### face tracking
 
+use camera pan and tilt to keep the face at the centre of the image
+
 #### object following
+
+follow a target object(can be a person) using motion
 
 #### Search
 
