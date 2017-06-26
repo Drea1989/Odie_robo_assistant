@@ -30,7 +30,7 @@ this build is designed for the following OS:
 
 Raspberry PI
 
-* Rasbian Jessie 8.0
+* Rasbian 8.0 Jessie
 
 Backend Server
 
@@ -86,10 +86,58 @@ follow the installation guide
 
 #### Pico TTS
 
+fist install editor to change source file
+
+```
+$ sudo apt-get install gedit
+```
+
+then uncomment the *deb-src* line using:
+
+```
+$ sudo gedit /etc/apt/sources.list
+```
+
+and run `$ sudo apt-get update` to update the sources
+
+then run the following commands:
+```
+$ sudo apt-get install libttspico0
+$ sudo apt-get install libttspico-utils
+```
+
+and test that it's all working:
+
+```
+pico2wave -w test.wav "it works! "
+aplay test.wav
+```
+
 #### Flask
+
+create a virtual environment for Flask
+```
+$ sudo pip install virtualenv
+$ mkdir webapp
+$ cd webapp
+$ virtualenv venv 
+```
+
+to activate the environments use `$ . venv/bin/activate`
+
+to exit use `deactivate`
+
+while it is active run this command to install flask
+
+```
+$ pip install Flask
+```
 
 #### Nginx 
 
+```
+sudo apt-get nginx
+```
 
 ### Ubuntu Server
 
@@ -102,6 +150,8 @@ TODO: create requirement.txt file for python packages
 #### CUDA
 
 #### TensorFlow
+
+##### TensorFlow Serving
 
 #### Keras
 
@@ -122,7 +172,7 @@ in case the *text to speech* function is too expensive to run on the PI once all
 
 ### Wake on Hotword
 
-Snowboy provided a light and effective hotword detection model, we will train it using our own word 'Odie' since it's the name of the robot.
+Snowboy provided a light and effective hotword detection model, we will train it using our own word 'Odie' the name of the robot.
 
 ### Audio / video streaming
 
@@ -143,14 +193,17 @@ to help navigation we need to preprocess the data by finding edges, removing bac
 
 ### Text to speech
 
-i did text multiple open source TTS platforms and voices like Flite and Espeak.
+i did test multiple open source TTS platforms and voices like Flite and Espeak.
 
 Pico provided the best experience with a more clear pronunciation and less metallic sound. 
 
 ### Speech Recognition
 
 #### Artificial Conversational Entity
+
 TODO: Sequence-to-Sequence Models 
+
+based on TensorFlow implementations : lm_1b, SyntaxNet/DRAGNN, textsum
 
 #### speech to text
 
@@ -160,15 +213,19 @@ Mozilla DeepSpeech
 
 #### object recognition
 
-Tensorflow Inception with transfer learning to train with real life situation
+Tensorflow Xception model with transfer learning to train with real life images
+
+considering also TensorFlow object_detection
 
 #### face recognition
 
-DNN architecture for face detection and expression recognition
+DNN architecture based on Xception for face expression and recognition
+
+MMI Facial Expression Database for training and Xception based architecture
 
 #### optical character recognition
 
-TODO: research for open source models
+DNN based on TensorFlow implementation of attention_ocr
 
 ### Interaction DB
 
@@ -194,6 +251,8 @@ follow a target object(can be a person) using motion
 
 #### Search
 
+based on TensorFlow implementation of cognitive_mapping_and_planning
+
 ### Natural Language Processing
 
 #### words embedding
@@ -204,19 +263,32 @@ TODO: Skip-gram Words2Vec
 
 #### motion controlling
 
+sensor fusion
+
 #### camera controlling
+
+pan/tilt controller
 
 #### command comprehension
 
+task understanding
+
 #### chatting
 
+create user DB
+
 #### fail safe conversations
+
+save conversations and audio/video files to enhancements DB
 
 ### Enhancements DB
 
 #### training examples
 
+fill new training examples
+
 #### failed detections
 
+failed interactions
 
 
