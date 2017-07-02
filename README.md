@@ -3,7 +3,7 @@ In this project i will build my first robo assistant, Odie
 
 ## Introduction
 
-This build includes Open Source products created by 3rd parties, the leverage of existing solutions makes the product more robust and speeds up the implementation, there is no need to reinvent the wheel.
+This build includes Open Source products created by 3rd parties, leverage existing solutions makes the product more robust and speeds up the implementation, there is no need to reinvent the wheel.
 
 ### Author
 Andrea Balzano, AI Engineer with background in computer science and physics.
@@ -20,6 +20,9 @@ the hardware is mostly made of plug and play kits since the scope of the build i
 * Raspberry PI 3
 * Alphabot 2 for PI
 * Raspberry PI camera
+* usb sound card
+* 3.5mm jack microphone
+* 3.5mm jack speaker
 * HC-SR04 sonar sensors
 * battery Pack
 * Backend Server
@@ -36,7 +39,7 @@ Backend Server
 
 * Ubuntu 16.04
 
-## Software required
+## Software required and Installation Guide
 
 ### Raspberry PI
 
@@ -74,6 +77,38 @@ We need to install the GTK development library so we can compile the `highgui` s
 $ sudo apt-get install libgtk2.0-dev
 ```
 
+#### sound card
+
+lookup the audio devices with `aplay -l`
+
+All we need to do is update the sound card index in the Alsa configuration. Open `alsa.conf` with
+```
+sudo nano /usr/share/alsa/alsa.conf
+```
+
+and replace the card number in these lines :
+
+```
+defaults.ctl.card 0
+defaults.pcm.card 0
+```
+
+like these :
+
+```
+defaults.ctl.card 1
+defaults.pcm.card 1
+```
+then `reboot`
+
+test the audio `speaker-test -c2 -twav`
+
+to change levels use `alsamixer`
+
+```
+sudo apt-get install mplayer2
+```
+
 #### OpenCV
 ------
 follow the installation guide
@@ -85,6 +120,7 @@ follow the installation guide
 [Snowboy Documentation](https://snowboy.kitt.ai/)
 
 #### Pico TTS
+---
 
 fist install editor to change source file
 
@@ -150,6 +186,7 @@ TODO: create requirement.txt file for python packages
 #### CUDA
 
 #### TensorFlow
+from source architecture kaby lake
 
 ##### TensorFlow Serving
 
@@ -176,7 +213,7 @@ Snowboy provided a light and effective hotword detection model, we will train it
 
 ### Audio / video streaming
 
-Python webservices will provide streaming for video and audio
+Python webservices running on the Pi will provide streaming for video and audio, these will be the inputs for the backend.
 
 ### Basic Computer Vision
 
@@ -227,16 +264,18 @@ MMI Facial Expression Database for training and Xception based architecture
 
 DNN based on TensorFlow implementation of attention_ocr
 
-### Interaction DB
+### Interactions DB
 
 
 #### Users data
 
-SQLScript DB
+MySQL
 
-#### common sentences
+#### Non Structured Data
 
-TODO: exploring SQL or NO-SQL architecture
+MongoDb is the platform of choice.
+
+commons sentenses and enhancement DB will stor information on how this data is catalogued to facilitate improvement for later training.
 
 
 ### Path Planning
@@ -269,17 +308,67 @@ sensor fusion
 
 pan/tilt controller
 
-#### command comprehension
+#### Brain
 
-task understanding
+Odie's brain is created with a modular architecture, configuration files will be created in YAML format.
+
+the Brain module loads all the configuration files (Neurons) at startup in the brain.yml file with the following syntax:
+
+```YAML
+  - includes:
+      - path/to/sub_brain.yml
+      - path/to/another_sub_brain.yml
+```
+the main unit in the brain is the neuron.
+
+each neuron can accept these signals as input:
+
+* _orders_ spoken by the User 
+* _events_ from sensors reading or scheduled 
+
+and performs one or more tasks, _brain functions_.
+
+below an example:
+
+```YAML
+
+  - Neuron: "Say-hello"
+    triggers:
+      - order: "say hello"
+    functions:      
+      - say:
+          message: "Hello, sir"    
+```
+
+in detail:
+
+**Neuron** is the Unique ID of the Neuron, It only accepts alphanumeric and dash.
+
+**triggers** is the list of input actions. Any of the signals will trigger the set of output actions.
+
+**functions** are the modules that will be executed when the input action is triggered. 
+More than one function can be triggered by the same input action.
+This declaration contains a list (because it starts with a "-") of functions
+
+The order of execution is defined by the order in which they are listed in functions declaration.
+
+Some functions need parameters that can be passed as arguments following the syntax below:
+
+```YAML
+functions:
+    - function_name:
+        parameter1: "value1"
+        parameter2: "value2"
+```
 
 #### chatting
 
-create user DB
+create user DB where to store information about the people who interacted with Odie, images will be stored with an ID that links to the user in order to recognise people.
 
 #### fail safe conversations
 
-save conversations and audio/video files to enhancements DB
+we will create a set of neurons that will be triggered in case an action is not understood to log audio/video files into the enhancements DB of the backend server for later improvements.
+
 
 ### Enhancements DB
 
