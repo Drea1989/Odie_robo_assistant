@@ -1,4 +1,3 @@
-# Odie the RoboAssistant
 In this project i will build my first robo assistant, Odie
 
 ## Introduction
@@ -15,8 +14,14 @@ this documentation includes both hardware and software implementation.
 
 the hardware is mostly made of plug and play kits since the scope of the build is the AI that controls the robot's functions.
 
-### hardware components
-------
+## hardware
+
+#### Notes on the Hardware
+
+the Alphabot 2 for PI turned out to be not the best option for the chassis of the rover, it is very small with littler room for the additional component needed and it is powered by only 2 batteries, insufficient to power the PI, the sensors and the motors, I will work on adding a trailer to carry the extra battery pack as I suggest to look for a different chassis.
+
+### Components
+
 * Raspberry PI 3
 * Alphabot 2 for PI
 * Raspberry PI camera
@@ -27,8 +32,10 @@ the hardware is mostly made of plug and play kits since the scope of the build i
 * battery Pack
 * Backend Server
 
+## Software 
+
 ### OS supported
-------
+
 this build is designed for the following OS:
 
 Raspberry PI
@@ -101,7 +108,7 @@ defaults.pcm.card 1
 ```
 then `reboot`
 
-test the audio `speaker-test -c2 -twav`
+test the audio `speaker-test -c2 -twav` when you are ready to stop it `ctrl+c` 
 
 to change levels use `alsamixer`
 
@@ -113,6 +120,9 @@ sudo apt-get install mplayer2
 ------
 follow the installation guide
 [OpenCV Documentation](http://opencv.org/)
+
+pip install "picamera[array]"
+sudo apt-get install vlc
 
 #### Snowboy
 ------
@@ -146,7 +156,7 @@ and test that it's all working:
 
 ```
 pico2wave -w test.wav "it works! "
-aplay test.wav
+mplayer test.wav
 ```
 
 #### Flask
@@ -200,9 +210,7 @@ in case of communication drops-out with the server i will have the trained model
 
 in case the *text to speech* function is too expensive to run on the PI once all the services are running i will review the architecture moving this function to the backend server.
 
-[Architecture]: https://github.com/Drea1989/Odie_robo_assistant/blob/master/architecture%20graph.jpg "Architecture"
-
-![Architecture]
+![Architecture](https://github.com/Drea1989/Odie_robo_assistant/blob/master/architecture%20graph.jpg)
 
 
 ## Components
@@ -213,7 +221,7 @@ Snowboy provided a light and effective hotword detection model, we will train it
 
 ### Audio / video streaming
 
-Python webservices running on the Pi will provide streaming for video and audio, these will be the inputs for the backend.
+Python web services running on the Pi will provide streaming for video and audio, these will be the inputs for the backend.
 
 ### Basic Computer Vision
 
@@ -244,7 +252,7 @@ based on TensorFlow implementations : lm_1b, SyntaxNet/DRAGNN, textsum
 
 #### speech to text
 
-Mozilla DeepSpeech
+Considering Mozilla DeepSpeech and Neon implementation of DeepSpeech2 becuase of the availability of pretrained models.
 
 ### Advanced Computer Vision
 
@@ -256,7 +264,7 @@ considering also TensorFlow object_detection
 
 #### face recognition
 
-DNN architecture based on Xception for face expression and recognition
+Xception DNN architecture with learning transfer for face expression and recognition
 
 MMI Facial Expression Database for training and Xception based architecture
 
@@ -269,24 +277,24 @@ DNN based on TensorFlow implementation of attention_ocr
 
 #### Users data
 
-MySQL
+MySQL for user data and link to profile image ID for authentication. 
 
 #### Non Structured Data
 
 MongoDb is the platform of choice.
 
-commons sentenses and enhancement DB will stor information on how this data is catalogued to facilitate improvement for later training.
+commons sentences and enhancement DB will store information on how this data is catalogued to facilitate improvement for later training.
 
 
 ### Path Planning
 
 #### face tracking
 
-use camera pan and tilt to keep the face at the centre of the image
+use camera pan and tilt to keep the face at the center of the image.
 
 #### object following
 
-follow a target object(can be a person) using motion
+follow a target object(can be a person) using motor controlling
 
 #### Search
 
@@ -300,11 +308,11 @@ TODO: Skip-gram Words2Vec
 
 ### Decision Making
 
-#### motion controlling
+#### motion controller
 
 sensor fusion
 
-#### camera controlling
+#### camera controller
 
 pan/tilt controller
 
@@ -331,7 +339,6 @@ and performs one or more tasks, _brain functions_.
 below an example:
 
 ```YAML
-
   - Neuron: "Say-hello"
     triggers:
       - order: "say hello"
@@ -363,7 +370,7 @@ functions:
 
 #### chatting
 
-create user DB where to store information about the people who interacted with Odie, images will be stored with an ID that links to the user in order to recognise people.
+create user DB where to store information about the people who interacted with Odie, images will be stored with an ID that links to the user in order to train the authentication model.
 
 #### fail safe conversations
 
