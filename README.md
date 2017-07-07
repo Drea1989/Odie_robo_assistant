@@ -16,7 +16,7 @@ this documentation includes both hardware and software implementation.
 
 the hardware is mostly made of plug and play kits since the scope of the build is the AI that controls the robot's functions.
 
-## hardware
+# hardware
 
 #### Notes on the Hardware
 
@@ -34,7 +34,7 @@ the Alphabot 2 for PI turned out to be not the best option for the chassis of th
 * battery Pack
 * Backend Server
 
-## Software 
+# Software
 
 ### OS supported
 
@@ -204,8 +204,9 @@ from source architecture kaby lake
 
 #### Keras
 
+### Neon
 
-## Architecture
+# Architecture
 
 This project will leverage the computing power of the backend server to process the most expensive tasks and the Raspberry PI hardware for what i call *life support* functions,
 in case of communication drops-out with the server i will have the trained models available on the PI in order to provide an emergency backup to fail-safe.
@@ -214,111 +215,7 @@ in case the *text to speech* function is too expensive to run on the PI once all
 
 ![Architecture](https://github.com/Drea1989/Odie_robo_assistant/blob/master/images/architecture%20graph.jpg)
 
-
-## Components
-
-### Wake on Hotword
-
-Snowboy provided a light and effective hotword detection model, we will train it using our own word 'Odie' the name of the robot.
-
-### Audio / video streaming
-
-Python web services running on the Pi will provide streaming for video and audio, these will be the inputs for the backend.
-
-### Basic Computer Vision
-
-#### Boxes bindings
-
-to avoid latency in the object and face recognition we will use the light OpenCV implementation to find bindings boxes and crop / divide the images to only the parts of interest.
-
-this will avoid to run expensive object recognition models on images without content as well as improve accuracy by subdividing the picture by object contained.
-
-
-#### image preprocessing
-
-to help navigation we need to preprocess the data by finding edges, removing background and find shapes. the OpenCV pre-built models can quickly prepare the data for DNN capable of driving the robot. this step might be moved to the backend server if the computation is too expensive. 
-
-### Text to speech
-
-i did test multiple open source TTS platforms and voices like Flite and Espeak.
-
-Pico provided the best experience with a more clear pronunciation and less metallic sound. 
-
-### Speech Recognition
-
-#### Artificial Conversational Entity
-
-TODO: Sequence-to-Sequence Models 
-
-based on TensorFlow implementations : lm_1b, SyntaxNet/DRAGNN, textsum
-
-#### speech to text
-
-Considering Mozilla DeepSpeech and Neon implementation of DeepSpeech2 becuase of the availability of pretrained models.
-
-### Advanced Computer Vision
-
-#### object recognition
-
-Tensorflow Xception model with transfer learning to train with real life images
-
-considering also TensorFlow object_detection
-
-#### face recognition
-
-Xception DNN architecture with learning transfer for face expression and recognition
-
-MMI Facial Expression Database for training and Xception based architecture
-
-#### optical character recognition
-
-DNN based on TensorFlow implementation of attention_ocr
-
-### Interactions DB
-
-
-#### Users data
-
-MySQL for user data and link to profile image ID for authentication. 
-
-#### Non Structured Data
-
-MongoDb is the platform of choice.
-
-commons sentences and enhancement DB will store information on how this data is catalogued to facilitate improvement for later training.
-
-
-### Path Planning
-
-#### face tracking
-
-use camera pan and tilt to keep the face at the center of the image.
-
-#### object following
-
-follow a target object(can be a person) using motor controlling
-
-#### Search
-
-based on TensorFlow implementation of cognitive_mapping_and_planning
-
-### Natural Language Processing
-
-#### words embedding
-
-TODO: Skip-gram Words2Vec
-
-### Decision Making
-
-#### motion controller
-
-sensor fusion
-
-#### camera controller
-
-pan/tilt controller
-
-#### Brain
+## Brain
 
 Odie's brain is created with a modular architecture, configuration files will be created in YAML format.
 
@@ -329,12 +226,13 @@ the Brain module loads all the configuration files (Neurons) at startup in the b
       - path/to/sub_brain.yml
       - path/to/another_sub_brain.yml
 ```
+
 the main unit in the brain is the neuron.
 
 each neuron can accept these signals as input:
 
-* _orders_ spoken by the User 
-* _events_ from sensors reading or scheduled 
+- _orders_ spoken by the User 
+- _events_ from sensors reading or scheduled 
 
 and performs one or more tasks, _brain functions_.
 
@@ -370,23 +268,7 @@ functions:
         parameter2: "value2"
 ```
 
-#### chatting
+## Components
 
-create user DB where to store information about the people who interacted with Odie, images will be stored with an ID that links to the user in order to train the authentication model.
-
-#### fail safe conversations
-
-we will create a set of neurons that will be triggered in case an action is not understood to log audio/video files into the enhancements DB of the backend server for later improvements.
-
-
-### Enhancements DB
-
-#### training examples
-
-fill new training examples
-
-#### failed detections
-
-failed interactions
-
+high level detail of each component can be found [here](C:\Users\andre\OneDrive\RoboAssistant\Docs\Components.md)
 
