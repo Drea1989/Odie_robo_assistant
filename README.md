@@ -212,7 +212,7 @@ in case of communication drops-out with the server i will have the trained model
 
 in case the *text to speech* function is too expensive to run on the PI once all the services are running i will review the architecture moving this function to the backend server.
 
-![Architecture](https://github.com/Drea1989/Odie_robo_assistant/blob/master/architecture%20graph.jpg)
+![Architecture](https://github.com/Drea1989/Odie_robo_assistant/blob/master/images/architecture%20graph.jpg)
 
 
 ## Components
