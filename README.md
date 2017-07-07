@@ -1,3 +1,5 @@
+# Odie the Robotic Assistant
+
 In this project i will build my first robo assistant, Odie
 
 ## Introduction
