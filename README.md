@@ -116,5 +116,5 @@ functions:
 
 ## Components
 
-high level detail of each component can be found [here](https://github.com/Drea1989/Odie_robo_assistant/blob/master/Docs/Components.md)
+high level detail of each component can be found
 
