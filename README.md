@@ -50,7 +50,7 @@ Backend Server
 
 ## Software required and Installation Guide
 
-Details of Software with installation guide can be found [here](https://github.com/Drea1989/Odie_robo_assistant/blob/master/docs/InstallationGuide.md)
+Details of Software with installation guide can be found [here](https://github.com/Drea1989/Odie_robo_assistant/blob/master/Docs/InstallationGuide.md)
 
 # Architecture
 
@@ -116,5 +116,5 @@ functions:
 
 ## Components
 
-high level detail of each component can be found [here](https://github.com/Drea1989/Odie_robo_assistant/blob/master/docs/Components.md)
+high level detail of each component can be found [here](https://github.com/Drea1989/Odie_robo_assistant/blob/master/Docs/Components.md)
 
