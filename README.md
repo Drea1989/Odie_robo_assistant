@@ -86,7 +86,7 @@ below an example:
 
 ```YAML
   - name: "Say-hello"
-    triggers:
+    cues:
       - order: "say hello"
     actions:      
       - say:
