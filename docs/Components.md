@@ -12,9 +12,9 @@ Python web sockets running on the Pi will provide streaming for video and audio,
 
 #### Boxes bindings
 
-to avoid latency in the object and face recognition we will use the light OpenCV implementation to find bindings boxes and crop / divide the images to only the parts of interest.
+to avoid latency in the object and face recognition we will use the light OpenCV implementation to find bindings boxes to pass to the tensorflow model.
 
-this will avoid to run expensive object recognition models on images without content as well as improve accuracy by subdividing the picture by object contained. 
+this will avoid to run expensive object recognition models on images without content as well as improve accuracy by preprocessing the picture by objects contained.
 
 #### image preprocessing
 
@@ -24,9 +24,12 @@ to help navigation we need to preprocess the data by finding edges, removing bac
 
 ### Object recognition
 
-Tensorflow Xception model with transfer learning to train with real life images
+Tensorflow Xception model with transfer learning to TensorFlow object_detection,
+this model will be compared with the default implementation and the speed/accuracy trade-off will be further analysed
 
-considering also TensorFlow object_detection
+#### scenary description
+
+Odie will also provide a brief image caption of what it sees, this will be based on im2txt architecture and implemented in tensorflow.
 
 ### face recognition
 
@@ -44,13 +47,15 @@ DNN based on TensorFlow implementation of attention_ocr
 
 i did test multiple open source TTS platforms and voices like Flite and Espeak.
 
-Pico provided the best experience with a more clear pronunciation and less metallic sound. 
+Pico TTS provided the best experience with a more clear pronunciation and less metallic sound. 
 
 ### Speech Recognition
 
 #### speech to text
 
-Considering Mozilla DeepSpeech and Neon implementation of DeepSpeech2 becuase of the availability of pretrained models.
+i did consider Tensorflow Mozilla DeepSpeech and Neon DeepSpeech2.
+
+Neon was preferred because of the availability of pretrained models and the modern architecture.
 
 #### Words embedding
 
@@ -78,9 +83,15 @@ we will create a set of neurons that will be triggered in case an action is not 
 
 ### interactions
 
+PostgreSQL is the database of choice because of the free text search capabilites.
+
+### Brain
+on initialisation the yaml brain file will be parsed and all the neurons saved into a table.
+this table will then be indexed and used to evaluate the STT output to retrieve neurons.
+
 #### Users data
 
-MySQL for user data and link to profile image ID for authentication. 
+user data and link to profile image ID will be stored for biometric authentication and options customisation. 
 
 #### Non Structured Data
 
@@ -92,7 +103,7 @@ commons sentences and enhancement DB will store information on how this data is 
 
 #### training examples
 
-fill new training examples
+provide a neuron to trigger save file for less than optimal results, this will have to save neuron id, function called, parameters and audio/video files related to the event to fill new training examples.
 
 #### failed detections
 
