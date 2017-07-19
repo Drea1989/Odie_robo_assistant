@@ -77,8 +77,8 @@ the main unit in the brain is the neuron.
 
 each neuron can accept these signals as input:
 
-- _orders_ spoken by the User 
-- _events_ from sensors reading or scheduled 
+- __orders__ spoken by the User 
+- __events__ from sensors reading or scheduled 
 
 and performs one or more tasks, _brain functions_.
 
