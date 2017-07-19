@@ -75,22 +75,22 @@ the Brain module loads all the configuration files (Neurons) at startup in the b
 
 the main unit in the brain is the neuron.
 
-each neuron can accept these signals as input:
+each neuron can accept these triggers as input:
 
 - __orders__ spoken by the User 
 - __events__ from sensors reading or scheduled 
 
-and performs one or more tasks, _brain functions_.
+and performs one or more tasks, _actions_.
 
 below an example:
 
 ```YAML
-  - Neuron: "Say-hello"
+  - name: "Say-hello"
     triggers:
       - order: "say hello"
-    functions:      
+    actions:      
       - say:
-          message: "Hello, sir"    
+          message: "Hello"    
 ```
 
 in detail:
@@ -108,8 +108,8 @@ The order of execution is defined by the order in which they are listed in funct
 Some functions need parameters that can be passed as arguments following the syntax below:
 
 ```YAML
-functions:
-    - function_name:
+actions:
+    - action_name:
         parameter1: "value1"
         parameter2: "value2"
 ```
@@ -118,3 +118,9 @@ functions:
 
 high level detail of each component can be found [here](https://github.com/Drea1989/Odie_robo_assistant/blob/master/docs/Components.md)
 
+# License
+Copyright (c) 2017. All rights reserved.
+
+the software is free to use for personal use under the AGPL-3.0 license. For full details see the [license](https://github.com/Drea1989/Odie_robo_assistant/blob/master/LICENSE)
+
+For an Enterprise Version of the software contact the Author at <andrea.balzano@live.it>.
