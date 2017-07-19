@@ -75,22 +75,22 @@ the Brain module loads all the configuration files (Neurons) at startup in the b
 
 the main unit in the brain is the neuron.
 
-each neuron can accept these signals as input:
+each neuron can accept these triggers as input:
 
 - _orders_ spoken by the User 
 - _events_ from sensors reading or scheduled 
 
-and performs one or more tasks, _brain functions_.
+and performs one or more tasks, _actions_.
 
 below an example:
 
 ```YAML
-  - Neuron: "Say-hello"
+  - name: "Say-hello"
     triggers:
       - order: "say hello"
-    functions:      
+    actions:      
       - say:
-          message: "Hello, sir"    
+          message: "Hello"    
 ```
 
 in detail:
@@ -108,8 +108,8 @@ The order of execution is defined by the order in which they are listed in funct
 Some functions need parameters that can be passed as arguments following the syntax below:
 
 ```YAML
-functions:
-    - function_name:
+actions:
+    - action_name:
         parameter1: "value1"
         parameter2: "value2"
 ```
