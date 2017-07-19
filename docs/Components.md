@@ -20,6 +20,27 @@ this will avoid to run expensive object recognition models on images without con
 
 to help navigation we need to preprocess the data by finding edges, removing background and find shapes. the OpenCV pre-built models can quickly prepare the data for DNN capable of driving the robot. this step might be moved to the backend server if the computation is too expensive. 
 
+## Advanced Computer Vision
+
+### Object recognition
+
+Tensorflow Xception model with transfer learning to TensorFlow object_detection,
+this model will be compared with the default implementation and the speed/accuracy trade-off will be further analysed
+
+#### scenary description
+
+Odie will also provide a brief image caption of what it sees, this will be based on im2txt architecture and implemented in tensorflow.
+
+### face recognition
+
+Xception DNN architecture with learning transfer for face expression and recognition
+
+MMI Facial Expression Database for training and Xception based architecture
+
+### optical character recognition
+
+DNN based on TensorFlow implementation of attention_ocr
+
 ## Natural Language Processing
 
 ### Text to speech
@@ -40,7 +61,7 @@ Neon was preferred because of the availability of pretrained models and the mode
 
 TODO: Skip-gram Words2Vec
 
-#### Artificial Conversational Entity
+### Artificial Conversational Entity
 
 TODO: Sequence-to-Sequence Models 
 
@@ -48,32 +69,15 @@ based on TensorFlow implementations : lm_1b, SyntaxNet/DRAGNN, textsum
 
 #### chatting
 
+Odie will use the *wolframalpha 3.0* and *wikipedia 1.4*  Python API to interrogate wolfram|alpha, a computational knowledge engine and wikipedia to be able to answer all the question the user might have.
+
+use *ratelimit* library to regulate api calls for wolfram|alpha  .
+
 create user DB where to store information about the people who interacted with Odie, images will be stored with an ID that links to the user in order to train the authentication model.
 
 #### fail safe conversations
 
 we will create a set of neurons that will be triggered in case an action is not understood to log audio/video files into the enhancements DB of the backend server for later improvements.
-
-## Advanced Computer Vision
-
-### Object recognition
-
-Tensorflow Xception model with transfer learning to TensorFlow object_detection,
-this model will be compared with the default implementation and the speed/accuracy trade-off will be further analysed. 
-
-#### scenary description
-
-Odie will also provide a brief image caption of what it sees, this will be based on im2txt architecture and implemented in tensorflow.
-
-### face recognition
-
-Xception DNN architecture with learning transfer for face expression and recognition
-
-MMI Facial Expression Database for training and Xception based architecture
-
-### optical character recognition
-
-DNN based on TensorFlow implementation of attention_ocr
 
 ## DataBase
 
@@ -131,5 +135,5 @@ pan/tilt servo controller
 
 #### Obstacle Avoidance
 
-sensor fusion
+Analogic sensors fusion
 
