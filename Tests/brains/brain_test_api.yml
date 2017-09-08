@@ -1,0 +1,28 @@
+---
+  - name: "test"
+    cues:
+      - order: "test_order"
+    actions:
+      - say:
+          message:
+            - "test message"
+
+  - name: "test2"
+    cues:
+      - order: "bonjour"
+    actions:
+      - say:
+          message:
+            - "test message"
+  
+  - includes:
+    - included_brain_test.yml
+
+  - name: "test4"
+    cues:
+      - order: "test_order_with_parameter"
+    actions:
+      - say:
+          message:
+            - "test message {{ parameter1 }}"
+

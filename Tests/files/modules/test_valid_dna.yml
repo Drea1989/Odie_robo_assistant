@@ -1,0 +1,10 @@
+---
+  name: "action_test"
+  type: "action"
+  author: "Andrea Balzano"
+
+  odie_supported_version:
+    - 0.1
+
+  tags:
+    - "test"

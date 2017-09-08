@@ -94,3 +94,5 @@ ENV/
 #ignore docs
 architecture graph.pptx
 docs/
+brain_example/
+what to replace.txt

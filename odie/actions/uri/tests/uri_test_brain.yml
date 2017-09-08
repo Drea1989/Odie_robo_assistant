@@ -1,0 +1,71 @@
+---
+  # GET
+  - name: "test-get-url"
+    cues:
+      - order: "test-get-url"
+    actions:
+      - uri:
+          url: "http://jsonplaceholder.typicode.com/posts/1"
+          file_template: "actions/uri/tests/test_get_template.j2"
+
+  # POST
+  - name: "test-post-url"
+    cues:
+      - order: "test-post-url"
+    actions:
+      - uri:
+          url: "http://jsonplaceholder.typicode.com/posts"
+          headers:
+            user-agent: 'my-app/0.0.1'
+            Content-Type: 'application/json'
+          timeout: 12
+          method: POST
+          data_from_file: "actions/uri/tests/data_post_test.json"
+          say_template:
+            - "{{ content.id }}"
+
+  # POST with auth
+  - name: "test-post-url-with-auth"
+    cues:
+      - order: "test-post-url-with-auth"
+    actions:
+      - uri:
+          url: "http://192.168.0.17:8000/app"
+          headers:
+            Content-Type: 'application/json'
+          method: POST
+          user: "admin"
+          password: "secret"
+          data_from_file: "actions/uri/tests/data_post_test.json"
+
+  # PUT
+  - name: "test-put-url"
+    cues:
+      - order: "test-put-url"
+    actions:
+      - uri:
+          url: "http://jsonplaceholder.typicode.com/posts/1"
+          method: PUT
+          data: "{\"id\": 1,\"title\": \"foo\", \"body\": \"bar\", \"userId\": 1}"
+
+  # PATCH
+  - name: "test-patch-url"
+    cues:
+      - order: "test-patch-url"
+    actions:
+      - uri:
+          url: "http://jsonplaceholder.typicode.com/posts/1"
+          method: PATCH
+          data: "{\"title\": \"foo\"}"
+
+  # DELETE
+  - name: "test-delete-url"
+    cues:
+      - order: "test-delete-url"
+    actions:
+      - uri:
+          url: "http://jsonplaceholder.typicode.com/posts/1"
+          method: DELETE
+          timeout: 2
+          say_template:
+            - "{% if status_code==200 %}delete complete{% else %}fail to delete{% endif %}"

@@ -1,0 +1,30 @@
+import time
+import six
+
+from odie.core.ActionModule import ActionModule,  MissingParameterException
+
+
+class Sleep(ActionModule):
+    def __init__(self, **kwargs):
+        super(Sleep, self).__init__(**kwargs)
+        self.seconds = kwargs.get('seconds', None)
+
+        # check parameters
+        if self._is_parameters_ok():
+
+            if isinstance(self.seconds, str) or \
+                    isinstance(self.seconds, six.text_type):
+                self.seconds = float(self.seconds)
+
+            time.sleep(self.seconds)
+
+    def _is_parameters_ok(self):
+        """
+        Check if received parameters are ok to perform operations in the action
+        :return: true if parameters are ok, raise an exception otherwise
+
+        .. raises:: MissingParameterException
+        """
+        if self.seconds is None:
+            raise MissingParameterException("You must set a number of seconds as parameter")
+        return True

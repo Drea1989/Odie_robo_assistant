@@ -1,0 +1,154 @@
+---
+# ---------------------------
+# Odie default settings
+# Use YAML syntax
+# ---------------------------
+
+# ---------------------------
+# Wakeon
+# ---------------------------
+# This is the wakeon that will catch your magic work to wake up Odie
+default_wakeon: "snowboy"
+
+# Wakeon engine configuration
+# Available engine are:
+# - snowboy
+wakeons:
+  - snowboy:
+      pmdl_file: "wakeon/snowboy/resources/odie-en-1samples.pmdl"
+
+
+# ---------------------------
+# Speech to text
+# ---------------------------
+
+# This is the STT that will be used by default
+default_speech_to_text: "google"
+
+speech_to_text:
+  - google:
+      language: "en-US"
+
+
+# ---------------------------
+# Text to speech
+# ---------------------------
+# This is the default TTS that will be used by Odie to talk.
+default_text_to_speech: "pico2wave"
+# where we store generated audio files from TTS engine to reuse them
+cache_path: "/tmp/odie_tts_cache"
+
+text_to_speech:
+  - pico2wave:
+      language: "en-US"
+      cache: True
+  - voxygen:
+      voice: "Agnes"
+      cache: True
+
+# ---------------------------
+# players
+# ---------------------------
+# This is the sound player that will be used by default
+default_player: "mplayer"
+
+# players configuration
+# Available engine are:
+# - mplayer
+# - pyalsaaudio
+# - pyaudioplayer
+# - sounddeviceplayer
+players:
+  - mplayer: {}
+  - pyalsaaudio:
+     device: "default"
+
+# ---------------------------
+# Wake up answers
+# ---------------------------
+# When Odie detect the hotword/wakeon, he will select randomly a phrase in the following list
+# to notify the user that he's listening for orders
+random_wake_up_answers:
+  - "yes men?"
+
+# You can play a sound when Odie detect the hotword/wakeon instead of saying something from
+# the `random_wake_up_answers`.
+# Place here the full path of the sound file or just the name of the file in /usr/lib/odie/sounds
+# The file must be .wav or .mp3 format. By default two file are provided: ding.wav and dong.wav
+random_wake_up_sounds:
+  - "sounds/ding.wav"
+  - "sounds/dong.wav"
+
+# ---------------------------
+# On ready notification
+# ---------------------------
+# This section is used to notify the user when Odie is waiting for a wakeon detection by playing a sound or speak a sentence out loud
+
+# This parameter define if you play the on ready answer:
+# - always: every time Odie is ready to be awaken
+# - never: never play a sound or sentences when odie is ready
+# - once: at the first start of Odie
+play_on_ready_notification: never
+
+# The on ready notification can be a sentence. Place here a sentence or a list of sentence. If you set a list, one sentence will be picked up randomly
+on_ready_answers:
+  - "Odie is ready"
+
+# You can play a sound instead of a sentence.
+# Remove the `on_ready_answers` parameters by commenting it out and use this one instead.
+# Place here the path of the sound file. Files must be .wav or .mp3 format.
+on_ready_sounds:
+  - "sounds/ding.wav"
+  - "sounds/dong.wav"
+
+
+# ---------------------------
+# Rest API
+# ---------------------------
+rest_api:
+  active: True
+  port: 5000
+  password_protected: True
+  login: admin
+  password: secret
+  allowed_cors_origin: False
+
+# ---------------------------
+# Default Neuron
+# ---------------------------
+# Specify an optional default neuron response in case your order is not found.
+default_neuron: "Default-neuron"
+
+# ---------------------------
+# PostgreSQL settings
+# ---------------------------
+# Specify connection parameters to PostgreSQL
+postgres:
+  dbname: odie
+  user : admin
+  password: secret
+  host: localhost
+  port: 5432
+
+# ---------------------------
+# Alphabot settings
+# ---------------------------
+# Specify parameters
+alphabot:
+  enable: False 
+
+# ---------------------------
+# resource directory path
+# ---------------------------
+resource_directory:
+  action: "/tmp/odie/tests/odie_resources_dir/actions"
+  stt: "/tmp/odie/tests/odie_resources_dir/stt"
+  tts: "/tmp/odie/tests/odie_resources_dir/tts"
+  wakeon: "/tmp/odie/tests/odie_resources_dir/wakeon"
+
+# ---------------------------
+# Global files variables
+# /!\ If a variable is defined in different files, the last file defines the value.
+# ---------------------------
+var_files:
+  - "../Tests/settings/variables.yml"

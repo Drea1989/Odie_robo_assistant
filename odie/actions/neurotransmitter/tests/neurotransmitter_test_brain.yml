@@ -1,0 +1,56 @@
+---
+  - name: "direct-link"
+    cues:
+      - order: "direct link"
+    actions:
+      - say:
+          message: "direct launch of neuron 1"
+      - neurotransmitter:
+          direct_link: "neuron-direct-link-1"
+
+  - name: "neuron-direct-link-1"
+    cues:
+      - order: "neuron-direct-link-1"
+    actions:
+      - say:
+          message: "Neuron 1 launched"
+
+  - name: "neuron1"
+    cues:
+      - order: "ask me a question"
+    actions:
+      - say:
+          message: "do you like pizza?"
+      - neurotransmitter:
+          from_answer_link:
+            - neuron: "neuron2"
+              answers:
+                - "love it"
+                - "of course"
+                - "yes"
+            - neuron: "neuron3"
+              answers:
+                - "no"
+          default: "neuron4"
+
+  - name: "neuron2"
+    cues:
+      - order: "neuron2"
+    actions:
+      - say:
+          message: "me too! pizza is my favourite"
+
+
+  - name: "neuron3"
+    cues:
+      - order: "neuron3"
+    actions:
+      - say:
+          message: "it's ok if you don't like pizza"
+
+  - name: "neuron4"
+    cues:
+      - order: "neuron4"
+    actions:
+      - say:
+          message: "sorry i couldn't understand your question"

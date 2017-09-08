@@ -1,0 +1,64 @@
+---
+- name: "neuron1"
+  cues:
+    - order: "enter in neuron 1"
+  actions:
+    - say:
+        message: "question in neuron 1"
+    - neurotransmitter:
+        from_answer_link:
+          - neuron: "neuron2"
+            answers:
+              - "answer neuron1"
+          - neuron: "neuron3"
+            answers:
+              - "other answer neuron1"
+        default: "neuron4"
+    - say:
+        message: "last action in neuron 1"
+
+- name: "neuron2"
+  cues:
+    - order: "neuron2"
+  actions:
+    - say:
+        message: "enter neuron 2"
+    - neurotransmitter:
+        from_answer_link:
+          - neuron: "neuron5"
+            answers:
+              - "neuron5"
+        default: "neuron4"
+
+- name: "neuron3"
+  cues:
+    - order: "neuron3"
+  actions:
+    - say:
+        message: "I enter in neuron 3"
+
+- name: "neuron4"
+  cues:
+    - order: "neuron4"
+  actions:
+    - say:
+        message: "not understood"
+
+
+- name: "neuron5"
+  cues:
+    - order: "neuron5"
+  actions:
+    - say:
+        message: "execution of neuron 5"
+
+- name: "neuron6"
+  cues:
+    - order: "neuron6"
+  actions:
+    - neurotransmitter:
+        from_answer_link:
+          - neuron: "neuron5"
+            answers:
+              - "neuron 6 answer"
+        default: "neuron4"
