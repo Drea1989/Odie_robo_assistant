@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-ENV no_proxy="127.0.0.1,localhost,odie.en"
+ENV no_proxy="127.0.0.1,localhost,odie.fr"
 
 # pico2wav is a multiverse package
 RUN echo "deb http://us.archive.ubuntu.com/ubuntu/ xenial multiverse" >> /etc/apt/sources.list

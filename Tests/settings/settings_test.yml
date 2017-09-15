@@ -15,7 +15,7 @@ default_wakeon: "snowboy"
 # - snowboy
 wakeons:
   - snowboy:
-      pmdl_file: "wakeon/snowboy/resources/odie-en-1samples.pmdl"
+      pmdl_file: "wakeon/snowboy/resources/odie-FR-6samples.pmdl"
 
 
 # ---------------------------
