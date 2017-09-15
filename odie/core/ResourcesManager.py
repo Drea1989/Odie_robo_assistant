@@ -137,7 +137,7 @@ class ResourcesManager(object):
                     "The module %s doest not exist in the path %s" % (module_name.lower(), target_path_to_delete))
 
     @staticmethod
-    def is_settings_ok(resources, dna):
+    def gis_settings_ok(resources, dna):
         """
         Test if required settings files in config of Odie are ok.
         The resource object must not be empty
