@@ -29,7 +29,7 @@ script:
 #  - pytest
   - docker run -it --rm odie-ubuntu1604
   - docker run -it --rm odie-debian8
-  - coverage run --source=odie -m unittest discover
+  - coverage run --source=Tests -m unittest discover
 
 after_success:
   coveralls
