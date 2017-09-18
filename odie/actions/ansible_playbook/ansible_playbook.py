@@ -6,13 +6,13 @@ from ansible.vars import VariableManager
 from ansible.inventory import Inventory
 from ansible.executor.playbook_executor import PlaybookExecutor
 
-from odie.core.actionModule import actionModule, MissingParameterException
+from odie.core.ActionModule import ActionModule, MissingParameterException
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
 
-class Ansible_playbook(actionModule):
+class Ansible_playbook(ActionModule):
     def __init__(self, **kwargs):
         super(Ansible_playbook, self).__init__(**kwargs)
 

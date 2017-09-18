@@ -30,7 +30,7 @@ CORE ACTION: No installation needed.
 | content         | The body content of the server answer. May be JSON serialized and usable in a template | string | {"title": "foo", "body": "bar", "userId": 1} |
 | response_header | Response header from the server.         | dict   | {'Date': 'Sat, 19 Nov 2016 11:17:56 GMT', 'Content-Length': '192', 'Content-Type': 'text/html'} |
 
-## Synapses example
+## Neurons example
 
 Simple call to a server. The default method is GET
 ```yml
@@ -130,7 +130,7 @@ Here, we ask the server to return us the user with ID number 42. We know that th
 }
 ```
 
-Here is the synapse we would use to make Odie speak out loud the name of the user and the name of his company
+Here is the neuron we would use to make Odie speak out loud the name of the user and the name of his company
 ```yml
   - name: "test-get-url-with-template"
     cues:

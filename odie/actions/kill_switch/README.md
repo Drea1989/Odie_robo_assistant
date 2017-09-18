@@ -2,7 +2,7 @@
 
 ## Synopsis
 
-This neuron exits the odie process.
+This neuron exits the Odie process.
 
 ## Installation
 
@@ -16,7 +16,7 @@ No parameters
 
 No returned values
 
-## Synapses example
+## Neuron example
 
 Simple example : 
 

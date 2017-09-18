@@ -54,7 +54,7 @@ If the user say something that is not present in `answers`, he will be redirecte
       - order: "ask me a question"
     actions:
       - say:
-          message: "do you like french fries?"
+          message: "do you like fries?"
       - neurotransmitter:
           from_answer_link:
             - neuron: "neuron2"
@@ -71,14 +71,14 @@ If the user say something that is not present in `answers`, he will be redirecte
       - order: "neuron2"
     actions:
       - say:
-          message: "You like french fries!! Me too! I suppose..."
+          message: "You like fries!! Me too! I suppose..."
 
   - name: "neuron3"
     cues:
       - order: "neuron3"
     actions:
       - say:
-          message: "You don't like french fries. It's ok."
+          message: "You don't like fries. It's ok."
       
   - name: "neuron4"
     cues:
@@ -111,9 +111,9 @@ Neurotransmitter also uses parameters in answers. You can provide parameters to 
     actions:
       - openweathermap:
           api_key: "your-api"
-          lang: "fr"
+          lang: "en"
           temp_unit: "celsius"
-          country: "FR"
+          country: "AU"
           location: "{{ location }}"
           say_template:
           - "Today in {{ location }} the weather is {{ weather_today }} with {{ temp_today_temp }} celsius"

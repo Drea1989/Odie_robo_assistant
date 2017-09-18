@@ -27,7 +27,7 @@ Values are only returned by the action if the async mode is set to `False`.
 | returncode | The returned code of the command. Return 0 if the command was succesfuly exectued, else 1 | int    | 0                             |
 
 
-## Synapses example
+## Neurons example
 
 Simple that will create a file locally
 ```

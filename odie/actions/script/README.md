@@ -24,7 +24,7 @@ Values are only returned by the action if the async mode is set to `False`.
 | output     | The shell output of the command if any. The command "date" will retun "Sun Oct 16 15:50:45 CEST 2016" | string | Sun Oct 16 15:50:45 CEST 2016 |
 | returncode | The returned code of the command. Return 0 if the command was succesfuly exectued, else 1 | int    | 0                             |
 
-## Synapses example
+## Neurons example
 
 Simple example : 
 ```yml

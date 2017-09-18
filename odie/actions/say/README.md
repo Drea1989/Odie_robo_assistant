@@ -18,7 +18,7 @@ CORE ACTION: No installation needed.
 
 No returned values
 
-## Synapses example
+## neurons example
 
 Simple example : 
 

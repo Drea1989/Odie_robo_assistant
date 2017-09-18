@@ -29,9 +29,9 @@ CORE ACTION: No installation needed.
 | year      | Year with century as a decimal number    | string | 2016   |
 
 
-## Synapses example
+## Neurons example
 
-Simple synapse that give the current time with only hours and minutes
+Simple neuron that give the current time with only hours and minutes
 ```yml
 - name: "time"
   cues:
@@ -42,7 +42,7 @@ Simple synapse that give the current time with only hours and minutes
           - "It' {{ hours }} hours and {{ minutes }} minutes"   
 ```
 
-Synapse that give complete date and time with a template file.
+neuron that give complete date and time with a template file.
 ```yml
 - name: "time"
   cues:
