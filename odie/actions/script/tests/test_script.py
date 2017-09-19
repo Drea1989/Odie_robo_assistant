@@ -2,7 +2,7 @@ import os
 import time
 import unittest
 
-from odie.core.NeuronModule import MissingParameterException, InvalidParameterException
+from odie.core.ActionModule import MissingParameterException, InvalidParameterException
 from odie.actions.script.script import Script
 
 
