@@ -100,8 +100,8 @@ setup(
         'odie': [
             'brain.yml',
             'settings.yml',
-            'wakeon/snowboy/armv7l/python35/_snowboydetect.so',
-            'wakeon/snowboy/x86_64/python35/_snowboydetect.so',
+            'wakeon/snowboy/armv7l/python34/_snowboydetect.so',
+            'wakeon/snowboy/x86_64/python34/_snowboydetect.so',
             'wakeon/snowboy/resources/*',
             'sounds/*'
          ],
