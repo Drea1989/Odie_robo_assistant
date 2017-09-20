@@ -129,26 +129,14 @@ def main():
     settings = settings_loader.settings
 
     #create postgres brain table
-    '''
     if settings.postgres:
         pg = settings.postgres
-        engine = PgManager.create_engine(pg.host, pg.port, pg.database, pg.user, pg.password)
-        connection = engine.connect()
-        #name of postgres table and python dictionary
-        try:
-            #connection.execute(brain.insert(),brain)
-            dfbrain = pd.from_dict(brain)
-            dfbrain = dfbrain.drop('actions',axis =1)
-            dfbrain.to_sql("brain", engine)
+        Bsaved = PgManager.save_brain_table(pg = pg,brain = brain)
+        if Bsaved:
             Utils.print_info("postgresql brain saved successfully")
-        except:
-             Utils.print_info("postgresql failed to insert brain")
-        #df.to_sql("table_name", engine)
-        #conn = psycopg2.connect(host=settings.postgres.host,database=settings.postgres.database, user=settings.postgres.user, password=settings.postgres.password)
     else:
-        #TODO: warning for now, when completed 'danger'
-        Utils.print_warning("no PostgreSQL configuration found")
-    '''
+        Utils.print_danger("no PostgreSQL configuration found")
+    
 
 
     #starting Odie
