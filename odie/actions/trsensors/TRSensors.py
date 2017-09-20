@@ -3,14 +3,20 @@
 import RPi.GPIO as GPIO
 import time
 
-CS = 5
-Clock = 25
-Address = 24
-DataOut = 23
-Button = 7
+from odie.core.ActionModule import ActionModule
 
-class TRSensor(object):
+logging.basicConfig()
+logger = logging.getLogger("odie")
+
+class TRSensor(ActionModule):
 	def __init__(self,numSensors = 5):
+		super(TRSensor, self).__init__(**kwargs)
+
+		CS = 5
+		Clock = 25
+		Address = 24
+		DataOut = 23
+		Button = 7
 		self.numSensors = numSensors
 		self.calibratedMin = [0] * self.numSensors
 		self.calibratedMax = [1023] * self.numSensors
@@ -23,17 +29,18 @@ class TRSensor(object):
 		GPIO.setup(DataOut,GPIO.IN,GPIO.PUD_UP)
 		GPIO.setup(Button,GPIO.IN,GPIO.PUD_UP)
 		
-	"""
-	Reads the sensor values into an array. There *MUST* be space
-	for as many values as there were sensors specified in the constructor.
-	Example usage:
-	unsigned int sensor_values[8];
-	sensors.read(sensor_values);
-	The values returned are a measure of the reflectance in abstract units,
-	with higher values corresponding to lower reflectance (e.g. a black
-	surface or a void).
-	"""
+	
 	def AnalogRead(self):
+		"""
+		Reads the sensor values into an array. There *MUST* be space
+		for as many values as there were sensors specified in the constructor.
+		Example usage:
+		unsigned int sensor_values[8];
+		sensors.read(sensor_values);
+		The values returned are a measure of the reflectance in abstract units,
+		with higher values corresponding to lower reflectance (e.g. a black
+		surface or a void).
+		"""
 		value = [0]*(self.numSensors+1)
 		#Read Channel0~channel6 AD value
 		for j in range(0,self.numSensors+1):
@@ -57,22 +64,21 @@ class TRSensor(object):
 					value[j] |= 0x01
 				GPIO.output(Clock,GPIO.HIGH)
 				GPIO.output(Clock,GPIO.LOW)
-			#no mean ,just delay
-#			for i in range(0,6):
-#				GPIO.output(Clock,GPIO.HIGH)
-#				GPIO.output(Clock,GPIO.LOW)
+
 			time.sleep(0.0001)
 			GPIO.output(CS,GPIO.HIGH)
-#		print value[1:]
+		logger.debug("reading: {}".format(value[1:]))
+
 		return value[1:]
 		
-	"""
-	Reads the sensors 10 times and uses the results for
-	calibration.  The sensor values are not returned; instead, the
-	maximum and minimum values found over time are stored internally
-	and used for the readCalibrated() method.
-	"""
+	
 	def calibrate(self):
+		"""
+		Reads the sensors 10 times and uses the results for
+		calibration.  The sensor values are not returned; instead, the
+		maximum and minimum values found over time are stored internally
+		and used for the readCalibrated() method.
+		"""
 		max_sensor_values = [0]*self.numSensors
 		min_sensor_values = [0]*self.numSensors
 		for j in range(0,10):
@@ -96,14 +102,14 @@ class TRSensor(object):
 			if(max_sensor_values[i] < self.calibratedMax[i]):
 				self.calibratedMax[i] = max_sensor_values[i]
 
-	"""
-	Returns values calibrated to a value between 0 and 1000, where
-	0 corresponds to the minimum value read by calibrate() and 1000
-	corresponds to the maximum value.  Calibration values are
-	stored separately for each sensor, so that differences in the
-	sensors are accounted for automatically.
-	"""
 	def	readCalibrated(self):
+		"""
+		Returns values calibrated to a value between 0 and 1000, where
+		0 corresponds to the minimum value read by calibrate() and 1000
+		corresponds to the maximum value.  Calibration values are
+		stored separately for each sensor, so that differences in the
+		sensors are accounted for automatically.
+		"""
 		value = 0
 		#read the needed values
 		sensor_values = self.AnalogRead();
@@ -122,32 +128,32 @@ class TRSensor(object):
 				
 			sensor_values[i] = value
 		
-		#print("readCalibrated",sensor_values)
+		logger.debug("readCalibrated: {}".format(sensor_values))
 		return sensor_values
 			
-	"""
-	Operates the same as read calibrated, but also returns an
-	estimated position of the robot with respect to a line. The
-	estimate is made using a weighted average of the sensor indices
-	multiplied by 1000, so that a return value of 0 indicates that
-	the line is directly below sensor 0, a return value of 1000
-	indicates that the line is directly below sensor 1, 2000
-	indicates that it's below sensor 2000, etc.  Intermediate
-	values indicate that the line is between two sensors.  The
-	formula is:
-
-	   0*value0 + 1000*value1 + 2000*value2 + ...
-	   --------------------------------------------
-			 value0  +  value1  +  value2 + ...
-
-	By default, this function assumes a dark line (high values)
-	surrounded by white (low values).  If your line is light on
-	black, set the optional second argument white_line to true.  In
-	this case, each sensor value will be replaced by (1000-value)
-	before the averaging.
-	"""
+	
 	def readLine(self, white_line = 0):
+		"""
+		Operates the same as read calibrated, but also returns an
+		estimated position of the robot with respect to a line. The
+		estimate is made using a weighted average of the sensor indices
+		multiplied by 1000, so that a return value of 0 indicates that
+		the line is directly below sensor 0, a return value of 1000
+		indicates that the line is directly below sensor 1, 2000
+		indicates that it's below sensor 2000, etc.  Intermediate
+		values indicate that the line is between two sensors.  The
+		formula is:
 
+		   0*value0 + 1000*value1 + 2000*value2 + ...
+		   --------------------------------------------
+				 value0  +  value1  +  value2 + ...
+
+		By default, this function assumes a dark line (high values)
+		surrounded by white (low values).  If your line is light on
+		black, set the optional second argument white_line to true.  In
+		this case, each sensor value will be replaced by (1000-value)
+		before the averaging.
+		"""
 		sensor_values = self.readCalibrated()
 		avg = 0
 		sum = 0
@@ -168,26 +174,14 @@ class TRSensor(object):
 		if(on_line != 1):
 			# If it last read to the left of center, return 0.
 			if(self.last_value < (self.numSensors - 1)*1000/2):
-				#print("left")
+				logger.debug("left")
 				self.last_value = 0;
 	
 			# If it last read to the right of center, return the max.
 			else:
-				#print("right")
+				logger.debug("right")
 				self.last_value = (self.numSensors - 1)*1000
 		else:
 			self.last_value = avg/sum
 		
 		return self.last_value,sensor_values
-	
-
-
-# Simple example prints accel/mag data once per second:
-if __name__ == '__main__':
-	TR = TRSensor()
-	print("TRSensor Example")
-	while True:
-		print(TR.AnalogRead())
-		time.sleep(0.2)
-
-			 

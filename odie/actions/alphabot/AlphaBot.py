@@ -4,6 +4,9 @@ from neopixel import Adafruit_NeoPixel
 
 from odie.core.ActionModule import ActionModule
 
+logging.basicConfig()
+logger = logging.getLogger("odie")
+
 class AlphaBot(ActionModule):
 	"""
 	class to control the movements of the robot
@@ -129,7 +132,7 @@ class AlphaBot(ActionModule):
 					self.buzz()
 			except:
 				self.stop()
-				print("Command error")
+				logger.debug("Command error: {}".format(direction))
 
 	def buzz(self):
 		GPIO.output(BUZ,GPIO.HIGH)
