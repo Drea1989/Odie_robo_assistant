@@ -62,5 +62,4 @@ class Script(ActionModule):
             raise InvalidParameterException("Script not found or is not a file.")
         if not os.access(self.path, os.X_OK):
             raise InvalidParameterException("Script not Executable.")
-
-return True
+        return True
