@@ -8,7 +8,6 @@ from odie.core.ActionModule import ActionModule, MissingParameterException, Inva
 class AsyncShell(threading.Thread):
     """
     Class used to run an asynchronous Shell command
-
     .. notes:: Impossible to get the success code of the command
     """
     def __init__(self, path):
@@ -55,7 +54,6 @@ class Script(ActionModule):
         """
         Check if received parameters are ok to perform operations in the action
         :return: true if parameters are ok, raise an exception otherwise
-
         .. raises:: MissingParameterException, InvalidParameterException
         """
         if self.path is None:
@@ -65,4 +63,4 @@ class Script(ActionModule):
         if not os.access(self.path, os.X_OK):
             raise InvalidParameterException("Script not Executable.")
 
-        return True
+return True
