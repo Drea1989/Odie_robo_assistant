@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-
+import logging
 from odie.core.ActionModule import ActionModule
 
 logging.basicConfig()

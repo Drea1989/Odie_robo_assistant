@@ -7,5 +7,5 @@
     tasks:
       - name: "create a local file"
         file:
-          path: "/tmp/kalliope_text_ansible_playbook.txt"
+          path: "/tmp/odie_text_ansible_playbook.txt"
           state: "touch"

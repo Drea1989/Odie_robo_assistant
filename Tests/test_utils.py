@@ -107,10 +107,10 @@ class TestUtils(unittest.TestCase):
 
         ###
         # /an/unknown/path/odie/
-        dir_path = "../odie/"
+        dir_path = "../Odie_robo_assistant/"
         file_name = "test_real_file_path"
         path_to_test = os.path.join(dir_path, file_name)
-        expected_result = os.path.normpath(os.getcwd() + os.sep + os.pardir + os.sep + "odie" + os.sep + file_name)
+        expected_result = os.path.normpath(os.getcwd() + os.sep + os.pardir + os.sep + "Odie_robo_assistant" + os.sep + file_name)
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 

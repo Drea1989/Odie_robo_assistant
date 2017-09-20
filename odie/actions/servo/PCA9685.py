@@ -3,7 +3,7 @@
 import time
 import math
 import smbus
-
+import logging
 from odie.core.ActionModule import ActionModule, MissingParameterException, InvalidParameterException
 
 logging.basicConfig()

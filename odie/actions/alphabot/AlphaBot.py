@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import logging
 from neopixel import Adafruit_NeoPixel
 
 from odie.core.ActionModule import ActionModule
