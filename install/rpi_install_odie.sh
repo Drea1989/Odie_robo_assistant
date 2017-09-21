@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# This script will install automatically everything needed for Kalliope
-# usage: ./rpi_install_kalliope.sh [<branch_name>]
-# E.g: ./rpi_install_kalliope.sh dev
+# This script will install automatically everything needed for odie
+# usage: ./rpi_install_odie.sh [<branch_name>]
+# E.g: ./rpi_install_odie.sh dev
 # If no branch are set, the master branch will be installed
 
 # name of the branch to install
@@ -31,7 +31,7 @@ libssl-dev libffi-dev sox libatlas3-base mplayer libyaml-dev libpython2.7-dev pu
 postgresql postgresql-contrib cython swig3.0 python-pyaudio python3-pyaudio python3-psycopg2 python3-dialog sox
 
 # this is used to help the RPI
-sudo apt-get install -y libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev
+sudo apt-get install -y libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev libatlas-base-dev
 sudo apt-get install -y libffi-dev python-yaml python-pycparser python-paramiko python-markupsafe apt-transport-https
 echo "Installing system packages...[OK]"
 

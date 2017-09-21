@@ -7,6 +7,32 @@
           message:
             - "Hello"
 
+  - name: "rover-move"
+    cues:
+      - order: "move {{direction}}"
+    actions:
+      - alphabot.setMove:
+          direction: "{{direction}}"
+
+  - name: "rover-look"
+    cues:
+      - order: "look {{direction}}"
+    actions:
+      - Servo.moveCommand:
+          direction: "{{direction}}"
+
+  - name: "rover-startup"
+    cues:
+      - order: "odie initialise"
+    actions:
+      - Servo.initialiseServo
+      - alphabot.setMotor:
+          left: 0
+          right: 0
+      - say:
+        message:
+            - "initialisation completed"
+
   - name: "default-neuron"
     cues:
       - order: "default-neuron-order"
