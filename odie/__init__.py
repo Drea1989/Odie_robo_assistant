@@ -38,7 +38,7 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 # actions available
-ACTION_LIST = ["start", "gui", "install", "uninstall"]
+ACTION_LIST = ["start", "gui", "install", "uninstall","cloud"]
 
 
 def parse_args(args):
@@ -184,6 +184,31 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             Utils.print_info("Ctrl+C pressed. Killing odie")
             sys.exit(0)
+
+    if parser.action == "cloud":
+        if settings.rpi_settings:
+            # init GPIO once
+            RpiUtils(settings.rpi_settings)
+        # load the brain once
+        CloudBrain_loader = BrainLoader(file_path=brain_file)
+        CloudBrain = CloudBrain_loader.brain
+        # then start odie
+        Utils.print_success("Starting odie Cloud")
+        Utils.print_info("Press Ctrl+C for stopping")
+        # catch signal for killing on Ctrl+C pressed
+        signal.signal(signal.SIGINT, signal_handler)
+        # start the state machine
+        try:
+            CloudFlaskAPI(brain=CloudBrain)
+        except (KeyboardInterrupt, SystemExit):
+            Utils.print_info("Ctrl+C pressed. Killing odie")
+        finally:
+            # we need to switch GPIO pin to default status if we are using a Rpi
+            if settings.rpi_settings:
+                logger.debug("Clean GPIO")
+                import RPi.GPIO as GPIO
+                GPIO.cleanup()
+
 
 
 def configure_logging(debug=None):

@@ -26,7 +26,7 @@ FAIL_UPLOAD_FOLDER = '/tmp/odie_cloud/tmp_uploaded_failed_interactions'
 ALLOWED_EXTENSIONS = {'mp3', 'wav','flac','jpg'}
 
 
-class FlaskAPI(threading.Thread):
+class CloudFlaskAPI(threading.Thread):
     def __init__(self, app, port=5000, brain=None, allowed_cors_origin=False):
         """
 
@@ -262,10 +262,8 @@ class FlaskAPI(threading.Thread):
             }
             return jsonify(error=data), 400
 
-    
-
-     @staticmethod
-     def _convert_to_wav(audio_file_path):
+    @staticmethod
+    def _convert_to_wav(audio_file_path):
         """
         If not already .wav, convert an incoming audio file to wav format. Using system avconv (raspberry)
         :param audio_file_path: the current full file path
