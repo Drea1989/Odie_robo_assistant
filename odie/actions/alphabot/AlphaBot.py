@@ -8,21 +8,18 @@ from odie.core.ActionModule import ActionModule
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
-class AlphaBot(ActionModule):
+class AlphaBot(object):
     """
-    class to control the movements of the robot
+    class to control the movements of the robot this is a utility class for the actions
     """
-    def __init__(self,ain1=12,ain2=13,ena=6,bin1=20,bin2=21,enb=26, **kwargs):
-        super(AlphaBot, self).__init__(**kwargs)
+    def __init__(self):
 
-        self.direction = kwargs.get('direction', None)
-
-        self.AIN1 = ain1
-        self.AIN2 = ain2
-        self.BIN1 = bin1
-        self.BIN2 = bin2
-        self.ENA = ena
-        self.ENB = enb
+        self.AIN1 = 12
+        self.AIN2 = 13
+        self.BIN1 = 20
+        self.BIN2 = 21
+        self.ENA = 6
+        self.ENB = 26
         self.PA  = 50
         self.PB  = 50
         self.DR = 16
@@ -115,26 +112,6 @@ class AlphaBot(ActionModule):
             GPIO.output(self.BIN2,GPIO.HIGH)
             self.PWMB.ChangeDutyCycle(0 - left)
 
-    def setMove(self,direction):
-        if self._is_parameters_ok():
-            
-            try:
-                if direction == "stop":
-                    self.stop()
-                elif direction == "forward":
-                    self.forward()
-                elif direction == "backward":
-                    self.backward()
-                elif direction == "turnleft":
-                    self.left()
-                elif direction == "turnright":
-                    self.right()
-                elif direction == "buzzeron":
-                    self.buzz()
-            except:
-                self.stop()
-                logger.debug("Command error: {}".format(direction))
-
     def buzz(self):
         GPIO.output(BUZ,GPIO.HIGH)
         GPIO.output(BUZ,GPIO.LOW)
@@ -169,6 +146,32 @@ class AlphaBot(ActionModule):
             strip.setPixelColor(led,LedDict[led].values)
         strip.show()
 
+class SetRover(ActionModule):
+    def __init__(self, **kwargs):
+        super(SetRover, self).__init__(**kwargs)
+
+        AB = AlphaBot()
+        self.direction = kwargs.get('direction', None)
+
+        if self._is_parameters_ok():
+        
+            try:
+                if direction == "stop":
+                    AB.stop()
+                elif direction == "forward":
+                    AB.forward()
+                elif direction == "backward":
+                    AB.backward()
+                elif direction == "turnleft":
+                    AB.left()
+                elif direction == "turnright":
+                    AB.right()
+                elif direction == "buzzeron":
+                    AB.buzz()
+            except:
+                AB.stop()
+                logger.debug("Command error: {}".format(direction))
+
     def _is_parameters_ok(self):
         """
         Check if received parameters are ok to perform operations in the action
@@ -179,3 +182,10 @@ class AlphaBot(ActionModule):
             raise MissingParameterException("AlphaBot need a direction parameter")
 
         return True
+
+class InitialiseRover(ActionModule):
+    def __init__(self, **kwargs):
+        super(InitialiseRover, self).__init__(**kwargs)
+
+        AB = AlphaBot()
+        AB.setMotor(0,0)

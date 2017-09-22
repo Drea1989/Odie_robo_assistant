@@ -13,14 +13,13 @@ logger = logging.getLogger("odie")
 # Raspi PCA9685 16-Channel PWM Servo Driver
 # ============================================================================
 
-class Servo(ActionModule):
+class Servo(object):
   """
   class to move the servo up/down and left/right
   """
   def __init__(self, address=0x40):
-    super(Servo, self).__init__(**kwargs)
 
-    self.direction = kwargs.get('direction', None)
+    
 
     self.bus = smbus.SMBus(1)
     self.address = address
@@ -87,24 +86,10 @@ class Servo(ActionModule):
     pulse = pulse*4096/20000        #PWM frequency is 50HZ,the period is 20000us
     self.setPWM(channel, 0, pulse)
 
-  def initialiseServo(self):
-    """
-    this set the servo to the centred position
-    """
-    #Set the Horizontal servo parameters
-    pwm.setServoPulse(0,HPulse)
-
-    #Set the vertical servo parameters
-    pwm.setServoPulse(1,VPulse)
-
   def moveServo(self,HStep=0,VStep=0):
     """
     this move the servo vertically and/or horizontally by a integer step
     """
-    # check if parameters have been provided
-    if self._is_parameters_ok():
-            self.moveServo(self.HStep,self.VStep)
-
     if(HStep != 0):
       self.HPulse += HStep
       if(HPulse >= 2500): 
@@ -112,7 +97,7 @@ class Servo(ActionModule):
       if(HPulse <= 500):
         self.HPulse = 500
       #set channel 2, the Horizontal servo
-      pwm.setServoPulse(0,HPulse)    
+      self.setServoPulse(0,HPulse)    
       
     if(VStep != 0):
       self.VPulse += VStep
@@ -121,33 +106,55 @@ class Servo(ActionModule):
       if(VPulse <= 500):
         self.VPulse = 500
       #set channel 3, the vertical servo
-      pwm.setServoPulse(1,VPulse) 
+      self.setServoPulse(1,VPulse) 
 
-  def moveCommand(self,direction=None):
+class initialiseServo(ActionModule):
+    """
+    this set the servo to the centred position
+    """
+    def __init__(self, **kwargs):
+      super(initialiseServo, self).__init__(**kwargs)
+      servo = Servo()
+      #Set the Horizontal servo parameters
+      servo.setServoPulse(0,HPulse)
+
+      #Set the vertical servo parameters
+      servo.setServoPulse(1,VPulse)
+
+
+
+class moveCommand(ActionModule):
     "move the servo 1 step each direction based on speach"
     # check if parameters have been provided
+    def __init__(self, **kwargs):
+      super(moveCommand, self).__init__(**kwargs)
+    self.direction = kwargs.get('direction', None)
+    self.HStep = kwargs.get('HStep', 0)
+    self.VStep = kwargs.get('VStep', 0)
+    servo = Servo()
+
     if self._is_parameters_ok():
-            self.moveCommand(self.direction)
+      if direction == 'up':
+        servo.moveServo(HStep= 500)
+      elif direction == 'down':
+        servo.moveServo(HStep= -500)
+      elif direction == 'left':
+        servo.moveServo(VStep= -500)
+      elif direction == 'right':
+        servo.moveServo(VStep= 500)
+      elif self.HStep != 0 or self.VStep != 0:
+        servo.moveServo(VStep= self.VStep ,HStep= self.HStep)
+      else:
+        logger.debug('direction not recognised')
 
-    if direction == 'up':
-      moveServo(HStep= 500)
-    elif direction == 'down':
-      moveServo(HStep= -500)
-    elif direction == 'left':
-      moveServo(VStep= -500)
-    elif direction == 'right':
-      moveServo(VStep= 500)
-    else:
-      logger.debug('direction not recognised')
-
-  def _is_parameters_ok(self):
+def _is_parameters_ok(self):
     """
     Check if received parameters are ok to perform operations in the action
     :return: true if parameters are ok, raise an exception otherwise
 
     .. raises:: MissingParameterException, InvalidParameterException
     """
-    if self.HStep is None and self.vStep is None:
+    if self.HStep is None and self.vStep is None and self.direction is None:
         raise MissingParameterException("You must provide a step.")
     if self.HStep or self.vStep:
         raise InvalidParameterException("Step is not a number.")
@@ -157,3 +164,4 @@ class Servo(ActionModule):
         raise InvalidParameterException("direction is not a string.")
 
     return True
+  

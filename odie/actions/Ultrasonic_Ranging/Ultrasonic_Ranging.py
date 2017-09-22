@@ -6,20 +6,17 @@ from odie.core.ActionModule import ActionModule
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
-class Ultrasonic_Ranging(ActionModule):
-	"""
-	class to read ultrasonic sensors
-	"""
+class Ultrasonic_dist(ActionModule):
 	def __init__(self, **kwargs):
-		super(AlphaBot, self).__init__(**kwargs)
+		super(Ultrasonic_dist, self).__init__(**kwargs)
+		
 		TRIG = 22
 		ECHO = 27
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setwarnings(False)
 		GPIO.setup(TRIG,GPIO.OUT,initial=GPIO.LOW)
 		GPIO.setup(ECHO,GPIO.IN)
-
-	def dist():
+		#calculating distance
 		GPIO.output(TRIG,GPIO.HIGH)
 		time.sleep(0.000015)
 		GPIO.output(TRIG,GPIO.LOW)

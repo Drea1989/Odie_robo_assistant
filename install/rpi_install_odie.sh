@@ -28,12 +28,21 @@ sudo apt-get update
 sudo apt-get install -y git python-dev libsmpeg0 libttspico-utils libsmpeg0 \
 flac dialog libffi-dev libffi-dev libssl-dev portaudio19-dev build-essential \
 libssl-dev libffi-dev sox libatlas3-base mplayer libyaml-dev libpython2.7-dev pulseaudio pulseaudio-utils libav-tools \
-postgresql postgresql-contrib cython swig3.0 python-pyaudio python3-pyaudio python3-psycopg2 python3-dialog sox
+postgresql postgresql-contrib cython swig3.0 python-pyaudio python3-pyaudio python3-psycopg2 python3-dialog sox \
+build-essential python-dev git scons
 
 # this is used to help the RPI
 sudo apt-get install -y libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev libatlas-base-dev
 sudo apt-get install -y libffi-dev python-yaml python-pycparser python-paramiko python-markupsafe apt-transport-https
 echo "Installing system packages...[OK]"
+
+echo "Cloning the adafruit neopixel"
+git clone https://github.com/jgarff/rpi_ws281x.git
+cd rpi_ws281x
+scons
+cd python
+sudo python3 setup.py install
+echo "Cloning the adafruit...[OK]"
 
 echo "Cloning the project"
 # clone the project

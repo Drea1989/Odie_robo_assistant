@@ -1,1 +1,1 @@
-from .TRSensors import TRSensors
+from .TRSensors import readLine

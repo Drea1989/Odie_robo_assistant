@@ -8,16 +8,15 @@ from odie.core.ActionModule import ActionModule
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
-class TRSensor(ActionModule):
-	def __init__(self,numSensors = 5):
-		super(TRSensor, self).__init__(**kwargs)
+class TRSensor(object):
+	def __init__(self):
 
 		CS = 5
 		Clock = 25
 		Address = 24
 		DataOut = 23
 		Button = 7
-		self.numSensors = numSensors
+		self.numSensors = 5
 		self.calibratedMin = [0] * self.numSensors
 		self.calibratedMax = [1023] * self.numSensors
 		self.last_value = 0
@@ -132,7 +131,9 @@ class TRSensor(ActionModule):
 		return sensor_values
 			
 	
-	def readLine(self, white_line = 0):
+class readLine(ActionModule):
+	def __init__(self, **kwargs):
+		super(readLine, self).__init__(**kwargs)
 		"""
 		Operates the same as read calibrated, but also returns an
 		estimated position of the robot with respect to a line. The
@@ -154,13 +155,18 @@ class TRSensor(ActionModule):
 		this case, each sensor value will be replaced by (1000-value)
 		before the averaging.
 		"""
-		sensor_values = self.readCalibrated()
+		TR = TRSensor()
+
+		self.white_line =  kwargs.get('white_line', 0)
+
+		sensor_values = TR.readCalibrated()
+
 		avg = 0
 		sum = 0
 		on_line = 0
-		for i in range(0,self.numSensors):
+		for i in range(0,TR.numSensors):
 			value = sensor_values[i]
-			if(white_line):
+			if(self.white_line):
 				value = 1000-value
 			# keep track of whether we see the line at all
 			if(value > 200):
@@ -173,14 +179,14 @@ class TRSensor(ActionModule):
 
 		if(on_line != 1):
 			# If it last read to the left of center, return 0.
-			if(self.last_value < (self.numSensors - 1)*1000/2):
+			if(self.last_value < (TR.numSensors - 1)*1000/2):
 				logger.debug("left")
 				self.last_value = 0;
 	
 			# If it last read to the right of center, return the max.
 			else:
 				logger.debug("right")
-				self.last_value = (self.numSensors - 1)*1000
+				self.last_value = (TR.numSensors - 1)*1000
 		else:
 			self.last_value = avg/sum
 		
