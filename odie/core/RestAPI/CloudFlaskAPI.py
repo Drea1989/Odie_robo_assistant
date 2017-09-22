@@ -35,7 +35,7 @@ class CloudFlaskAPI(threading.Thread):
         :param brain: Brain object
         :type brain: Brain
         """
-        super(FlaskAPI, self).__init__()
+        super(CloudFlaskAPI, self).__init__()
         self.app = app
         self.port = port
         self.brain = brain
