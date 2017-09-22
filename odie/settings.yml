@@ -32,7 +32,7 @@ default_speech_to_text: "odie_stt"
 speech_to_text:
   - Odie_stt:
       language: "en-US"
-
+      host:"192.168.1.112:5000"
 
 # ---------------------------
 # Text to speech
@@ -115,7 +115,7 @@ random_wake_up_answers:
 # - always: every time odie is ready to be awaken
 # - never: never play a sound or sentences when odie is ready
 # - once: at the first start of odie
-play_on_ready_notification: never
+play_on_ready_notification: once
 
 # The on ready notification can be a sentence. Place here a sentence or a list of sentence. If you set a list, one sentence will be picked up randomly
 on_ready_answers:
@@ -163,7 +163,7 @@ postgres:
 # ---------------------------
 # Specify parameters
 alphabot:
-  enable: False 
+  enable: True 
 
 # ---------------------------
 # Resource directory path

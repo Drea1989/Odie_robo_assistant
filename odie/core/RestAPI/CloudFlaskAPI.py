@@ -23,7 +23,7 @@ logger = logging.getLogger("odie")
 AUDIO_UPLOAD_FOLDER = '/tmp/odie_cloud/tmp_uploaded_audio'
 VIDEO_UPLOAD_FOLDER = '/tmp/odie_cloud/tmp_uploaded_video'
 FAIL_UPLOAD_FOLDER = '/tmp/odie_cloud/tmp_uploaded_failed_interactions'
-ALLOWED_EXTENSIONS = {'mp3', 'wav','jpg'}
+ALLOWED_EXTENSIONS = {'mp3', 'wav','flac','jpg'}
 
 
 class FlaskAPI(threading.Thread):
@@ -161,7 +161,7 @@ class FlaskAPI(threading.Thread):
         """
         logger.debug("[FlaskAPI] run_image_by_model: model_name name -> %s" % model_name)
         # get a neuron object from the name
-        model_target = BrainLoader().get_brain()._get_neuron_by_name(model_name=model_name)
+        model_target = BrainLoader().get_brain()._get_neuron_by_name(name=model_name)
 
         # get parameters
         parameters = self.get_parameters_from_request(request)
@@ -248,7 +248,7 @@ class FlaskAPI(threading.Thread):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
         #TODO: Call deepspeech2 model for inference
-        model = BrainLoader().get_brain()._get_neuron_by_name(model_name='deepspeech2')
+        model = BrainLoader().get_brain()._get_neuron_by_name(name='deepspeech2')
         response = model.predict(audio_path)
         
         if self.response is not None and self.response:

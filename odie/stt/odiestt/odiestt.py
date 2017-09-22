@@ -19,6 +19,7 @@ class Odiestt(SpeechRecognition):
         self.main_controller_callback = callback
         self.key = kwargs.get('key', None)
         self.language = kwargs.get('language', "en-US")
+        self.host = kwargs.get('host', "localhost:5000")
         self.show_all = kwargs.get('show_all', False)
 
         # start listening in the background
@@ -82,7 +83,7 @@ class Odiestt(SpeechRecognition):
         )
         if key is None: key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw"
         #TODO:set up proper URL
-        url = "http://www.odie.com/speech/recognize?{}".format(urlencode({
+        url = "http://{}/speech/recognize?{}".format(self.host,urlencode({
             "client": "Odie",
             "lang": language,
             "key": key,
