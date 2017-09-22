@@ -186,12 +186,16 @@ def main():
             sys.exit(0)
 
     if parser.action == "cloud":
+        # Cloud API
+        from flask import Flask
+        from odie.core.RestAPI.CloudFlaskAPI import CloudFlaskAPI
         if settings.rpi_settings:
             # init GPIO once
             RpiUtils(settings.rpi_settings)
         # load the brain once
         CloudBrain_loader = BrainLoader(file_path=brain_file)
         CloudBrain = CloudBrain_loader.brain
+        Utils.print_info("Starting Cloud REST API Listening port: %s" % self.settings.rest_api.port)       
         # then start odie
         Utils.print_success("Starting odie Cloud")
         Utils.print_info("Press Ctrl+C for stopping")
@@ -199,9 +203,15 @@ def main():
         signal.signal(signal.SIGINT, signal_handler)
         # start the state machine
         try:
-            CloudFlaskAPI(brain=CloudBrain)
+            app = Flask(__name__)
+            flask_api = CloudFlaskAPI(app=app,
+                                 port=self.settings.rest_api.port,
+                                 brain=CloudBrain,
+                                 allowed_cors_origin=self.settings.rest_api.allowed_cors_origin)
+            flask_api.daemon = True
+            flask_api.start()
         except (KeyboardInterrupt, SystemExit):
-            Utils.print_info("Ctrl+C pressed. Killing odie")
+            Utils.print_info("Ctrl+C pressed. Killing odie Cloud")
         finally:
             # we need to switch GPIO pin to default status if we are using a Rpi
             if settings.rpi_settings:
