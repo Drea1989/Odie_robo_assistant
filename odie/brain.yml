@@ -11,24 +11,22 @@
     cues:
       - order: "move {{direction}}"
     actions:
-      - alphabot.setMove:
+      - SetRover:
           direction: "{{direction}}"
 
   - name: "rover-look"
     cues:
       - order: "look {{direction}}"
     actions:
-      - Servo.moveCommand:
+      - moveCommand:
           direction: "{{direction}}"
 
   - name: "rover-startup"
     cues:
-      - order: "odie initialise"
+      - order: "initialise"
     actions:
-      - Servo.initialiseServo
-      - alphabot.setMotor:
-          left: 0
-          right: 0
+      - initialiseServo
+      - InitialiseRover
       - say:
         message:
             - "initialisation completed"
