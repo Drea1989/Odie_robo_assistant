@@ -143,7 +143,13 @@ class ConfigurationChecker:
             """
             sl = SettingLoader()
             settings = sl.settings
-            package_name = "odie.actions" + "." + action_module_name.lower() + "." + action_module_name.lower()
+            #composite actions
+            if '.' in action_module_name:
+                composite_action_module = action_module_name.strip().split(".")
+                package_name = "odie.actions" + "." + composite_action_module[0].lower() + "." + composite_action_module[0].lower()
+            else:
+                package_name = "odie.actions" + "." + action_module_name.lower() + "." + action_module_name.lower()
+
             if settings.resources is not None:
                 action_resource_path = settings.resources.action_folder + \
                                        os.sep + action_module_name.lower() + os.sep + \
@@ -153,7 +159,10 @@ class ConfigurationChecker:
                     package_name = action_module_name.capitalize()
 
             try:
-                mod = __import__(package_name, fromlist=[action_module_name.capitalize()])
+                if composite_action_module:
+                    mod = __import__(package_name, fromlist=[composite_action_module[1].capitalize()])
+                else:
+                    mod = __import__(package_name, fromlist=[action_module_name.capitalize()])
                 getattr(mod, action_module_name.capitalize())
             except AttributeError:
                 raise ModuleNotFoundError("[AttributeError] The module %s does not exist in the package %s " % (action_module_name.capitalize(),
