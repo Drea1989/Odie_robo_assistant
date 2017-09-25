@@ -1,57 +1,14 @@
 ---
   - name: "caption"
     cues:
-      - order:"None"
+      - order: "no order"
     actions:
       - model:
-          path: /odie_cloud/models/im2xt/model.pm
+        path: /odie_cloud/models/im2xt/model.pm
 
   - name: "deepspeech2"
     cues:
-      - order:"None"
+      - order: "no order"
     actions:
       - model:
-          path: /odie_cloud/models/deepspeech/model.pm
-
-
-  - name: "object-recognition"
-    cues:
-      - order:"None"
-    actions:
-      - model:
-          path: /odie_cloud/models/recognition/model.pm
-
-  - name: "read-text"
-    cues:
-      - order:"None"
-    actions:
-      - model:
-          path: /odie_cloud/models/text/model.pm
-
-  - name: "face-recognition"
-    cues:
-      - order:"None"
-    actions:
-      - model:
-          path: /odie_cloud/models/face-recognition/model.pm
-
-  - name: "face-tracking"
-    cues:
-      - order:"None"
-    actions:
-      - model:
-          path: /odie_cloud/models/face-tracking/model.pm
-
-  - name: "follow"
-    cues:
-      - order:"None"
-    actions:
-      - model:
-          path: /odie_cloud/models/follow/model.pm
-
-  - name: "path-planning"
-    cues:
-      - order:"None"
-    actions:
-      - model:
-          path: /odie_cloud/models/path-planning/model.pm
+        path: /odie_cloud/models/deepspeech/model.pm

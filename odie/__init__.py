@@ -126,21 +126,19 @@ def main():
     # load settings
     # get global configuration once
     settings_loader = SettingLoader()
-    settings = settings_loader.settings
-
-    #create postgres brain table
-    if settings.postgres:
-        pg = settings.postgres
-        Bsaved = PgManager.save_brain_table(pg = pg,brain = brain)
-        if Bsaved:
-            Utils.print_info("postgresql brain saved successfully")
-    else:
-        Utils.print_danger("no PostgreSQL configuration found")
-    
+    settings = settings_loader.settings 
 
 
     #starting Odie
     if parser.action == "start":
+        #create postgres brain table
+        if settings.postgres:
+            pg = settings.postgres
+            Bsaved = PgManager.save_brain_table(pg = pg,brain = brain)
+            if Bsaved:
+                Utils.print_info("postgresql brain saved successfully")
+        else:
+            Utils.print_danger("no PostgreSQL configuration found")
 
         if settings.rpi_settings:
             # init GPIO once
@@ -192,9 +190,7 @@ def main():
         if settings.rpi_settings:
             # init GPIO once
             RpiUtils(settings.rpi_settings)
-        # load the brain once
-        CloudBrain_loader = BrainLoader(file_path=brain_file)
-        CloudBrain = CloudBrain_loader.brain
+
         Utils.print_info("Starting Cloud REST API Listening port: %s" % settings.rest_api.port)       
         # then start odie
         Utils.print_success("Starting odie Cloud")
@@ -206,7 +202,7 @@ def main():
             app = Flask(__name__)
             flask_api = CloudFlaskAPI(app=app,
                                  port=settings.rest_api.port,
-                                 brain=CloudBrain,
+                                 brain=brain,
                                  allowed_cors_origin=settings.rest_api.allowed_cors_origin)
             flask_api.start()
         except (KeyboardInterrupt, SystemExit):

@@ -4,7 +4,7 @@ services:
   - docker
 
 python:
-  - "3.4"
+  - "3.5"
 
 # command to install dependencies
 before_install:
@@ -28,7 +28,7 @@ install:
 script:
 #  - pytest
   - docker run -it --rm odie-ubuntu1604
-  - docker run -it --rm odie-debian8
+  - docker run -it --rm odie-debian9
   - coverage run --source=Tests -m unittest discover
 
 after_success:

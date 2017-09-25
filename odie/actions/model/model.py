@@ -4,15 +4,23 @@ import six
 from odie.core.ActionModule import ActionModule,  MissingParameterException
 
 
-class model(ActionModule):
+class Model(ActionModule):
     def __init__(self, **kwargs):
-        super(model, self).__init__(**kwargs)
+        super(Model, self).__init__(**kwargs)
         self.path = kwargs.get('path', None)
+        self.platform = kwargs.get('platform', None)
 
         # check parameters
         if self._is_parameters_ok():
+            if self.platform == 'neon':
+                from neon.models import Model
+
+                return Model(self.path)
+
+            elif self.platform == 'tensorflow':
+
             return self.path
-            
+    
 
     def _is_parameters_ok(self):
         """

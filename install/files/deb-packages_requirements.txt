@@ -21,3 +21,6 @@ sox
 libatlas3-base
 mplayer
 libav-tools
+postgresql
+postgresql-contrib
+python3-psycopg2

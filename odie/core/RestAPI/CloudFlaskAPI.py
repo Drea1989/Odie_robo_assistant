@@ -17,6 +17,9 @@ from flask_cors import CORS
 from odie.core.RestAPI.utils import requires_auth
 from odie._version import version_str
 
+#cloud Models
+from odie_cloud.speech.evaluate import DeepSpeechPredict 
+
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
@@ -248,8 +251,8 @@ class CloudFlaskAPI(threading.Thread):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
         #TODO: Call deepspeech2 model for inference
-        model = BrainLoader().get_brain()._get_neuron_by_name(name='deepspeech2')
-        response = model.predict(audio_path)
+        
+        self.response = DeepSpeechPredict(model_file,audio_path)
         
         if self.response is not None and self.response:
             data = jsonify(self.response)
