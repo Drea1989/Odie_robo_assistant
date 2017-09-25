@@ -1,2 +1,2 @@
-from .SetRover import SetRover
-from .InitialiseRover import InitialiseRover
+from .setrover import Setrover
+from .initialiserover import Initialiserover

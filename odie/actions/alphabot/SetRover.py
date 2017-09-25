@@ -6,15 +6,16 @@ from odie.actions.alphabot import AlphaBot
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
-class SetRover(ActionModule):
+
+class Setrover(ActionModule):
     def __init__(self, **kwargs):
-        super(SetRover, self).__init__(**kwargs)
+        super(Setrover, self).__init__(**kwargs)
 
         AB = AlphaBot()
         self.direction = kwargs.get('direction', None)
 
         if self._is_parameters_ok():
-        
+
             try:
                 if direction == "stop":
                     AB.stop()

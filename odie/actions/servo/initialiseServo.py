@@ -6,15 +6,16 @@ from odie.actions.PCA9685 import Servo
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
-class initialiseServo(ActionModule):
+
+class Initialiseservo(ActionModule):
     """
     this set the servo to the centred position
     """
     def __init__(self, **kwargs):
-      super(initialiseServo, self).__init__(**kwargs)
-      servo = Servo()
-      #Set the Horizontal servo parameters
-      servo.setServoPulse(0,HPulse)
+        super(Initialiseservo, self).__init__(**kwargs)
+        servo = Servo()
+        # Set the Horizontal servo parameters
+        servo.setServoPulse(0, HPulse)
 
-      #Set the vertical servo parameters
-      servo.setServoPulse(1,VPulse)
+        # Set the vertical servo parameters
+        servo.setServoPulse(1, VPulse)

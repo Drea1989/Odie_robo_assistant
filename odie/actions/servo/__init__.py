@@ -1,2 +1,2 @@
-from .initialiseServo import initialiseServo
-from .moveCommand import moveCommand
+from .initialiseservo import Initialiseservo
+from .movecommand import Movecommand
