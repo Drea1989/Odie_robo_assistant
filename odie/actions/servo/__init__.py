@@ -1,1 +1,2 @@
-from .PCA9685 import initialiseServo, moveCommand
+from .initialiseServo import initialiseServo
+from .moveCommand import moveCommand

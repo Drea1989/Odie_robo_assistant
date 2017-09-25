@@ -11,22 +11,22 @@
     cues:
       - order: "move {{direction}}"
     actions:
-      - SetRover:
+      - servo.SetRover:
           direction: "{{direction}}"
 
   - name: "rover-look"
     cues:
       - order: "look {{direction}}"
     actions:
-      - moveCommand:
+      - alphabot.moveCommand:
           direction: "{{direction}}"
 
   - name: "rover-startup"
     cues:
       - order: "initialise"
     actions:
-      - initialiseServo
-      - InitialiseRover
+      - servo.initialiseServo
+      - alphabot.InitialiseRover
       - say:
         message:
             - "initialisation completed"

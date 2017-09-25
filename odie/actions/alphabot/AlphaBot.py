@@ -3,7 +3,6 @@ import time
 import logging
 from neopixel import Adafruit_NeoPixel
 
-from odie.core.ActionModule import ActionModule
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -145,47 +144,3 @@ class AlphaBot(object):
         for led in LedDict:         
             strip.setPixelColor(led,LedDict[led].values)
         strip.show()
-
-class SetRover(ActionModule):
-    def __init__(self, **kwargs):
-        super(SetRover, self).__init__(**kwargs)
-
-        AB = AlphaBot()
-        self.direction = kwargs.get('direction', None)
-
-        if self._is_parameters_ok():
-        
-            try:
-                if direction == "stop":
-                    AB.stop()
-                elif direction == "forward":
-                    AB.forward()
-                elif direction == "backward":
-                    AB.backward()
-                elif direction == "turnleft":
-                    AB.left()
-                elif direction == "turnright":
-                    AB.right()
-                elif direction == "buzzeron":
-                    AB.buzz()
-            except:
-                AB.stop()
-                logger.debug("Command error: {}".format(direction))
-
-    def _is_parameters_ok(self):
-        """
-        Check if received parameters are ok to perform operations in the action
-        :return: true if parameters are ok, raise an exception otherwise
-        .. raises:: NotImplementedError
-        """
-        if self.direction is None:
-            raise MissingParameterException("AlphaBot need a direction parameter")
-
-        return True
-
-class InitialiseRover(ActionModule):
-    def __init__(self, **kwargs):
-        super(InitialiseRover, self).__init__(**kwargs)
-
-        AB = AlphaBot()
-        AB.setMotor(0,0)

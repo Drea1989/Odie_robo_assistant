@@ -4,7 +4,6 @@ import time
 import math
 import smbus
 import logging
-from odie.core.ActionModule import ActionModule, MissingParameterException, InvalidParameterException
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -107,61 +106,4 @@ class Servo(object):
         self.VPulse = 500
       #set channel 3, the vertical servo
       self.setServoPulse(1,VPulse) 
-
-class initialiseServo(ActionModule):
-    """
-    this set the servo to the centred position
-    """
-    def __init__(self, **kwargs):
-      super(initialiseServo, self).__init__(**kwargs)
-      servo = Servo()
-      #Set the Horizontal servo parameters
-      servo.setServoPulse(0,HPulse)
-
-      #Set the vertical servo parameters
-      servo.setServoPulse(1,VPulse)
-
-
-
-class moveCommand(ActionModule):
-    "move the servo 1 step each direction based on speach"
-    # check if parameters have been provided
-    def __init__(self, **kwargs):
-      super(moveCommand, self).__init__(**kwargs)
-    self.direction = kwargs.get('direction', None)
-    self.HStep = kwargs.get('HStep', 0)
-    self.VStep = kwargs.get('VStep', 0)
-    servo = Servo()
-
-    if self._is_parameters_ok():
-      if direction == 'up':
-        servo.moveServo(HStep= 500)
-      elif direction == 'down':
-        servo.moveServo(HStep= -500)
-      elif direction == 'left':
-        servo.moveServo(VStep= -500)
-      elif direction == 'right':
-        servo.moveServo(VStep= 500)
-      elif self.HStep != 0 or self.VStep != 0:
-        servo.moveServo(VStep= self.VStep ,HStep= self.HStep)
-      else:
-        logger.debug('direction not recognised')
-
-def _is_parameters_ok(self):
-    """
-    Check if received parameters are ok to perform operations in the action
-    :return: true if parameters are ok, raise an exception otherwise
-
-    .. raises:: MissingParameterException, InvalidParameterException
-    """
-    if self.HStep is None and self.vStep is None and self.direction is None:
-        raise MissingParameterException("You must provide a step.")
-    if self.HStep or self.vStep:
-        raise InvalidParameterException("Step is not a number.")
-    if self.direction is None:
-        raise MissingParameterException("You must provide a direction.")
-    if self.direction:
-        raise InvalidParameterException("direction is not a string.")
-
-    return True
   

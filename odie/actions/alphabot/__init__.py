@@ -1,1 +1,2 @@
-from .AlphaBot import SetRover,InitialiseRover
+from .SetRover import SetRover
+from .InitialiseRover import InitialiseRover
