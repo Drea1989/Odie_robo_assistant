@@ -32,7 +32,7 @@ class TestDynamicLoading(unittest.TestCase):
         # get wakeon dir
         self.wakeon_dir = os.path.normpath(root_dir + os.sep + "odie/wakeon")
 
-        self.action_to_skip = ['Alphabot', 'Ultrasonic_ranging']
+        self.action_to_skip = ['alphabot', 'ultrasonic_ranging']
 
     def test_packages_present(self):
         """
@@ -51,7 +51,7 @@ class TestDynamicLoading(unittest.TestCase):
         actions = self.get_package_in_folder(self.actions_dir)
         package_name = "actions"
         for action_name in actions:
-            if action_name not in action_to_skip:
+            if action_name not in self.action_to_skip:
                 module_name = action_name.capitalize()
                 self.dynamic_import(package_name, module_name)
 
