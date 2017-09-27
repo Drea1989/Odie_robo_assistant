@@ -7,6 +7,7 @@ from neopixel import Adafruit_NeoPixel
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
+
 class AlphaBot(object):
     """
     class to control the movements of the robot this is a utility class for the actions
