@@ -2,13 +2,15 @@ import os
 import unittest
 import sys
 from collections import namedtuple
-
+from mock import mock
 from unittest.mock import MagicMock
 
+import sys
 from odie.actions.alphabot.initialiserover import Initialiserover
 from odie.actions.alphabot.setrover import Setrover
 
 from odie.core.ActionModule import MissingParameterException
+
 
 mymodule = MagicMock()
 
@@ -29,6 +31,11 @@ class TestAlphabot(unittest.TestCase):
 
     def test_parameter_ok(self):
         with self.assertRaises(MissingParameterException):
+            mock.patch(Setrover())
+
+    def test_stop(self):
+        try:
+
             mock.patch(Setrover('stop'))
             return True
         except:
