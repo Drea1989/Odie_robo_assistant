@@ -1,6 +1,6 @@
 import logging
 
-from odie.core.ActionModule import ActionModule, MissingParameterException, InvalidParameterException
+from odie.core.ActionModule import ActionModule
 from odie.actions.PCA9685 import Servo
 
 logging.basicConfig()
@@ -15,7 +15,7 @@ class Initialiseservo(ActionModule):
         super(Initialiseservo, self).__init__(**kwargs)
         servo = Servo()
         # Set the Horizontal servo parameters
-        servo.setServoPulse(0, HPulse)
+        servo.setServoPulse(0, 1250)
 
         # Set the vertical servo parameters
-        servo.setServoPulse(1, VPulse)
+        servo.setServoPulse(1, 1250)

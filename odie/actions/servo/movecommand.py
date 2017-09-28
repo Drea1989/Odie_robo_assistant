@@ -17,19 +17,19 @@ class Movecommand(ActionModule):
         self.VStep = kwargs.get('VStep', 0)
         servo = Servo()
 
-    if self._is_parameters_ok():
-        if direction == 'up':
-            servo.moveServo(HStep=500)
-        elif direction == 'down':
-            servo.moveServo(HStep=-500)
-        elif direction == 'left':
-            servo.moveServo(VStep=-500)
-        elif direction == 'right':
-            servo.moveServo(VStep=500)
-        elif self.HStep != 0 or self.VStep != 0:
-            servo.moveServo(VStep=self.VStep, HStep=self.HStep)
-        else:
-            logger.debug('direction not recognised')
+        if self._is_parameters_ok():
+            if self.direction == 'up':
+                servo.moveServo(HStep=500)
+            elif self.direction == 'down':
+                servo.moveServo(HStep=-500)
+            elif self.direction == 'left':
+                servo.moveServo(VStep=-500)
+            elif self.direction == 'right':
+                servo.moveServo(VStep=500)
+            elif self.HStep != 0 or self.VStep != 0:
+                servo.moveServo(VStep=self.VStep, HStep=self.HStep)
+            else:
+                logger.debug('direction not recognised')
 
     def _is_parameters_ok(self):
         """
