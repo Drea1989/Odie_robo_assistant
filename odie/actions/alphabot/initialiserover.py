@@ -1,5 +1,4 @@
 import logging
-
 from odie.core.ActionModule import ActionModule
 from odie.actions.alphabot.AlphaBot import AlphaBot
 

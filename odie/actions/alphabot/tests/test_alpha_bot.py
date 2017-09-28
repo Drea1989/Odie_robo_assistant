@@ -1,11 +1,8 @@
-import os
 import unittest
 import sys
-from collections import namedtuple
 from mock import mock
 from unittest.mock import MagicMock
 
-import sys
 from odie.actions.alphabot.initialiserover import Initialiserover
 from odie.actions.alphabot.setrover import Setrover
 
@@ -69,7 +66,7 @@ class TestAlphabot(unittest.TestCase):
         except:
             return False
 
-    def test_right(self):
+    def test_invalid_direction(self):
         try:
             mock.patch(Setrover('diagonal'))
             return False
