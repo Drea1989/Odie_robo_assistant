@@ -1,13 +1,18 @@
-import os
 import unittest
-from collections import namedtuple
-
-from unittest.mock import MagicMock
-mymodule = MagicMock()
 import sys
-sys.modules["RPi"] = mymodule
-from odie.actions.alphabot import InitialiseRover, SetRover
+from mock import mock
+from unittest.mock import MagicMock
+
+from odie.actions.alphabot.initialiserover import Initialiserover
+from odie.actions.alphabot.setrover import Setrover
+
 from odie.core.ActionModule import MissingParameterException
+
+
+mymodule = MagicMock()
+
+sys.modules["RPi"] = mymodule
+
 
 class TestAlphabot(unittest.TestCase):
 
@@ -16,53 +21,54 @@ class TestAlphabot(unittest.TestCase):
 
     def test_init(self):
         try:
-            mock.patch(InitialiseRover())
+            mock.patch(Initialiserover())
             return True
         except:
             return False
 
     def test_parameter_ok(self):
         with self.assertRaises(MissingParameterException):
-            mock.patch(SetRover())
+            mock.patch(Setrover())
 
     def test_stop(self):
         try:
-            mock.patch(SetRover('stop'))
+
+            mock.patch(Setrover('stop'))
             return True
         except:
             return False
 
     def test_forward(self):
         try:
-            mock.patch(SetRover('forward'))
+            mock.patch(Setrover('forward'))
             return True
         except:
             return False
 
     def test_backward(self):
         try:
-            mock.patch(SetRover('backward'))
+            mock.patch(Setrover('backward'))
             return True
         except:
             return False
 
     def test_left(self):
         try:
-            mock.patch(SetRover('left'))
+            mock.patch(Setrover('left'))
             return True
         except:
             return False
 
     def test_right(self):
         try:
-            mock.patch(SetRover('right'))
+            mock.patch(Setrover('right'))
             return True
         except:
             return False
 
-    def test_right(self):
+    def test_invalid_direction(self):
         try:
-            mock.patch(SetRover('diagonal'))
+            mock.patch(Setrover('diagonal'))
             return False
         except:
             return True

@@ -1,7 +1,6 @@
 import logging
-
 from odie.core.ActionModule import ActionModule
-from odie.actions.alphabot import AlphaBot
+from odie.actions.alphabot.AlphaBot import AlphaBot
 
 logging.basicConfig()
 logger = logging.getLogger("odie")

@@ -1,7 +1,8 @@
 import logging
+import time
 
-from odie.core.ActionModule import ActionModule
-from odie.actions.alphabot import AlphaBot
+from odie.core.ActionModule import ActionModule, MissingParameterException
+from odie.actions.alphabot.AlphaBot import AlphaBot
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -11,27 +12,35 @@ class Setrover(ActionModule):
     def __init__(self, **kwargs):
         super(Setrover, self).__init__(**kwargs)
 
-        AB = AlphaBot()
         self.direction = kwargs.get('direction', None)
 
         if self._is_parameters_ok():
+            AB = AlphaBot()
 
             try:
-                if direction == "stop":
+                if self.direction == "stop":
                     AB.stop()
-                elif direction == "forward":
+                elif self.direction == "forward":
                     AB.forward()
-                elif direction == "backward":
+                    time.sleep(.5)
+                    AB.stop()
+                elif self.direction == "backward":
                     AB.backward()
-                elif direction == "turnleft":
+                    time.sleep(.5)
+                    AB.stop()
+                elif self.direction == "turnleft":
                     AB.left()
-                elif direction == "turnright":
+                    time.sleep(.5)
+                    AB.stop()
+                elif self.direction == "turnright":
                     AB.right()
-                elif direction == "buzzeron":
+                    time.sleep(.5)
+                    AB.stop()
+                elif self.direction == "buzzeron":
                     AB.buzz()
             except:
                 AB.stop()
-                logger.debug("Command error: {}".format(direction))
+                logger.debug("Command error: {}".format(self.direction))
 
     def _is_parameters_ok(self):
         """
