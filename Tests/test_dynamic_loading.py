@@ -32,6 +32,8 @@ class TestDynamicLoading(unittest.TestCase):
         # get wakeon dir
         self.wakeon_dir = os.path.normpath(root_dir + os.sep + "odie/wakeon")
 
+        self.action_to_skip = ['alphabot', 'ultrasonic_ranging']
+
     def test_packages_present(self):
         """
         Check that the actions folder exist in the root of the project
@@ -49,8 +51,9 @@ class TestDynamicLoading(unittest.TestCase):
         actions = self.get_package_in_folder(self.actions_dir)
         package_name = "actions"
         for action_name in actions:
-            module_name = action_name.capitalize()
-            self.dynamic_import(package_name, module_name)
+            if action_name not in self.action_to_skip:
+                module_name = action_name.capitalize()
+                self.dynamic_import(package_name, module_name)
 
     def test_can_import_stt(self):
         """

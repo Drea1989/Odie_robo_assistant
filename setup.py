@@ -53,7 +53,7 @@ setup(
         'Topic :: Scientific/Engineering :: Robotics'
         'Topic :: Home Automation',
         'Topic :: Multimedia :: Sound/Audio :: Speech',
-        'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis' 
+        'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis'
     ],
     keywords='AI robotics',
 
@@ -91,7 +91,8 @@ setup(
         'psycopg2>=2.7.1',
         'sqlalchemy>=1.2',
         'pandas>=0.20',
-        'sox>=1.3.0'
+        'sox>=1.3.0',
+        'snowboy>=1.2.0'
     ],
 
 

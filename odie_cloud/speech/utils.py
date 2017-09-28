@@ -14,9 +14,9 @@
 # limitations under the License.
 # ----------------------------------------------------------------------------
 
-import sys
 import numpy as np
 from tqdm import tqdm
+from decoder import decoder
 
 
 def softmax(x):
@@ -24,18 +24,22 @@ def softmax(x):
             np.exp(x - np.max(x, axis=0)), axis=0)) *
             np.exp(x - np.max(x, axis=0)))
 
+
 def get_outputs(model, be, inputs, nout):
     outputs = model.fprop(inputs, inference=True)
     return softmax(outputs.get()).reshape(
         (nout, -1, be.bsz)).transpose((2, 0, 1))
 
+
 def eval_model(model, dataset, nout, bsz):
     return [((get_outputs(model, x, nout, bsz),
               y[0]), y[2]) for (x, y) in dataset]
 
+
 def decrypt(decoder, message):
     msg = decoder.convert_to_string(message)
     return decoder.process_string(msg, remove_repetitions=False)
+
 
 def get_wer(model, be, dataset, decoder, nout, use_wer=False, print_examples=False):
     wer = 0
@@ -47,7 +51,7 @@ def get_wer(model, be, dataset, decoder, nout, use_wer=False, print_examples=Fal
 
     if not model.initialized:
         model.initialize(dataset)
-    
+
     progress_bar = tqdm(dataset, total=nbatches, unit="batches")
     for x, y in progress_bar:
         probs = get_outputs(model, be, x, nout)
@@ -67,7 +71,7 @@ def get_wer(model, be, dataset, decoder, nout, use_wer=False, print_examples=Fal
             else:
                 wer += decoder.wer(prediction, target) / \
                         float(len(target.split()))
-        
+
         if use_wer:
             progress_bar.set_description("WER: {}".format(wer / len(predictions)))
         else:
@@ -78,18 +82,24 @@ def get_wer(model, be, dataset, decoder, nout, use_wer=False, print_examples=Fal
 
     results = zip(predictions, targets)
     nsamples = len(predictions)
-    return wer / nsamples, nsamples , results
+    return wer / nsamples, nsamples, results
 
-def get_predictions(model, be, dataset,nout):
+
+def get_predictions(model, be, dataset, nout):
+
     batchcount = 0
     predictions = list()
+    numitems = dataset.item_count
+    nbatches = int(np.ceil(numitems/be.bsz))
 
     if not model.initialized:
         model.initialize(dataset)
-    
+
     progress_bar = tqdm(dataset, total=nbatches, unit="batches")
     for x, y in progress_bar:
         probs = get_outputs(model, be, x, nout)
+        strided_tmax = probs.shape[-1]
+        utt_lens = strided_tmax * y[2].get().ravel() / 100
         for mu in range(be.bsz):
             prediction = decoder.decode(probs[mu, :, :int(utt_lens[mu])])
             predictions.append(prediction)
