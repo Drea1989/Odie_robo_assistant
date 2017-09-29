@@ -91,8 +91,7 @@ setup(
         'psycopg2>=2.7.1',
         'sqlalchemy>=1.2',
         'pandas>=0.20',
-        'sox>=1.3.0',
-        'snowboy>=1.2.0'
+        'sox>=1.3.0'
     ],
 
 

@@ -30,7 +30,7 @@ else
 fi
 
 # install
-sudo python setup.py install
+sudo python3 setup.py install
 
 # tests
-python -m unittest discover
+python3 -m unittest discover
