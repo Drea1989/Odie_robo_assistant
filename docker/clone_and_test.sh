@@ -29,8 +29,10 @@ else
     git checkout ${TRAVIS_BRANCH};
 fi
 
+alias python=python3
+
 # install
-sudo python3 setup.py install
+sudo python setup.py install
 
 # tests
-python3 -m unittest discover
+python -m unittest discover
