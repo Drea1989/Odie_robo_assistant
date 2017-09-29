@@ -1,4 +1,4 @@
-FROM debian:8
+FROM debian:9
 
 ENV no_proxy="127.0.0.1,localhost,odie.au.com"
 

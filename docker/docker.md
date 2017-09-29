@@ -21,7 +21,7 @@ docker build \
 ```
 
 ### Debian Jessie
-Build the image for Debian Jessie. By default, the master branch of the odie project will be cloned.
+Build the image for Debian 9. By default, the master branch of the odie project will be cloned.
 ```
 docker build --force-rm=true -t odie-debian8 -f docker/debian8.dockerfile .
 ```
@@ -34,8 +34,8 @@ docker build \
 --build-arg TRAVIS_EVENT_TYPE=${TRAVIS_EVENT_TYPE} \
 --build-arg TRAVIS_PULL_REQUEST_SLUG=${TRAVIS_PULL_REQUEST_SLUG} \
 --build-arg TRAVIS_PULL_REQUEST_BRANCH=${TRAVIS_PULL_REQUEST_BRANCH} \
--t odie-debian8 \
--f docker/debian8.dockerfile .
+-t odie-debian9 \
+-f docker/debian9.dockerfile .
 ```
 
 ## Run the test
@@ -47,5 +47,5 @@ docker run -it --rm odie-ubuntu1604
 
 Debian image
 ```
-docker run -it --rm odie-debian8
+docker run -it --rm odie-debian9
 ```
