@@ -19,12 +19,12 @@ fi
 
 # check if this is a pull request or a push
 if [ ${TRAVIS_EVENT_TYPE} == "pull_request" ]; then
-    git clone https://github.com/${TRAVIS_PULL_REQUEST_SLUG} odie;
+    git clone git@github.com:${TRAVIS_PULL_REQUEST_SLUG} odie;
     cd odie;
     git checkout ${TRAVIS_PULL_REQUEST_BRANCH};
 else
     # it's a push
-    git clone https://github.com/odie-project/odie.git odie;
+    git clone git@github.com:drea1989/Odie_robo_assistant.git odie;
     cd odie;
     git checkout ${TRAVIS_BRANCH};
 fi
