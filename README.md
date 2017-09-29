@@ -121,6 +121,6 @@ high level detail of each component can be found [here](https://github.com/Drea1
 # License
 Copyright (c) 2017. All rights reserved.
 
-the software is free to use for personal use under the EULA license. For full details see the [license](https://github.com/Drea1989/Odie_robo_assistant/blob/master/LICENSE)
+the software is free to use for personal use under the EULA license. For full details see the [license](https://github.com/Drea1989/Odie_robo_assistant/blob/master/LICENSE,pdf)
 
 For an Enterprise Version of the software contact the Author at <andrea.balzano@live.it>.

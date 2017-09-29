@@ -3,7 +3,7 @@ FROM debian:9
 ENV no_proxy="127.0.0.1,localhost,odie.au.com"
 
 # Need some packages in non-free repo
-RUN sed -i -- 's/jessie main/jessie main contrib non-free/g' /etc/apt/sources.list
+RUN sed -i -- 's/stretch main/stretch main contrib non-free/g' /etc/apt/sources.list
 
 # install packages
 RUN apt-get update && apt-get install -y \
