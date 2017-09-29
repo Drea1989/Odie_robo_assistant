@@ -1,6 +1,6 @@
 FROM debian:8
 
-ENV no_proxy="127.0.0.1,localhost,odie.fr"
+ENV no_proxy="127.0.0.1,localhost,odie.au.com"
 
 # Need some packages in non-free repo
 RUN sed -i -- 's/jessie main/jessie main contrib non-free/g' /etc/apt/sources.list
