@@ -1,1 +1,1 @@
-from odie.postgres import PostgresManager
+from odie.postgres.PostgreManager import PostgresManager
