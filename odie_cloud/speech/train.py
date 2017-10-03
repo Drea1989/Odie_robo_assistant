@@ -32,8 +32,8 @@ from neon.optimizers import GradientDescentMomentum
 from neon.util.argparser import NeonArgparser, extract_valid_args
 
 from ctc import CTC
-from decoder import ArgMaxDecoder
-from sample_proposals_callback import WordErrorRateCallback
+from odie_cloud.speech.decoder import ArgMaxDecoder
+from odie_cloud.speech.sample_proposals_callback import WordErrorRateCallback
 
 
 def data_transform(dl):
