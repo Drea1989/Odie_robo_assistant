@@ -20,7 +20,7 @@ docker build \
 -f docker/ubuntu_16_04.dockerfile .
 ```
 
-### Debian Jessie
+### Debian stretch
 Build the image for Debian 9. By default, the master branch of the odie project will be cloned.
 ```
 docker build --force-rm=true -t odie-debian8 -f docker/debian8.dockerfile .

@@ -29,12 +29,10 @@ else
     git checkout ${TRAVIS_BRANCH};
 fi
 
-source ~/virtualenv/python3.5/bin/activate
-
 python --version
 
 # install
 sudo python setup.py install
 
 # tests
-python -m unittest discover
+#python -m unittest discover
