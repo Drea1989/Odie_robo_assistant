@@ -271,6 +271,39 @@ class ConfigurationChecker:
         return True
 
     @staticmethod
+    def check_platform():
+        """
+        Check running on RPI:
+        :return: True if is running on Pi
+        :rtype: Boolean
+
+        :Example:
+            ConfigurationChecker().check_platform():
+        """
+        import platform
+
+        PLATFORM = platform.system().lower()
+
+        DEBIAN = 'debian'
+        IS_LINUX = (PLATFORM == 'linux')
+        RASPBERRY_PI = 'raspberry-pi'
+
+        if IS_LINUX:
+            PLATFORM = platform.linux_distribution()[0].lower()
+            if PLATFORM == DEBIAN:
+                try:
+                    with open('/proc/cpuinfo') as f:
+                        for line in f:
+                            line = line.strip()
+                            if line.startswith('Hardware') and line.endswith('BCM2708'):
+                                PLATFORM = RASPBERRY_PI
+                                return True
+                except:
+                    pass
+
+        return False
+
+    @staticmethod
     def check_neurons(neurons_list):
         """
         Check the neuron list is ok:

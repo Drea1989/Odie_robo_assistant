@@ -30,7 +30,9 @@ else
 fi
 
 echo 'alias python="/usr/bin/python3.5"' >> ~/.bashrc
-. .bashrc
+. ~/.bashrc
+
+python --version
 
 # install
 sudo python setup.py install
