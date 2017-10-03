@@ -127,13 +127,12 @@ def main():
     settings_loader = SettingLoader()
     settings = settings_loader.settings 
 
-
     # starting Odie
     if parser.action == "start":
         # create postgres brain table
         if settings.postgres:
             pg = settings.postgres
-            from odie.core.Utils.PostgreManager import PostgresManager as PgManager
+            from odie.postgres.PostgreManager import PostgresManager as PgManager
             Bsaved = PgManager.save_brain_table(pg=pg, brain=brain)
             if Bsaved:
                 Utils.print_info("postgresql brain saved successfully")
@@ -213,8 +212,6 @@ def main():
                 logger.debug("Clean GPIO")
                 import RPi.GPIO as GPIO
                 GPIO.cleanup()
-
-
 
 def configure_logging(debug=None):
     """
