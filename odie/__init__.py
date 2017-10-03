@@ -36,6 +36,7 @@ def signal_handler(signal, frame):
     Utils.print_info("Ctrl+C pressed. Killing odie")
     sys.exit(0)
 
+
 # actions available
 ACTION_LIST = ["start", "gui", "install", "uninstall", "cloud"]
 
@@ -125,7 +126,7 @@ def main():
     # load settings
     # get global configuration once
     settings_loader = SettingLoader()
-    settings = settings_loader.settings 
+    settings = settings_loader.settings
 
     # starting Odie
     if parser.action == "start":
@@ -190,7 +191,7 @@ def main():
             # init GPIO once
             RpiUtils(settings.rpi_settings)
 
-        Utils.print_info("Starting Cloud REST API Listening port: %s" % settings.rest_api.port)       
+        Utils.print_info("Starting Cloud REST API Listening port: %s" % settings.rest_api.port)      
         # then start odie
         Utils.print_success("Starting odie Cloud")
         Utils.print_info("Press Ctrl+C for stopping")
@@ -200,9 +201,9 @@ def main():
         try:
             app = Flask(__name__)
             flask_api = CloudFlaskAPI(app=app,
-                                 port=settings.rest_api.port,
-                                 brain=brain,
-                                 allowed_cors_origin=settings.rest_api.allowed_cors_origin)
+                                      port=settings.rest_api.port,
+                                      brain=brain,
+                                      allowed_cors_origin=settings.rest_api.allowed_cors_origin)
             flask_api.start()
         except (KeyboardInterrupt, SystemExit):
             Utils.print_info("Ctrl+C pressed. Killing odie Cloud")
@@ -212,6 +213,7 @@ def main():
                 logger.debug("Clean GPIO")
                 import RPi.GPIO as GPIO
                 GPIO.cleanup()
+
 
 def configure_logging(debug=None):
     """

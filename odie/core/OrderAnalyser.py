@@ -6,7 +6,6 @@ import six
 
 from odie.core.Models.MatchedNeuron import MatchedNeuron
 from odie.core.Utils.Utils import Utils
-from odie.core.Utils.PostgreManager import PostgresManager
 from odie.core.ConfigurationManager import SettingLoader
 from odie.core.Models import Order
 
@@ -99,18 +98,18 @@ class OrderAnalyser:
             order = order.replace(match, "")
 
         #connect to postgres
-        pg = cls.settings.postgres
-        conn = PostgresManager.get_connection(pg.host,pg.database,pg.user,pg.password)
+        # pg = cls.settings.postgres
+        # conn = PostgresManager.get_connection(pg.host,pg.database,pg.user,pg.password)
 
         #TODO make postgres work
         #cur = conn.cursor()
         #cur.execute("SELECT name FROM brain WHERE to_tsvector(cues) @@ to_tsquery(%s) order by ts_rank"),(order))
         
-        list_neuron_to_process = cur.fetchall() 
+        #list_neuron_to_process = cur.fetchall() 
 
         #close connection
-        cur.close()
-        cunn.close()
+        #cur.close()
+        #cunn.close()
 
         if list_neuron_to_process:
             logger.debug("Order found! Run neuron name: %s" % list_neuron_to_process)
