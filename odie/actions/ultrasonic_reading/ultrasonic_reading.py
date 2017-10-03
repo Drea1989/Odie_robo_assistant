@@ -7,10 +7,10 @@ logging.basicConfig()
 logger = logging.getLogger("odie")
 
 
-class Ultrasonic_dist(ActionModule):
+class Ultrasonic_reading(ActionModule):
 
     def __init__(self, **kwargs):
-        super(Ultrasonic_dist, self).__init__(**kwargs)
+        super(Ultrasonic_reading, self).__init__(**kwargs)
 
         TRIG = 22
         ECHO = 27

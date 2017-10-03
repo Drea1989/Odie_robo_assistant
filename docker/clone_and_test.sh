@@ -32,10 +32,10 @@ fi
 echo 'alias python="/usr/bin/python3.5"' >> ~/.bashrc
 . ~/.bashrc
 
-python --version
+python3 --version
 
 # install
-sudo python setup.py install
+sudo python3 setup.py install
 
 # tests
-python -m unittest discover
+python3 -m unittest discover

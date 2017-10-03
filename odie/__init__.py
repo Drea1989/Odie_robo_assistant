@@ -186,7 +186,7 @@ def main():
     if parser.action == "cloud":
         # Cloud API
         from flask import Flask
-        from odie.core.RestAPI.CloudFlaskAPI import CloudFlaskAPI
+        from odie_cloud.CloudFlaskAPI import CloudFlaskAPI
         if settings.rpi_settings:
             # init GPIO once
             RpiUtils(settings.rpi_settings)
