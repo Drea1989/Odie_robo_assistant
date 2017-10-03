@@ -29,7 +29,8 @@ else
     git checkout ${TRAVIS_BRANCH};
 fi
 
-alias python=python3
+echo 'alias python="/usr/bin/python3.5"' >> ~/.bashrc
+. .bashrc
 
 # install
 sudo python setup.py install
