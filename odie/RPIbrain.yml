@@ -1,0 +1,25 @@
+---
+  - name: "rover-move"
+    cues:
+      - order: "move {{direction}}"
+    actions:
+      - alphabot.Setrover:
+          direction: "{{direction}}"
+
+  - name: "rover-look"
+    cues:
+      - order: "look {{direction}}"
+    actions:
+      - servo.Movecommand:
+          direction: "{{direction}}"
+
+  - name: "rover-startup"
+    cues:
+      - order: "initialise"
+    actions:
+      - servo.Initialiseservo
+      - alphabot.Initialiserover
+      - say:
+        message:
+            - "initialisation completed"
+        
