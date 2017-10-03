@@ -1,7 +1,7 @@
 import logging
 
 from odie.core.ActionModule import ActionModule, MissingParameterException, InvalidParameterException
-from odie.actions.PCA9685 import Servo
+from odie.actions.servo.PCA9685 import Servo
 
 logging.basicConfig()
 logger = logging.getLogger("odie")

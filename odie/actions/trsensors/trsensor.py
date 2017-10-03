@@ -1,6 +1,4 @@
 #!/usr/bin/python
-# -*- coding:utf-8 -*-
-
 try:
     # only import if we are on a Rpi
     import RPi.GPIO as GPIO

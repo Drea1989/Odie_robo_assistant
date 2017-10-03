@@ -29,8 +29,7 @@ else
     git checkout ${TRAVIS_BRANCH};
 fi
 
-update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
-update-alternatives --install /usr/bin/python python /usr/bin/python3.5 2
+source ~/virtualenv/python3.5/bin/activate
 
 python --version
 
