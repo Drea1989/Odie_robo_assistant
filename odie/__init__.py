@@ -191,7 +191,7 @@ def main():
             # init GPIO once
             RpiUtils(settings.rpi_settings)
 
-        Utils.print_info("Starting Cloud REST API Listening port: %s" % settings.rest_api.port)      
+        Utils.print_info("Starting Cloud REST API Listening port: %s" % settings.rest_api.port)    
         # then start odie
         Utils.print_success("Starting odie Cloud")
         Utils.print_info("Press Ctrl+C for stopping")

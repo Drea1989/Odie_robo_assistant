@@ -29,13 +29,13 @@ else
     git checkout ${TRAVIS_BRANCH};
 fi
 
-echo 'alias python="/usr/bin/python3.5"' >> ~/.bashrc
-. ~/.bashrc
+update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+update-alternatives --install /usr/bin/python python /usr/bin/python3.5 2
 
-python3 --version
+python --version
 
 # install
-sudo python3 setup.py install
+sudo python setup.py install
 
 # tests
-python3 -m unittest discover
+python -m unittest discover
