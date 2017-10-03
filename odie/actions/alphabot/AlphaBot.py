@@ -1,19 +1,18 @@
+import logging
+import time
+import sys
+logging.basicConfig()
+logger = logging.getLogger("odie")
+
+
 try:
     # only import if we are on a Rpi
     import RPi.GPIO as GPIO
+    from neopixel import Adafruit_NeoPixel
 except RuntimeError:
     pass
-import logging
-import time
-try:
-    # only import if we are on a Rpi
-    from neopixel import Adafruit_NeoPixel
 except:
-    pass
-
-
-logging.basicConfig()
-logger = logging.getLogger("odie")
+    logger.debug("RPi not imported: {}".format(sys.exc_info()[0]))
 
 
 class AlphaBot(object):

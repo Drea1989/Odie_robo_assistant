@@ -1,15 +1,19 @@
+import sys
+import time
+import logging
+from odie.core.ActionModule import ActionModule
+
+
+logging.basicConfig()
+logger = logging.getLogger("odie")
+
 try:
     # only import if we are on a Rpi
     import RPi.GPIO as GPIO
 except RuntimeError:
     pass
-
-import time
-import logging
-from odie.core.ActionModule import ActionModule
-
-logging.basicConfig()
-logger = logging.getLogger("odie")
+except:
+    logger.debug("RPi not imported: {}".format(sys.exc_info()[0]))
 
 
 class Ultrasonic_reading(ActionModule):
