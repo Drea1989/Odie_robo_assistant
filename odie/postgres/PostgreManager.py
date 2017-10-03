@@ -74,8 +74,8 @@ class PostgresManager(object):
         """
         try:
             cur = con.cursor()
-            #con.execute("SELECT name FROM brain WHERE to_tsvector('english', order) @@ to_tsquery('english', '{}') ORDER BY ts_rank_cd(to_tsvector('english', order), to_tsquery('english', '{}') ) DESC LIMIT 1;".format(term))
-            #testing simple execution
+            # con.execute("SELECT name FROM brain WHERE to_tsvector('english', order) @@ to_tsquery('english', '{}') ORDER BY ts_rank_cd(to_tsvector('english', order), to_tsquery('english', '{}') ) DESC LIMIT 1;".format(term))
+            # testing simple execution
             con.execute("SELECT name FROM brain WHERE to_tsvector('english', order) @@ to_tsquery('english', '{}')LIMIT 1;".format(term))
             return cur.fetchall()
         except:

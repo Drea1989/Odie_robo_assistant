@@ -1,7 +1,15 @@
-import RPi.GPIO as GPIO
+try:
+    # only import if we are on a Rpi
+    import RPi.GPIO as GPIO
+except RuntimeError:
+    pass
 import logging
 import time
-from neopixel import Adafruit_NeoPixel
+try:
+    # only import if we are on a Rpi
+    from neopixel import Adafruit_NeoPixel
+except:
+    pass
 
 
 logging.basicConfig()

@@ -1,7 +1,12 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-import RPi.GPIO as GPIO
+try:
+    # only import if we are on a Rpi
+    import RPi.GPIO as GPIO
+except RuntimeError:
+    pass
+
 import time
 import logging
 
