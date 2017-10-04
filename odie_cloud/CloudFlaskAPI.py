@@ -3,7 +3,7 @@ import os
 import threading
 
 import time
-
+import csv
 from odie.core.Utils.FileManager import FileManager
 
 from odie.core.ConfigurationManager import SettingLoader, BrainLoader
@@ -192,6 +192,7 @@ class CloudFlaskAPI(threading.Thread):
         filename = secure_filename(uploaded_file.filename)
         base_path = os.path.join(self.app.config['VIDEO_UPLOAD_FOLDER'])
         uploaded_file.save(os.path.join(base_path, filename))
+        
         # now start analyse the audio with STT engine
         video_path = base_path + os.sep + filename
         logger.debug("[FlaskAPI] run_image_by_model: with file path %s" % video_path)
@@ -238,6 +239,11 @@ class CloudFlaskAPI(threading.Thread):
         filename = secure_filename(uploaded_file.filename)
         base_path = os.path.join(self.app.config['AUDIO_UPLOAD_FOLDER'])
         uploaded_file.save(os.path.join(base_path, filename))
+        # write aeon manifest file
+        with open(os.path.join(base_path, filename), 'w') as tsvfile:
+            writer = csv.writer(tsvfile, delimiter='\t', newline='\n')
+            writer.writerow([filename])
+
         # now start analyse the audio with STT engine
         audio_path = base_path + os.sep + filename
         logger.debug("[FlaskAPI] run_speech_recognition: with file path %s" % audio_path)
@@ -245,9 +251,9 @@ class CloudFlaskAPI(threading.Thread):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
         # TODO: Call deepspeech2 model for inference
-        model_file = self.settings.speech.model
+        model_file = self.settings.cloud.speech.model
         self.response = DeepSpeechPredict(model_file, audio_path)
-        
+
         if self.response is not None and self.response:
             data = jsonify(self.response)
             self.response = None
