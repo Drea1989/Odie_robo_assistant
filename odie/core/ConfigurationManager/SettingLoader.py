@@ -6,6 +6,7 @@ from odie.core.Models.RpiSettings import RpiSettings
 from .YAMLLoader import YAMLLoader
 from odie.core.Models.Resources import Resources
 from odie.core.Models.Postgres import Postgres
+from odie.core.Models.Cloud import Cloud
 from odie.core.Utils.Utils import Utils
 from odie.core.Models import Singleton
 from odie.core.Models.RestAPI import RestAPI
@@ -121,6 +122,7 @@ class SettingLoader(with_metaclass(Singleton, object)):
         rpi_settings = self._get_rpi_settings(settings)
         postgres = self._get_postgres(settings)
         alphabot = self._get_alphabot(settings)
+        cloud = self._get_cloud(settings)
 
         # Load the setting singleton with the parameters
         setting_object.default_tts_name = default_tts_name
@@ -144,6 +146,7 @@ class SettingLoader(with_metaclass(Singleton, object)):
         setting_object.rpi_settings = rpi_settings
         setting_object.postgres = postgres
         setting_object.alphabot = alphabot
+        setting_object.cloud = cloud
 
         return setting_object
 
@@ -825,3 +828,37 @@ class SettingLoader(with_metaclass(Singleton, object)):
         except KeyError:
             # User does not provide this settings
             return dict()
+
+    @staticmethod
+    def _get_cloud(settings):
+        """
+        Return the dict of cloud models from the settings.
+        :param settings: The YAML settings file
+        :return: dict
+        """
+        try:
+            cl = settings["cloud"]
+
+            if "category" in cl:
+                category = cl["category"]
+
+            if "model" in cl["model"]:
+                model = cl["model"]
+
+            if "TFhost" in cl:
+                TFhost = cl["TFhost"]
+
+            if "TFport" in cl:
+                TFport = cl["TFport"]
+
+            if category is None \
+                    and (model is None or (TFhost is None and TFport is None)):
+                raise SettingInvalidException("Define : \'TFport\' or/and \'TFhost")
+
+            cloud = Cloud(category=category, model=model, TFhost=TFhost, TFport=TFport)
+
+        except KeyError:
+            logger.debug("Cloud not found in settings")
+            cloud = None
+
+        return cloud

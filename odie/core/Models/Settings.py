@@ -29,7 +29,8 @@ class Settings(object):
                  variables=None,
                  rpi_settings=None,
                  postgres=None,
-                 alphabot=None):
+                 alphabot=None,
+                 cloud=None):
 
         self.default_tts_name = default_tts_name
         self.default_stt_name = default_stt_name
@@ -54,6 +55,7 @@ class Settings(object):
         self.rpi_settings = rpi_settings
         self.postgres = postgres
         self.alphabot = alphabot
+        self.cloud = cloud
 
     def serialize(self):
         """
@@ -85,8 +87,9 @@ class Settings(object):
             'machine': self.machine,
             'odie_version': self.odie_version,
             'rpi_settings': self.rpi_settings.serialize() if self.rpi_settings is not None else None,
-            'postgres':self.postgres,
-            'alphabot':self.alphabot
+            'postgres': self.postgres,
+            'alphabot': self.alphabot,
+            'cloud': self.cloud
         }
 
     def __str__(self):

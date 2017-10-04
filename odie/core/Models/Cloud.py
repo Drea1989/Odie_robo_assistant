@@ -1,15 +1,14 @@
 
 
-class Postgres(object):
+class Cloud(object):
     """
-    postgres ojbect
+    Cloud ojbect
     """
-    def __init__(self, host='localhost', port=5432, database=None, user=None, password=None):
-        self.host = host
-        self.port = port
-        self.database = database
-        self.user = user
-        self.password = password
+    def __init__(self, category=None, model=None, TFhost=None, TFport=None):
+        self.category = category
+        self.model = model
+        self.TFhost = TFhost
+        self.TFport = TFport
 
     def __str__(self):
         return str(self.serialize())
@@ -23,11 +22,10 @@ class Postgres(object):
         """
 
         return {
-            'host': self.host,
-            'port': self.port,
-            'database': self.database,
-            'user': self.user,
-            'password': self.password
+            'category': self.category,
+            'model': self.model,
+            'tfhost':  self.TFhost,
+            'tfport':  self.TFport
         }
 
     def __eq__(self, other):

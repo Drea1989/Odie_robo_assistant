@@ -210,10 +210,10 @@ class FlaskAPI(threading.Thread):
             order_to_run = order["order"]
             logger.debug("[FlaskAPI] run_neuron_by_order: order to run -> %s" % order_to_run)
             api_response = NeuronLauncher.run_matching_neuron_from_order(order_to_run,
-                                                                           self.brain,
-                                                                           self.settings,
-                                                                           is_api_call=True,
-                                                                           no_voice=no_voice)
+                                                                         self.brain,
+                                                                         self.settings,
+                                                                         is_api_call=True,
+                                                                         no_voice=no_voice)
 
             data = jsonify(api_response)
             return data, 201
@@ -320,10 +320,10 @@ class FlaskAPI(threading.Thread):
         """
         logger.debug("[FlaskAPI] audio_analyser_callback: order to process -> %s" % order)
         api_response = NeuronLauncher.run_matching_neuron_from_order(order,
-                                                                       self.brain,
-                                                                       self.settings,
-                                                                       is_api_call=True,
-                                                                       no_voice=self.no_voice)
+                                                                     self.brain,
+                                                                     self.settings,
+                                                                     is_api_call=True,
+                                                                     no_voice=self.no_voice)
         self.api_response = api_response
 
         # this boolean will notify the main process that the order have been processed

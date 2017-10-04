@@ -1,17 +1,15 @@
 import logging
 import os
 import threading
-
-import time
 import csv
 from odie.core.Utils.FileManager import FileManager
 
-from odie.core.ConfigurationManager import SettingLoader, BrainLoader
+from odie.core.ConfigurationManager import SettingLoader
 from werkzeug.utils import secure_filename
 
 from flask import jsonify
 from flask import request
-from flask_restful import abort
+# from flask_restful import abort
 from flask_cors import CORS
 
 from odie.core.RestAPI.utils import requires_auth
@@ -19,6 +17,7 @@ from odie._version import version_str
 
 # cloud Models
 from odie_cloud.speech.evaluate import DeepSpeechPredict
+from tensorflow_serving_client import TensorflowServingClient as TFClient
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -32,7 +31,6 @@ ALLOWED_EXTENSIONS = {'mp3', 'wav', 'flac', 'jpg'}
 class CloudFlaskAPI(threading.Thread):
     def __init__(self, app, port=5000, brain=None, allowed_cors_origin=False):
         """
-
         :param app: Flask API
         :param port: Port to listen
         :param brain: Brain object
@@ -61,6 +59,7 @@ class CloudFlaskAPI(threading.Thread):
         # create the temp folder
         FileManager.create_directory(AUDIO_UPLOAD_FOLDER)
         FileManager.create_directory(VIDEO_UPLOAD_FOLDER)
+        FileManager.create_directory(FAIL_UPLOAD_FOLDER)
 
         # Flask configuration remove default Flask behaviour to encode to ASCII
         self.app.url_map.strict_slashes = False
@@ -76,12 +75,8 @@ class CloudFlaskAPI(threading.Thread):
         self.app.add_url_rule('/', view_func=self.get_main_page, methods=['GET'])
         self.app.add_url_rule('/image', view_func=self.get_models, methods=['GET'])
         self.app.add_url_rule('/enhance', view_func=self.get_models, methods=['GET'])
-        self.app.add_url_rule('/speech', view_func=self.get_models, methods=['GET'])
-        # self.app.add_url_rule('/neurons/<neuron_name>', view_func=self.get_neuron, methods=['GET'])
-        # self.app.add_url_rule('/neurons/start/id/<neuron_name>', view_func=self.run_neuron_by_name, methods=['POST'])
         self.app.add_url_rule('/speech/recognize', view_func=self.run_speech_recognition, methods=['POST'])
-        self.app.add_url_rule('/image/<model_name>', view_func=self.run_image_by_model, methods=['POST'])
-        # self.app.add_url_rule('/neurons/start/audio', view_func=self.run_neuron_by_audio, methods=['POST'])
+        self.app.add_url_rule('/image/<model_name>', view_func=self.run_image_with_model, methods=['POST'])
         self.app.add_url_rule('/shutdown/', view_func=self.shutdown_server, methods=['POST'])
 
     def run(self):
@@ -91,7 +86,7 @@ class CloudFlaskAPI(threading.Thread):
     def get_main_page(self):
         logger.debug("[FlaskAPI] get_main_page")
         data = {
-            "Odie version": "%s" % version_str
+            "Odie Cloud Version": "%s" % version_str
         }
         return jsonify(data), 200
 
@@ -123,10 +118,11 @@ class CloudFlaskAPI(threading.Thread):
         curl -i --user admin:secret  -X GET  http://127.0.0.1:5000/image
         """
         logger.debug("[FlaskAPI] get_models: all")
+        models = []
+        for category in self.settings.cloud:
+            models.append(category)
 
-        models = [m for m in self.brain.neurons if m.cues == 'None']
-
-        data = jsonify(neurons=[e.serialize() for e in models])
+        data = jsonify(models=[models])
         return data, 200
 
     @requires_auth
@@ -148,9 +144,9 @@ class CloudFlaskAPI(threading.Thread):
         return jsonify(error=data), 404
 
     @requires_auth
-    def run_image_by_model(self, model_name):
+    def run_image_with_model(self, model_name):
         """
-        Run a image model by its name
+        Run an image model by its name
         test with curl:
         curl -i --user admin:secret -X POST  http://127.0.0.1:5000/image/caption
 
@@ -158,17 +154,9 @@ class CloudFlaskAPI(threading.Thread):
         :return:
         """
         logger.debug("[FlaskAPI] run_image_by_model: model_name name -> %s" % model_name)
-        # get a neuron object from the name
-        model_target = BrainLoader().get_brain()._get_neuron_by_name(name=model_name)
 
         # get parameters
-        parameters = self.get_parameters_from_request(request)
-
-        if model_target is None:
-            data = {
-                "model name not found": "%s" % model_name
-            }
-            return jsonify(error=data), 404
+        # parameters = self.get_parameters_from_request(request)
 
         # check if the post request has the file part
         uploaded_file = request.form['data']
@@ -190,19 +178,31 @@ class CloudFlaskAPI(threading.Thread):
 
         # save the file
         filename = secure_filename(uploaded_file.filename)
-        base_path = os.path.join(self.app.config['VIDEO_UPLOAD_FOLDER'])
+        base_path = os.path.join(self.app.config['UPLOAD_VIDEO'])
         uploaded_file.save(os.path.join(base_path, filename))
-        
+
         # now start analyse the audio with STT engine
         video_path = base_path + os.sep + filename
         logger.debug("[FlaskAPI] run_image_by_model: with file path %s" % video_path)
         if not self.allowed_file(video_path):
             video_path = self._convert_to_wav(audio_file_path=video_path)
-            
-        # TODO: Call model selected
-        # TODO: Call im2txt model for inference
-        model = model_target.name()
-        response = model.predict(video_path)
+
+        modelHost = None
+        modelPort = None
+        for category, md, tfhost, tfport in self.settings.cloud:
+            if category == model_name:
+                modelHost = tfhost
+                modelPort = tfport
+
+        if modelHost is None or modelPort is None:
+            data = {
+                "model name not found": "%s" % model_name
+            }
+            return jsonify(error=data), 404
+
+        tfclient = TFClient(tfhost, tfport)
+        response = tfclient.make_prediction(input_data=video_path, timeout=10)
+        logger.debug("[FlaskAPI] run_image_by_model prediction: {}".format(response))
 
         data = jsonify(response)
         return data, 201
@@ -237,7 +237,7 @@ class CloudFlaskAPI(threading.Thread):
 
         # save the file
         filename = secure_filename(uploaded_file.filename)
-        base_path = os.path.join(self.app.config['AUDIO_UPLOAD_FOLDER'])
+        base_path = os.path.join(self.app.config['UPLOAD_AUDIO'])
         uploaded_file.save(os.path.join(base_path, filename))
         # write aeon manifest file
         with open(os.path.join(base_path, filename), 'w') as tsvfile:
@@ -250,8 +250,17 @@ class CloudFlaskAPI(threading.Thread):
         if not self.allowed_file(audio_path):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
-        # TODO: Call deepspeech2 model for inference
-        model_file = self.settings.cloud.speech.model
+        # get model file
+        model_file = None
+        for category, model in self.settings.cloud:
+            if category == 'speech':
+                model_file = model
+        if model_file is None:
+            data = {
+                "model category not found": "exception"
+            }
+            return jsonify(error=data), 404
+
         self.response = DeepSpeechPredict(model_file, audio_path)
 
         if self.response is not None and self.response:
@@ -263,6 +272,8 @@ class CloudFlaskAPI(threading.Thread):
             data = {
                 "error": "failed to process the given file"
             }
+            base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
+            uploaded_file.save(os.path.join(base_path, filename))
             return jsonify(error=data), 400
 
     @staticmethod
