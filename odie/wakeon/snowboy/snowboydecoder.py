@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import collections
 from threading import Thread
 

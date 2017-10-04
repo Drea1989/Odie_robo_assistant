@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ----------------------------------------------------------------------------
 # Copyright 2017 Andrea Balzano
 # Licensed under the GNU Affero General Public License v3.0 (the "License");
@@ -22,8 +22,8 @@ from neon.backends import gen_backend
 from neon.models import Model
 from neon.data.dataloader_transformers import TypeCast, Retuple
 
-from decoder import ArgMaxDecoder
-from utils import get_predictions
+from odie_cloud.speech.decoder import ArgMaxDecoder
+from odie_cloud.speech.utils import get_predictions
 
 
 def data_transform(dl):

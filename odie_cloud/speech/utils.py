@@ -16,7 +16,7 @@
 
 import numpy as np
 from tqdm import tqdm
-from decoder import decoder
+from odie_cloud.speech.decoder import decoder
 
 
 def softmax(x):

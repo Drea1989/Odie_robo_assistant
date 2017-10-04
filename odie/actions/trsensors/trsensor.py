@@ -1,12 +1,17 @@
-#!/usr/bin/python
-# -*- coding:utf-8 -*-
-
-import RPi.GPIO as GPIO
+import sys
 import time
 import logging
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
+
+try:
+    # only import if we are on a Rpi
+    import RPi.GPIO as GPIO
+except RuntimeError:
+    pass
+except:
+    logger.debug("RPi not imported: {}".format(sys.exc_info()[0]))
 
 
 class TRSensor(object):

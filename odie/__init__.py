@@ -10,16 +10,15 @@ from odie.core.ConfigurationManager.BrainLoader import BrainLoader
 from odie.core.EventManager import EventManager
 from odie.core.MainController import MainController
 from odie.core.Utils.RpiUtils import RpiUtils
-from odie.core.Utils.PostgreManager import PostgresManager as PgManager
+
 
 from ._version import version_str
-#to check keyboard input
+# to check keyboard input
 import signal
 import sys
 
 from odie.core.ResourcesManager import ResourcesManager
 from odie.core.NeuronLauncher import NeuronLauncher
-from odie.core.OrderAnalyser import OrderAnalyser
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -37,8 +36,9 @@ def signal_handler(signal, frame):
     Utils.print_info("Ctrl+C pressed. Killing odie")
     sys.exit(0)
 
+
 # actions available
-ACTION_LIST = ["start", "gui", "install", "uninstall","cloud"]
+ACTION_LIST = ["start", "gui", "install", "uninstall", "cloud"]
 
 
 def parse_args(args):
@@ -126,15 +126,15 @@ def main():
     # load settings
     # get global configuration once
     settings_loader = SettingLoader()
-    settings = settings_loader.settings 
+    settings = settings_loader.settings
 
-
-    #starting Odie
+    # starting Odie
     if parser.action == "start":
-        #create postgres brain table
+        # create postgres brain table
         if settings.postgres:
             pg = settings.postgres
-            Bsaved = PgManager.save_brain_table(pg = pg,brain = brain)
+            from odie.postgres.PostgreManager import PostgresManager as PgManager
+            Bsaved = PgManager.save_brain_table(pg=pg, brain=brain)
             if Bsaved:
                 Utils.print_info("postgresql brain saved successfully")
         else:
@@ -147,13 +147,13 @@ def main():
         # user set a neuron to start
         if parser.run_neuron is not None:
             NeuronLauncher.start_neuron_by_name(parser.run_neuron,
-                                                  brain=brain)
+                                                brain=brain)
 
         if parser.run_order is not None:
             NeuronLauncher.run_matching_neuron_from_order(parser.run_order,
-                                                            brain=brain,
-                                                            settings=settings,
-                                                            is_api_call=False)
+                                                          brain=brain,
+                                                          settings=settings,
+                                                          is_api_call=False)
 
         if (parser.run_neuron is None) and (parser.run_order is None):
             # first, load events in event manager
@@ -191,7 +191,7 @@ def main():
             # init GPIO once
             RpiUtils(settings.rpi_settings)
 
-        Utils.print_info("Starting Cloud REST API Listening port: %s" % settings.rest_api.port)       
+        Utils.print_info("Starting Cloud REST API Listening port: %s" % settings.rest_api.port)    
         # then start odie
         Utils.print_success("Starting odie Cloud")
         Utils.print_info("Press Ctrl+C for stopping")
@@ -201,9 +201,9 @@ def main():
         try:
             app = Flask(__name__)
             flask_api = CloudFlaskAPI(app=app,
-                                 port=settings.rest_api.port,
-                                 brain=brain,
-                                 allowed_cors_origin=settings.rest_api.allowed_cors_origin)
+                                      port=settings.rest_api.port,
+                                      brain=brain,
+                                      allowed_cors_origin=settings.rest_api.allowed_cors_origin)
             flask_api.start()
         except (KeyboardInterrupt, SystemExit):
             Utils.print_info("Ctrl+C pressed. Killing odie Cloud")
@@ -213,7 +213,6 @@ def main():
                 logger.debug("Clean GPIO")
                 import RPi.GPIO as GPIO
                 GPIO.cleanup()
-
 
 
 def configure_logging(debug=None):

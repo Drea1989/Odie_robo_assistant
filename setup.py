@@ -88,8 +88,8 @@ setup(
         'SoundFile>=0.9.0',
         'pyalsaaudio>=0.8.4',
         'RPi.GPIO>=0.6.3',
-        'psycopg2>=2.7.1',
-        'sqlalchemy>=1.2',
+        #'psycopg2>=2.7.1',
+        'sqlalchemy>=1.1.14',
         'pandas>=0.20',
         'sox>=1.3.0'
     ],

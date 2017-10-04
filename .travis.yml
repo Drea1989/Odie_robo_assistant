@@ -22,6 +22,7 @@ before_install:
 install:
   - pip install -r install/files/python_requirements.txt
   - pip install python2-pythondialog || pip install pythondialog
+  - pip install pytest
   - pip install coveralls
 
 # command to run tests
@@ -29,7 +30,7 @@ script:
 #  - pytest
   # docker run -it --rm odie-ubuntu1604
   - docker run -it --rm odie-debian9
-  - coverage run --source=Tests -m unittest discover
+  - coverage run --source=Odie_robo_assistant -m pytest
 
 after_success:
   coveralls
