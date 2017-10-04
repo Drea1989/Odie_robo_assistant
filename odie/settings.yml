@@ -163,6 +163,17 @@ postgres:
 # Specify parameters
 alphabot:
   enable: True 
+# ---------------------------
+# Cloud settings
+# ---------------------------
+# Specify parameters
+cloud:
+  - speech:
+    model: "/usr/home/odie_cloud/models/speech.pmld"
+  - caption:
+    TFhost: "localhost"
+    TFport: 9001
+
 
 # ---------------------------
 # Resource directory path

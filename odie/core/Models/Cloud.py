@@ -2,13 +2,15 @@
 
 class Cloud(object):
     """
-    Cloud ojbect
+    Cloud object
+    parameters can be:
+    :param: model # to pass the model file
+    :param: TFhost # to pass the host of tensorflow serving
+    :param: TFport # to pass the port of tensorflow serving
     """
-    def __init__(self, category=None, model=None, TFhost=None, TFport=None):
+    def __init__(self, category=None, parameters=None):
         self.category = category
-        self.model = model
-        self.TFhost = TFhost
-        self.TFport = TFport
+        self.parameters = parameters
 
     def __str__(self):
         return str(self.serialize())
@@ -23,9 +25,7 @@ class Cloud(object):
 
         return {
             'category': self.category,
-            'model': self.model,
-            'tfhost':  self.TFhost,
-            'tfport':  self.TFport
+            'parameters': self.parameters
         }
 
     def __eq__(self, other):

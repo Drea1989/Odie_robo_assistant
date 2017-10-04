@@ -7,7 +7,7 @@ import unittest
 from odie.core.ConfigurationManager import SettingLoader
 from odie.core.Models import Singleton
 from odie.core.Models import Resources
-from odie.core.Models import Postgres
+from odie.core.Models import Postgres, Cloud
 from odie.core.Models.Player import Player
 from odie.core.Models.RestAPI import RestAPI
 from odie.core.Models.Settings import Settings
@@ -36,11 +36,12 @@ class TestSettingLoader(unittest.TestCase):
                  'password': 'secret', 'port': 5000},
             'postgres':
                 {'dbname': 'odie',
-                 'user' : 'admin',
+                 'user': 'admin',
                  'password': 'secret',
                  'host': 'localhost',
                  'port': 5432},
             'alphabot': {'enable': False},
+            'cloud': {'category': 'speech', "parameters": {'model': '/tmp/model.pmld'}},
             'default_wakeon': 'snowboy',
             'default_player': 'mplayer',
             'play_on_ready_notification': 'never',
@@ -61,8 +62,7 @@ class TestSettingLoader(unittest.TestCase):
             'random_wake_up_sounds': ['sounds/ding.wav', 'sounds/dong.wav'],
             'text_to_speech': [
                 {'pico2wave': {'cache': True, 'language': 'en-US'}},
-                {'voxygen': {'voice': 'Agnes', 'cache': True}}
-            ],
+                {'voxygen': {'voice': 'Agnes', 'cache': True}}],
             'var_files': ["../Tests/settings/variables.yml"]
         }
 
@@ -106,7 +106,7 @@ class TestSettingLoader(unittest.TestCase):
         settings_object.on_ready_answers = ['Odie is ready']
         settings_object.on_ready_sounds = ['sounds/ding.wav', 'sounds/dong.wav']
         wakeon1 = Wakeon(name="snowboy",
-                           parameters={'pmdl_file': 'wakeon/snowboy/resources/odie-FR-6samples.pmdl'})
+                         parameters={'pmdl_file': 'wakeon/snowboy/resources/odie-EN-1samples.pmdl'})
         settings_object.wakeons = [wakeon1]
         player1 = Player(name="mplayer", parameters={})
         player2 = Player(name="pyalsaaudio", parameters={"device": "default"})
@@ -127,13 +127,16 @@ class TestSettingLoader(unittest.TestCase):
             "test": "odie"
         }
         settings_object.machine = platform.machine()
-        postgres = Postgres(database= 'odie',
-                            user= 'admin',
-                            password= 'secret',
-                            host= 'localhost',
-                            port= 5432)
+        postgres = Postgres(database='odie',
+                            user='admin',
+                            password='secret',
+                            host='localhost',
+                            port=5432)
         settings_object.postgres = postgres
-        settings_object.alphabot = {'enable' : False}
+        cl = Cloud(category='speech',
+                   parameters={'model': '/tmp/model.pmld'})
+        settings_object.cloud = cl
+        settings_object.alphabot = {'enable': True}
 
         sl = SettingLoader(file_path=self.settings_file_to_test)
 
@@ -168,7 +171,7 @@ class TestSettingLoader(unittest.TestCase):
 
     def test_get_wakeons(self):
         wakeon1 = Wakeon(name="snowboy",
-                           parameters={'pmdl_file': 'wakeon/snowboy/resources/odie-FR-6samples.pmdl'})
+                         parameters={'pmdl_file': 'wakeon/snowboy/resources/odie-EN-1samples.pmdl'})
         sl = SettingLoader(file_path=self.settings_file_to_test)
         self.assertEqual([wakeon1], sl._get_wakeons(self.settings_dict))
 
@@ -232,6 +235,25 @@ class TestSettingLoader(unittest.TestCase):
         sl = SettingLoader(file_path=self.settings_file_to_test)
         self.assertEqual(expected_result,
                          sl._get_variables(self.settings_dict))
+
+    def test_get_postgres(self):
+        expected_result = {'dbname': 'odie',
+                           'user': 'admin',
+                           'password': 'secret',
+                           'host': 'localhost',
+                           'port': 5432}
+        sl = SettingLoader(file_path=self.settings_file_to_test)
+        self.assertEqual(expected_result, sl._get_postgres(self.settings_dict))
+
+    def test_get_alphabot(self):
+        expected_result = {'enable': False}
+        sl = SettingLoader(file_path=self.settings_file_to_test)
+        self.assertEqual(expected_result, sl._get_alphabot(self.settings_dict))
+
+    def test_get_cloud(self):
+        expected_result = {'category': 'speech', "parameters": {'model': '/tmp/model.pmld'}}
+        sl = SettingLoader(file_path=self.settings_file_to_test)
+        self.assertEqual(expected_result, sl._get_cloud(self.settings_dict))
 
 
 if __name__ == '__main__':

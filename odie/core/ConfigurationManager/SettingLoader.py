@@ -780,7 +780,7 @@ class SettingLoader(with_metaclass(Singleton, object)):
         """
         try:
             pg = settings["postgres"]
-            
+
             if "host" in pg:
                 host = pg["host"]
 
@@ -837,28 +837,19 @@ class SettingLoader(with_metaclass(Singleton, object)):
         :return: dict
         """
         try:
-            cl = settings["cloud"]
-
-            if "category" in cl:
-                category = cl["category"]
-
-            if "model" in cl["model"]:
-                model = cl["model"]
-
-            if "TFhost" in cl:
-                TFhost = cl["TFhost"]
-
-            if "TFport" in cl:
-                TFport = cl["TFport"]
-
-            if category is None \
-                    and (model is None or (TFhost is None and TFport is None)):
-                raise SettingInvalidException("Define : \'TFport\' or/and \'TFhost")
-
-            cloud = Cloud(category=category, model=model, TFhost=TFhost, TFport=TFport)
-
+            clCategory = settings["cloud"]
         except KeyError:
-            logger.debug("Cloud not found in settings")
-            cloud = None
+            raise SettingNotFound("cloud settings not found")
 
-        return cloud
+        cl = list()
+        for clSetting in clCategory:
+            if isinstance(clSetting, dict):
+                for category in clSetting:
+                    parameters = clSetting[category]
+                    new_cl = Cloud(category=category, parameters=parameters)
+                    cl.append(new_cl)
+            else:
+                # the stt does not have parameter
+                new_cl = Cloud(category=category, parameters=dict())
+                cl.append(new_cl)
+        return cl

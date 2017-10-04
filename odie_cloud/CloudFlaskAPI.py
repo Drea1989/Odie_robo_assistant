@@ -18,6 +18,20 @@ from odie._version import version_str
 # cloud Models
 from odie_cloud.speech.evaluate import DeepSpeechPredict
 from tensorflow_serving_client import TensorflowServingClient as TFClient
+'''
+tensorflow serving configuration
+model_config_list: {
+                    config: {
+                    name: "model1",
+                    base_path: "/serving/models/model1",
+                    model_platform: "tensorflow"},
+                    config: {
+                    name: "model2",
+                    base_path: "/serving/models/model2",
+                    model_platform: "tensorflow"}
+                    }
+/serving/bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_config_file=/serving/model_config/model_config.conf
+'''
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -95,21 +109,6 @@ class CloudFlaskAPI(threading.Thread):
         return '.' in filename and \
                filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-    def _get_neuron_by_name(self, neuron_name):
-        """
-        Find a neuron in the brain by its name
-        :param neuron_name:
-        :return:
-        """
-        all_neuron = self.brain.neurons
-        for neuron in all_neuron:
-            try:
-                if neuron.name == neuron_name:
-                    return neuron
-            except KeyError:
-                pass
-        return None
-
     @requires_auth
     def get_models(self):
         """
@@ -119,29 +118,10 @@ class CloudFlaskAPI(threading.Thread):
         """
         logger.debug("[FlaskAPI] get_models: all")
         models = []
-        for category in self.settings.cloud:
-            models.append(category)
-
+        for cl_object in self.settings.cloud:
+            models.append(cl_object.category)
         data = jsonify(models=[models])
         return data, 200
-
-    @requires_auth
-    def get_neuron(self, neuron_name):
-        """
-        get a neuron by its name
-        test with curl:
-        curl --user admin:secret -i -X GET  http://127.0.0.1:5000/neurons/say-hello-en
-        """
-        logger.debug("[FlaskAPI] get_neuron: neuron_name -> %s" % neuron_name)
-        neuron_target = self._get_neuron_by_name(neuron_name)
-        if neuron_target is not None:
-            data = jsonify(neurons=neuron_target.serialize())
-            return data, 200
-
-        data = {
-            "neuron name not found": "%s" % neuron_name
-        }
-        return jsonify(error=data), 404
 
     @requires_auth
     def run_image_with_model(self, model_name):
@@ -189,10 +169,10 @@ class CloudFlaskAPI(threading.Thread):
 
         modelHost = None
         modelPort = None
-        for category, md, tfhost, tfport in self.settings.cloud:
-            if category == model_name:
-                modelHost = tfhost
-                modelPort = tfport
+        for cl_object in self.settings.cloud:
+            if cl_object.category == model_name:
+                modelHost = cl_object.parameters['tfhost']
+                modelPort = cl_object.parameters['tfport']
 
         if modelHost is None or modelPort is None:
             data = {
@@ -200,8 +180,8 @@ class CloudFlaskAPI(threading.Thread):
             }
             return jsonify(error=data), 404
 
-        tfclient = TFClient(tfhost, tfport)
-        response = tfclient.make_prediction(input_data=video_path, timeout=10)
+        tfclient = TFClient(modelHost, modelPort)
+        response = tfclient.make_prediction(input_data=video_path, timeout=10, model_name=model_name)
         logger.debug("[FlaskAPI] run_image_by_model prediction: {}".format(response))
 
         data = jsonify(response)
@@ -217,14 +197,31 @@ class CloudFlaskAPI(threading.Thread):
 
         Returns the most likely transcription if ``show_all`` is false (the default). Otherwise, returns the raw API response as a JSON dictionary.
         Test with curl
-        curl -i --user admin:secret -H "Content-Type: audio/x-flac" -X POST -d '{"client":"odie","lang":"eng","key":"asdfg12345"}' http://localhost:5000/speech/recognise
+        curl -i --user admin:secret -H "Content-Type: audio/x-flac" -X POST /
+        -d '{"client":"odie","lang":"eng","key":"asdfg12345"}' http://localhost:5000/speech/recognise
         In case of quotes in the order or accents, use a file
         :return:
         """
         assert request.path == 'speech/recognise'
         assert request.method == 'POST'
         # check if the post request has the file part
-        uploaded_file = request.form['data']
+        # uploaded_file = request.form['data']
+
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            data = {
+                "error": "No file provided"
+            }
+            return jsonify(error=data), 400
+
+        uploaded_file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if uploaded_file.filename == '':
+            data = {
+                "error": "No file provided"
+            }
+            return jsonify(error=data), 400
 
         if not uploaded_file:
             data = {
@@ -244,7 +241,6 @@ class CloudFlaskAPI(threading.Thread):
             writer = csv.writer(tsvfile, delimiter='\t', newline='\n')
             writer.writerow([filename])
 
-        # now start analyse the audio with STT engine
         audio_path = base_path + os.sep + filename
         logger.debug("[FlaskAPI] run_speech_recognition: with file path %s" % audio_path)
         if not self.allowed_file(audio_path):
@@ -252,15 +248,17 @@ class CloudFlaskAPI(threading.Thread):
 
         # get model file
         model_file = None
-        for category, model in self.settings.cloud:
-            if category == 'speech':
-                model_file = model
+
+        for cl_object in self.settings.cloud:
+            if cl_object.category == 'speech':
+                model_file = cl_object.parameters['model']
         if model_file is None:
             data = {
                 "model category not found": "exception"
             }
             return jsonify(error=data), 404
 
+        # now start analyse the audio with STT engine
         self.response = DeepSpeechPredict(model_file, audio_path)
 
         if self.response is not None and self.response:
