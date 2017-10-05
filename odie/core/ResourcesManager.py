@@ -32,6 +32,7 @@ TYPE_ACTION = "action"
 TYPE_TTS = "tts"
 TYPE_STT = "stt"
 TYPE_WAKEON = "wakeon"
+TYPE_CUE = "cue"
 
 
 class ResourcesManagerException(Exception):
@@ -103,7 +104,7 @@ class ResourcesManager(object):
                                  % str(self.tmp_path))
                     shutil.rmtree(self.tmp_path)
 
-    def uninstall(self, action_name=None, tts_name=None, stt_name=None, wakeon_name=None):
+    def uninstall(self, action_name=None, tts_name=None, stt_name=None, wakeon_name=None, cue_name=None):
         """
         Uninstall a community resource
         """
@@ -111,20 +112,26 @@ class ResourcesManager(object):
         module_name = ""
         if action_name is not None:
             target_path_to_delete = self._get_target_folder(resources=self.settings.resources,
-                                                            module_type="action")
+                                                            module_type=TYPE_ACTION)
             module_name = action_name
         if tts_name is not None:
             target_path_to_delete = self._get_target_folder(resources=self.settings.resources,
-                                                            module_type="action")
+                                                            module_type=TYPE_TTS)
             module_name = tts_name
         if stt_name is not None:
             target_path_to_delete = self._get_target_folder(resources=self.settings.resources,
-                                                            module_type="action")
+                                                            module_type=TYPE_STT)
             module_name = stt_name
+
         if wakeon_name is not None:
             target_path_to_delete = self._get_target_folder(resources=self.settings.resources,
-                                                            module_type="action")
+                                                            module_type=TYPE_WAKEON)
             module_name = wakeon_name
+
+        if cue_name is not None:
+            target_path_to_delete = self._get_target_folder(resources=self.settings.resources,
+                                                            module_type=TYPE_CUE)
+            module_name = cue_name
 
         if target_path_to_delete is not None:
             try:
@@ -173,6 +180,11 @@ class ResourcesManager(object):
                 logger.debug(message)
                 Utils.print_danger(message)
                 settings_ok = False
+            if dna.module_type == "cue" and resources.wakeon_folder is None:
+                message = "Resources folder for cue installation not set in settings, cannot install."
+                logger.debug(message)
+                Utils.print_danger(message)
+                settings_ok = False
 
         return settings_ok
 
@@ -201,7 +213,7 @@ class ResourcesManager(object):
         Return the folder from the resources and given a module type
         :param resources: Resource object
         :type resources: Resources
-        :param module_type: type of the module (TYPE_ACTION, TYPE_STT, TYPE_TTS, TYPE_WAKEON)
+        :param module_type: type of the module (TYPE_ACTION, TYPE_STT, TYPE_TTS, TYPE_WAKEON, TYPE_CUE)
         :return: path of the folder
         """
         module_type_converter = dict()
@@ -211,7 +223,8 @@ class ResourcesManager(object):
                 TYPE_ACTION: resources.action_folder,
                 TYPE_STT: resources.stt_folder,
                 TYPE_TTS: resources.tts_folder,
-                TYPE_WAKEON: resources.wakeon_folder
+                TYPE_WAKEON: resources.wakeon_folder,
+                TYPE_CUE: resources.cue_folder
             }
         except AttributeError:
             # will be raised if the resource folder is not set in settings

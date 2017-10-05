@@ -5,6 +5,7 @@ from odie.core.Models import Brain
 from odie.core.Models import Action
 from odie.core.Models import Order
 from odie.core.Models import Neuron
+from odie.core.Cue import Cue
 from odie.core.Models.MatchedNeuron import MatchedNeuron
 from odie.core.OrderAnalyser import OrderAnalyser
 
@@ -23,17 +24,17 @@ class TestOrderAnalyser(unittest.TestCase):
         action3 = Action(name='actione3', parameters={'var3': 'val3'})
         action4 = Action(name='actione4', parameters={'var4': 'val4'})
 
-        cue1 = Order(sentence="this is the sentence")
-        cue2 = Order(sentence="this is the second sentence")
-        cue3 = Order(sentence="that is part of the third sentence")
+        cue1 = Cue(name="order", parameters="this is the sentence")
+        cue2 = Cue(name="order", parameters="this is the second sentence")
+        cue3 = Cue(name="order", parameters="that is part of the third sentence")
 
         neuron1 = Neuron(name="Neuron1", actions=[action1, action2], cues=[cue1])
         neuron2 = Neuron(name="Neuron2", actions=[action3, action4], cues=[cue2])
         neuron3 = Neuron(name="Neuron3", actions=[action2, action4], cues=[cue3])
 
         all_neuron_list = [neuron1,
-                            neuron2,
-                            neuron3]
+                           neuron2,
+                           neuron3]
 
         br = Brain(neurons=all_neuron_list)
 
@@ -42,8 +43,8 @@ class TestOrderAnalyser(unittest.TestCase):
 
         # Create the matched neuron
         matched_neuron_1 = MatchedNeuron(matched_neuron=neuron1,
-                                           matched_order=spoken_order,
-                                           user_order=spoken_order)
+                                         matched_order=spoken_order,
+                                         user_order=spoken_order)
 
         matched_neurons = OrderAnalyser.get_matching_neuron(order=spoken_order, brain=br)
         self.assertEqual(len(matched_neurons), 1)

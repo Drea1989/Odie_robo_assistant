@@ -7,7 +7,6 @@ import six
 from odie.core.Models.MatchedNeuron import MatchedNeuron
 from odie.core.Utils.Utils import Utils
 from odie.core.ConfigurationManager import SettingLoader
-from odie.core.Models import Order
 
 import logging
 
@@ -44,7 +43,7 @@ class OrderAnalyser:
 
         # We use a named tuple to associate the neuron and the cue of the neuron
         neuron_order_tuple = collections.namedtuple('tuple_neuron_matchingOrder',
-                                                     ['neuron', 'order'])
+                                                    ['neuron', 'order'])
 
         list_match_neuron = list()
 
@@ -56,22 +55,23 @@ class OrderAnalyser:
         for neuron in cls.brain.neurons:
             # we are only concerned by neuron with a order type of cue
             for cue in neuron.cues:
-                if type(cue) == Order:
-                    if cls.spelt_order_match_brain_order_via_table(cue.sentence, order):
+                if cue.name == "order":
+                    if cls.spelt_order_match_brain_order_via_table(cue.parameters, order):
                         # the order match the neuron, we add it to the returned list
                         logger.debug("Order found! Run neuron name: %s" % neuron.name)
                         Utils.print_success("Order matched in the brain. Running neuron \"%s\"" % neuron.name)
-                        list_match_neuron.append(neuron_order_tuple(neuron=neuron, order=cue.sentence))
+                        list_match_neuron.append(neuron_order_tuple(neuron=neuron, order=cue.parameters))
 
         # create a list of MatchedNeuron from the tuple list
         list_neuron_to_process = list()
         for tuple_el in list_match_neuron:
             new_matching_neuron = MatchedNeuron(matched_neuron=tuple_el.neuron,
-                                                  matched_order=tuple_el.order,
-                                                  user_order=order)
+                                                matched_order=tuple_el.order,
+                                                user_order=order)
             list_neuron_to_process.append(new_matching_neuron)
 
         return list_neuron_to_process
+
     @classmethod
     def get_matching_neuron_new(cls, order, brain=None):
         """
@@ -116,7 +116,6 @@ class OrderAnalyser:
             Utils.print_success("Order matched in the brain. Running neuron \"%s\"" % list_neuron_to_process)
 
         return list_neuron_to_process
-
 
     @classmethod
     def spelt_order_match_brain_order_via_table(cls, order_to_analyse, user_said):

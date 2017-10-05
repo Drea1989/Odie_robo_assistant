@@ -29,10 +29,9 @@ else
     git checkout ${TRAVIS_BRANCH};
 fi
 
-python --version
-
 # install
-sudo python setup.py install
+sudo python3 setup.py install
 
 # tests
-#python -m unittest discover
+export LANG=C.UTF-8
+python3 -m unittest discover

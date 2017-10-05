@@ -5,6 +5,7 @@ import imp
 from odie.core.Utils.Utils import ModuleNotFoundError
 from odie.core.ConfigurationManager.SettingLoader import SettingLoader
 
+
 class InvalidNeuronName(Exception):
     """
     The name of the neuron is not correct. It should only contains alphanumerics at the beginning and the end of
@@ -45,15 +46,6 @@ class NoValidCue(Exception):
     .. seealso:: Event, Order
     """
 
-    pass
-
-
-class NoEventPeriod(Exception):
-    """
-    An Event must contains a period corresponding to its execution
-
-    .. seealso:: Event
-    """
     pass
 
 
@@ -152,7 +144,7 @@ class ConfigurationChecker:
             else:
                 package_name = "odie.actions" + "." + action_module_name.lower() + "." + action_module_name.lower()
 
-            if settings.resources is not None:
+            if settings.resources.action_folder is not None:
                 action_resource_path = settings.resources.action_folder + \
                                        os.sep + action_module_name.lower() + os.sep + \
                                        action_module_name.lower()+".py"
@@ -180,72 +172,43 @@ class ConfigurationChecker:
 
     @staticmethod
     def check_cue_dict(cue_dict):
-        """
-        Check received cue dictionary is valid:
 
-        :param cue_dict: The cue Dictionary
-        :type cue_dict: Dict
-        :return: True if cue are ok
-        :rtype: Boolean
+        def check_cue_exist(cue_name):
+            """
+            Return True if the cue_name python Class exist in cues package
+            :param cue_name: Name of the neuron module to check
+            :type cue_name: str
+            :return:
+            """
+            sl = SettingLoader()
+            settings = sl.settings
+            package_name = "odie.cues" + "." + cue_name.lower() + "." + cue_name.lower()
+            if settings.resources.cue_folder is not None:
+                neuron_resource_path = settings.resources.neuron_folder + \
+                                       os.sep + cue_name.lower() + os.sep + \
+                                       cue_name.lower() + ".py"
+                if os.path.exists(neuron_resource_path):
+                    imp.load_source(cue_name.capitalize(), neuron_resource_path)
+                    package_name = cue_name.capitalize()
 
-        :Example:
-
-            ConfigurationChecker().check_cue_dict(cue_dict):
-
-        .. seealso:: Order, Event
-        .. raises:: NoValidCue
-        .. warnings:: Static and Public
-        """
-
-        if ('event' not in cue_dict) and ('order' not in cue_dict):
-            raise NoValidCue("The cue is not an event or an order %s" % cue_dict)
-        return True
-
-    @staticmethod
-    def check_event_dict(event_dict):
-        """
-        Check received event dictionary is valid:
-
-        :param event_dict: The event Dictionary
-        :type event_dict: Dict
-        :return: True if event are ok
-        :rtype: Boolean
-
-        :Example:
-
-            ConfigurationChecker().check_event_dict(event_dict):
-
-        .. seealso::  Event
-        .. raises:: NoEventPeriod
-        .. warnings:: Static and Public
-        """
-        def get_key(key_name):
             try:
-                return event_dict[key_name]
-            except KeyError:
-                return None
+                mod = __import__(package_name, fromlist=[cue_name.capitalize()])
+                getattr(mod, cue_name.capitalize())
+            except AttributeError:
+                raise ModuleNotFoundError(
+                    "[AttributeError] The module %s does not exist in the package %s " % (cue_name.capitalize(),
+                                                                                          package_name))
+            except ImportError:
+                raise ModuleNotFoundError(
+                    "[ImportError] The module %s does not exist in the package %s " % (cue_name.capitalize(),
+                                                                                       package_name))
+            return True
 
-        if event_dict is None or event_dict == "":
-            raise NoEventPeriod("Event must contain at least one of those elements: "
-                                "year, month, day, week, day_of_week, hour, minute, second")
-
-        # check content as at least on key
-        year = get_key("year")
-        month = get_key("month")
-        day = get_key("day")
-        week = get_key("week")
-        day_of_week = get_key("day_of_week")
-        hour = get_key("hour")
-        minute = get_key("minute")
-        second = get_key("second")
-
-        list_to_check = [year, month, day, week, day_of_week, hour, minute, second]
-        number_of_none_object = list_to_check.count(None)
-        list_size = len(list_to_check)
-        if number_of_none_object >= list_size:
-            raise NoEventPeriod("Event must contain at least one of those elements: "
-                                "year, month, day, week, day_of_week, hour, minute, second")
-
+        if isinstance(cue_dict, dict):
+            for cue_name in cue_dict:
+                check_cue_exist(cue_name)
+        else:
+            check_cue_exist(cue_dict)
         return True
 
     @staticmethod

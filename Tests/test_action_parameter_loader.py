@@ -170,6 +170,30 @@ class TestActionParameterLoader(unittest.TestCase):
         expected_result = {'variable': 'VAlue'}
         self.assertEqual(ActionParameterLoader._associate_order_params_to_values(order_user, order_brain),
                          expected_result)
+        # Upper/Lower case between multiple variables
+        order_brain = "This Is The {{ variable }} And The {{ variable2 }}"
+        order_user = "ThiS is tHe VAlue aND tHE vAlUe2"
+        expected_result = {'variable': 'VAlue',
+                           'variable2': 'vAlUe2'}
+        self.assertEqual(ActionParameterLoader._associate_order_params_to_values(order_user, order_brain),
+                         expected_result)
+
+        # Upper/Lower case between multiple variables and at the End
+        order_brain = "This Is The {{ variable }} And The {{ variable2 }} And Again"
+        order_user = "ThiS is tHe VAlue aND tHE vAlUe2 and aGAIN"
+        expected_result = {'variable': 'VAlue',
+                           'variable2': 'vAlUe2'}
+        self.assertEqual(ActionParameterLoader._associate_order_params_to_values(order_user, order_brain),
+                         expected_result)
+
+        # integers variables
+        order_brain = "This Is The {{ variable }} And The {{ variable2 }}"
+        order_user = "ThiS is tHe 1 aND tHE 2"
+        expected_result = {'variable': '1',
+                           'variable2': '2'}
+        self.assertEqual(ActionParameterLoader._associate_order_params_to_values(order_user, order_brain),
+                         expected_result)
+
 
 if __name__ == '__main__':
     unittest.main()

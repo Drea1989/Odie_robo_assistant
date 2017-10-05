@@ -5,6 +5,7 @@ import shutil
 import unittest
 
 from odie.core.ConfigurationManager import SettingLoader
+from odie.core.Models.RecognitionOptions import RecognitionOptions
 from odie.core.Models import Singleton
 from odie.core.Models import Resources
 from odie.core.Models import Postgres, Cloud
@@ -127,6 +128,7 @@ class TestSettingLoader(unittest.TestCase):
             "test": "odie"
         }
         settings_object.machine = platform.machine()
+        settings_object.recognition_options = RecognitionOptions()
         postgres = Postgres(database='odie',
                             user='admin',
                             password='secret',

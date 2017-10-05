@@ -73,51 +73,84 @@ class TestRestAPI(LiveServerTestCase):
 
         response = self.client.get(url)
         expected_content = {
-            "neurons": [{
-                "name": "test",
-                "actions": [{
-                    "name": "say",
-                    "parameters": {
-                        "message": ["test message"]
-                    }
-                }],
-                "cues": [{
-                    "order": "test_order"
-                }]
-            }, {
-                "name": "test2",
-                "actions": [{
-                    "name": "say",
-                    "parameters": {
-                        "message": ["test message"]
-                    }
-                }],
-                "cues": [{
-                    "order": "bonjour"
-                }]
-            }, {
-                "name": "test4",
-                "actions": [{
-                    "name": "say",
-                    "parameters": {
-                        "message": ["test message {{parameter1}}"]
-                    }
-                }],
-                "cues": [{
-                    "order": "test_order_with_parameter"
-                }]
-            }, {
-                "name": "test3",
-                "actions": [{
-                    "name": "say",
-                    "parameters": {
-                        "message": ["test message"]
-                    }
-                }],
-                "cues": [{
-                    "order": "test_order_3"
-                }]
-            }]
+          "neurons": [
+            {
+              "name": "test",
+              "actions": [
+                {
+                  "name": "say",
+                  "parameters": {
+                    "message": [
+                      "test message"
+                    ]
+                  }
+                }
+              ],
+              "cues": [
+                {
+                  "name": "order",
+                  "parameters": "test_order"
+                }
+              ]
+            },
+            {
+              "name": "test2",
+              "actions": [
+                {
+                  "name": "say",
+                  "parameters": {
+                    "message": [
+                      "test message"
+                    ]
+                  }
+                }
+              ],
+              "cues": [
+                {
+                  "name": "order",
+                  "parameters": "bonjour"
+                }
+              ]
+            },
+            {
+              "name": "test4",
+              "actions": [
+                {
+                  "name": "say",
+                  "parameters": {
+                    "message": [
+                      "test message {{parameter1}}"
+                    ]
+                  }
+                }
+              ],
+              "cues": [
+                {
+                  "name": "order",
+                  "parameters": "test_order_with_parameter"
+                }
+              ]
+            },
+            {
+              "name": "test3",
+              "actions": [
+                {
+                  "name": "say",
+                  "parameters": {
+                    "message": [
+                      "test message"
+                    ]
+                  }
+                }
+              ],
+              "cues": [
+                {
+                  "name": "order",
+                  "parameters": "test_order_3"
+                }
+              ]
+            }
+          ]
         }
         # a lot of char ti process
         self.maxDiff = None
@@ -143,12 +176,14 @@ class TestRestAPI(LiveServerTestCase):
                     }
                 ],
                 "cues": [
-                    {
-                        "order": "test_order"
-                    }
-                ]
+                      {
+                       "name": "order",
+                       "parameters": "test_order"
+                      }
+                        ]
             }
         }
+
         self.assertEqual(json.dumps(expected_content, sort_keys=True),
                          json.dumps(json.loads(response.get_data().decode('utf-8')), sort_keys=True))
 

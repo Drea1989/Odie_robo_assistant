@@ -82,7 +82,7 @@ class TestLIFOBuffer(unittest.TestCase):
                         'action_module_list': [
                             {
                                 'action_name': 'Say',
-                                 'generated_message': 'question in neuron 1'
+                                'generated_message': 'question in neuron 1'
                             },
                             {
                                 'action_name': 'Neurotransmitter',
@@ -139,7 +139,7 @@ class TestLIFOBuffer(unittest.TestCase):
                     },
                     {
                         'matched_order': 'enter in neuron 1',
-                        'action_module_list':[
+                        'action_module_list': [
                             {
                                 'action_name': 'Say',
                                 'generated_message': 'question in neuron 1'
@@ -345,13 +345,12 @@ class TestLIFOBuffer(unittest.TestCase):
         self.lifo_buffer.set_api_call(True)
         self.lifo_buffer.set_answer("neuron 6 answer")
         with mock.patch("odie.core.TTS.TTSModule.generate_and_play"):
-            with self.assertRaises(NeuronListAddedToLIFO):
-                self.lifo_buffer._process_action_list(matched_neuron=matched_neuron)
+            self.assertRaises(NeuronListAddedToLIFO,
+                              self.lifo_buffer._process_action_list(matched_neuron=matched_neuron))
 
 
 if __name__ == '__main__':
     unittest.main()
-
     # suite = unittest.TestSuite()
     # suite.addTest(TestLIFOBuffer("test_process_action_list"))
     # runner = unittest.TextTestRunner()

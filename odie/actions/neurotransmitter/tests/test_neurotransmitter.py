@@ -108,21 +108,23 @@ class TestNeurotransmitter(unittest.TestCase):
                 # testing running the default when audio None
                 audio_text = None
                 nt.callback(audio=audio_text)
-                mock_run_neuron_by_name.assert_called_once_with(self.default)
+                mock_run_neuron_by_name.assert_called_once_with(self.default, high_priority=True, is_api_call=False)
                 mock_run_neuron_by_name.reset_mock()
 
                 # testing running the default when no order matching
                 audio_text = "try test audio "
                 nt.callback(audio=audio_text)
-                mock_run_neuron_by_name.assert_called_once_with(self.default)
+                mock_run_neuron_by_name.assert_called_once_with(self.default, high_priority=True, is_api_call=False)
                 mock_run_neuron_by_name.reset_mock()
 
                 # Testing calling the right neuron
                 audio_text = "answer one"
                 nt.callback(audio=audio_text)
                 mock_run_neuron_by_name.assert_called_once_with(neuron_name="neuron2",
-                                                                 user_order=audio_text,
-                                                                 neuron_order="answer one")
+                                                                user_order=audio_text,
+                                                                neuron_order="answer one",
+                                                                high_priority=True,
+                                                                is_api_call=False)
 
     def testInit(self):
         """
@@ -136,7 +138,7 @@ class TestNeurotransmitter(unittest.TestCase):
                 "direct_link": self.direct_link
             }
             Neurotransmitter(**parameters)
-            mock_run_neuron_by_name.assert_called_once_with(self.direct_link)
+            mock_run_neuron_by_name.assert_called_once_with(self.direct_link, high_priority=True)
 
         with mock.patch("odie.core.ActionModule.get_audio_from_stt") as mock_get_audio_from_stt:
             # Test get_audio_from_stt
@@ -146,3 +148,7 @@ class TestNeurotransmitter(unittest.TestCase):
             }
             Neurotransmitter(**parameters)
             mock_get_audio_from_stt.assert_called_once()
+
+
+if __name__ == '__main__':
+    unittest.main()

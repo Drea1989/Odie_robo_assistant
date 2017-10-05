@@ -2,7 +2,7 @@
 
 import unittest
 import mock
-
+from odie.core.Models import Singleton
 from odie.core.Models.Resources import Resources
 from odie.core.ActionLauncher import ActionLauncher, ActionParameterNotAvailable
 from odie.core.ConfigurationManager import SettingLoader
@@ -16,7 +16,10 @@ class TestActionLauncher(unittest.TestCase):
     """
 
     def setUp(self):
-        pass
+        Singleton._instances = dict()
+
+    def tearDown(self):
+        Singleton._instances = dict()
 
     ####
     # Actions Launcher
@@ -181,6 +184,39 @@ class TestActionLauncher(unittest.TestCase):
         self.assertEqual(expected_result, ActionLauncher._replace_brackets_by_loaded_parameter(action_parameters,
                                                                                                loaded_parameters))
 
+        # now replacing with variable
+        sl = SettingLoader()
+        sl.settings.variables = {"replaced": {"name": u'replaced successfully'}}
+        action_parameters = {"param1": "this is a value {{ replaced['name'] }}"}
+
+        loaded_parameters = {
+            "name": "replaced successfully"
+        }
+
+        expected_result = {
+            "param1": "this is a value replaced successfully"
+        }
+
+        self.assertEqual(expected_result, ActionLauncher._replace_brackets_by_loaded_parameter(action_parameters,
+                                                                                               loaded_parameters))
+
+        # the parameter is a reserved key. for example from_answer_link from the neurotransmitter
+        list_reserved_keys = ["say_template", "file_template", "odie_memory", "from_answer_link"]
+
+        for reserved_key in list_reserved_keys:
+            action_parameters = {
+                reserved_key: "this is a value with {{ 'brackets '}}"
+            }
+
+            loaded_parameters = dict()
+
+            expected_result = {
+               reserved_key: "this is a value with {{ 'brackets '}}"
+            }
+
+            self.assertEqual(expected_result, ActionLauncher._replace_brackets_by_loaded_parameter(action_parameters,
+                                                                                                   loaded_parameters))
+
     def test_parameters_are_available_in_loaded_parameters(self):
         # the parameter in bracket is available in the dict
         string_parameters = "this is a {{ parameter1 }}"
@@ -222,6 +258,6 @@ if __name__ == '__main__':
     unittest.main()
 
     # suite = unittest.TestSuite()
-    # suite.addTest(TestActionLauncher("test_start_action"))
+    # suite.addTest(TestActionLauncher("test_replace_brackets_by_loaded_parameter"))
     # runner = unittest.TextTestRunner()
     # runner.run(suite)

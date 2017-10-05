@@ -43,10 +43,15 @@ class TestInit(unittest.TestCase):
     def test_main(self):
         # test start odie
         sys.argv = ['odie.py', 'start']
-        with mock.patch('odie.core.MainController.__init__') as mock_maincontroller:
-            mock_maincontroller.return_value = None
+        with mock.patch('odie.start_rest_api') as mock_rest_api:
+            with mock.patch('odie.start_odie') as mock_start_odie:
+                mock_rest_api.return_value = None
+                main()
+                mock_rest_api.assert_called()
+                mock_start_odie.assert_called()
+            mock_rest_api.return_value = None
             main()
-            mock_maincontroller.assert_called()
+            mock_rest_api.assert_called()
 
         # test start gui
         sys.argv = ['odie.py', 'gui']

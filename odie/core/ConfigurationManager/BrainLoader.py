@@ -4,15 +4,14 @@ import os
 from six import with_metaclass
 import six
 
+from odie.core.Models.Cue import Cue
 from .YAMLLoader import YAMLLoader
 from odie.core.Utils import Utils
 from odie.core.ConfigurationManager import SettingLoader
 from odie.core.ConfigurationManager.ConfigurationChecker import ConfigurationChecker
 from odie.core.Models import Singleton
 from odie.core.Models.Brain import Brain
-from odie.core.Models.Event import Event
 from odie.core.Models.Action import Action
-from odie.core.Models.Order import Order
 from odie.core.Models.Neuron import Neuron
 
 logging.basicConfig()
@@ -166,11 +165,14 @@ class BrainLoader(with_metaclass(Singleton, object)):
         cues = list()
         for cue_dict in cues_dict:
             if ConfigurationChecker().check_cue_dict(cue_dict):
-                event_or_order = cls._get_event_or_order_from_dict(cue_dict)
-                cues.append(event_or_order)
+                for cue_name in cue_dict:
+                    new_cue = Cue(name=cue_name, parameters=cue_dict[cue_name])
+                    cues.append(new_cue)
 
         return cues
 
+    '''
+    DEPRECATED
     @classmethod
     def _get_event_or_order_from_dict(cls, cue_or_event_dict):
         """
@@ -197,6 +199,7 @@ class BrainLoader(with_metaclass(Singleton, object)):
             order = cue_or_event_dict["order"]
             if ConfigurationChecker.check_order_dict(order):
                 return Order(sentence=order)
+    '''
 
     @staticmethod
     def _get_root_brain_path():
@@ -221,6 +224,8 @@ class BrainLoader(with_metaclass(Singleton, object)):
             return brain_path
         raise IOError("Default brain.yml file not found")
 
+    '''
+    DEPRECATED    
     @classmethod
     def _get_event_object(cls, event_dict):
         def get_key(key_name):
@@ -242,6 +247,8 @@ class BrainLoader(with_metaclass(Singleton, object)):
                      day_of_week=day_of_week, hour=hour, minute=minute, second=second)
 
     @classmethod
+    '''
+
     def _replace_global_variables(cls, parameter, settings):
         """
         replace a parameter that contains bracket by the instantiated parameter from the var file

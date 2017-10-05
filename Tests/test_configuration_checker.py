@@ -1,7 +1,7 @@
 import unittest
 
 from odie.core.ConfigurationManager.ConfigurationChecker import ConfigurationChecker, NoNeuronName, NoNeuronActions, \
-    NoNeuronCues, NoValidCue, NoEventPeriod, NoValidOrder, MultipleSameNeuronName
+    NoNeuronCues, NoValidCue, MultipleSameNeuronName
 from odie.core.Models import Neuron
 from odie.core.Utils.Utils import ModuleNotFoundError
 
@@ -57,16 +57,16 @@ class TestConfigurationChecker(unittest.TestCase):
             ConfigurationChecker.check_action_dict(invalid_action)
 
     def test_check_cue_dict(self):
-        valid_cue_with_order = {'order': 'test_order'}
-        valid_cue_with_event = {'event': '0 * * * *'}
-        invalid_cue = {'invalid_option': 'test_order'}
+        valid_cue = {'event': {'parameter_1': ['value1']}}
+        invalid_cue = {'non_existing_cue_name': {'parameter_2': ['value2']}}
 
-        self.assertTrue(ConfigurationChecker.check_cue_dict(valid_cue_with_order))
-        self.assertTrue(ConfigurationChecker.check_cue_dict(valid_cue_with_event))
+        self.assertTrue(ConfigurationChecker.check_cue_dict(valid_cue))
 
-        with self.assertRaises(NoValidCue):
+        with self.assertRaises(ModuleNotFoundError):
             ConfigurationChecker.check_cue_dict(invalid_cue)
 
+    '''
+    DEPRECATED
     def test_check_event_dict(self):
         valid_event = {
             "hour": "18",
@@ -98,6 +98,7 @@ class TestConfigurationChecker(unittest.TestCase):
             ConfigurationChecker.check_order_dict(invalid_order)
         with self.assertRaises(NoValidOrder):
             ConfigurationChecker.check_order_dict(invalid_order2)
+    '''
 
     def test_check_neurons(self):
         neuron_1 = Neuron(name="test")

@@ -47,6 +47,13 @@ class TestResourcesmanager(unittest.TestCase):
         dna.module_type = "wakeon"
         self.assertTrue(ResourcesManager.is_settings_ok(valid_resource, dna))
 
+        # valid signal
+        valid_resource = Resources()
+        valid_resource.signal_folder = "/path"
+        dna = Dna()
+        dna.module_type = "cue"
+        self.assertTrue(ResourcesManager.is_settings_ok(valid_resource, dna))
+
         # -----------------
         # invalid resource
         # -----------------
@@ -76,6 +83,13 @@ class TestResourcesmanager(unittest.TestCase):
         valid_resource.wakeon_folder = None
         dna = Dna()
         dna.module_type = "wakeon"
+        self.assertFalse(ResourcesManager.is_settings_ok(valid_resource, dna))
+
+        # valid signal
+        valid_resource = Resources()
+        valid_resource.signal_folder = None
+        dna = Dna()
+        dna.module_type = "cue"
         self.assertFalse(ResourcesManager.is_settings_ok(valid_resource, dna))
 
     def test_is_repo_ok(self):
@@ -130,6 +144,11 @@ class TestResourcesmanager(unittest.TestCase):
         # test get non existing resource
         resources = Resources()
         self.assertIsNone(ResourcesManager._get_target_folder(resources, "not_existing"))
+
+        # test get signal folder
+        resources = Resources()
+        resources.signal_folder = '/var/tmp/test/resources'
+        self.assertEqual(ResourcesManager._get_target_folder(resources, "cue"), "/var/tmp/test/resources")
 
     def test_check_supported_version(self):
         # version ok

@@ -68,7 +68,7 @@ setup(
         'markupsafe>=1.0',
         'pyaudio>=0.2.10',
         'pyasn1>=0.2.3',
-        'ansible>=2.3',
+        'ansible>=2.3,<2.4',
         py2_prefix + 'pythondialog>=3.4.0',
         'jinja2>=2.8,<=2.9.6',
         'cffi>=1.9.1',
@@ -88,10 +88,11 @@ setup(
         'SoundFile>=0.9.0',
         'pyalsaaudio>=0.8.4',
         'RPi.GPIO>=0.6.3',
-        #'psycopg2>=2.7.1',
+        # 'psycopg2>=2.7.1',
         'sqlalchemy>=1.1.14',
         'pandas>=0.20',
-        'sox>=1.3.0'
+        'sox>=1.3.0',
+        'paho-mqtt>=1.3.0'
     ],
 
 
