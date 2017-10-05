@@ -12,7 +12,7 @@ from odie.core.OrderListener import OrderListener
 from odie import Utils, BrainLoader
 from odie.actions.say import Say
 
-from odie.core.TriggerLauncher import TriggerLauncher
+from odie.core.WakeonLauncher import WakeonLauncher
 from transitions import Machine
 
 from odie.core.PlayerLauncher import PlayerLauncher
@@ -25,10 +25,10 @@ logger = logging.getLogger("odie")
 
 class Order(Thread):
     states = ['init',
-              'starting_trigger',
+              'starting_wakeon',
               'playing_ready_sound',
-              'waiting_for_trigger_callback',
-              'stopping_trigger',
+              'waiting_for_wakeon_callback',
+              'stopping_wakeon',
               'playing_wake_up_answer',
               'start_order_listener',
               'waiting_for_order_listener_callback',
@@ -48,10 +48,10 @@ class Order(Thread):
         # get the player instance
         self.player_instance = PlayerLauncher.get_player(settings=self.settings)
 
-        # save an instance of the trigger
-        self.trigger_instance = None
-        self.trigger_callback_called = False
-        self.is_trigger_muted = False
+        # save an instance of the wakeon
+        self.wakeon_instance = None
+        self.wakeon_callback_called = False
+        self.is_wakeon_muted = False
 
         # save the current order listener
         self.order_listener = None
@@ -67,39 +67,39 @@ class Order(Thread):
         self.machine = Machine(model=self, states=Order.states, initial='init', queued=True)
 
         # define transitions
-        self.machine.add_transition('start_trigger', ['init', 'analysing_order'], 'starting_trigger')
-        self.machine.add_transition('play_ready_sound', 'starting_trigger', 'playing_ready_sound')
-        self.machine.add_transition('wait_trigger_callback', 'playing_ready_sound', 'waiting_for_trigger_callback')
-        self.machine.add_transition('stop_trigger', 'waiting_for_trigger_callback', 'stopping_trigger')
-        self.machine.add_transition('play_wake_up_answer', 'stopping_trigger', 'playing_wake_up_answer')
+        self.machine.add_transition('start_wakeon', ['init', 'analysing_order'], 'starting_wakeon')
+        self.machine.add_transition('play_ready_sound', 'starting_wakeon', 'playing_ready_sound')
+        self.machine.add_transition('wait_wakeon_callback', 'playing_ready_sound', 'waiting_for_wakeon_callback')
+        self.machine.add_transition('stop_wakeon', 'waiting_for_wakeon_callback', 'stopping_wakeon')
+        self.machine.add_transition('play_wake_up_answer', 'stopping_wakeon', 'playing_wake_up_answer')
         self.machine.add_transition('wait_for_order', 'playing_wake_up_answer', 'waiting_for_order_listener_callback')
         self.machine.add_transition('analyse_order', 'playing_wake_up_answer', 'analysing_order')
 
         self.machine.add_ordered_transitions()
 
         # add method which are called when changing state
-        self.machine.on_enter_starting_trigger('start_trigger_process')
+        self.machine.on_enter_starting_wakeon('start_wakeon_process')
         self.machine.on_enter_playing_ready_sound('play_ready_sound_process')
-        self.machine.on_enter_waiting_for_trigger_callback('waiting_for_trigger_callback_thread')
+        self.machine.on_enter_waiting_for_wakeon_callback('waiting_for_wakeon_callback_thread')
         self.machine.on_enter_playing_wake_up_answer('play_wake_up_answer_thread')
-        self.machine.on_enter_stopping_trigger('stop_trigger_process')
+        self.machine.on_enter_stopping_wakeon('stop_wakeon_process')
         self.machine.on_enter_start_order_listener('start_order_listener_thread')
         self.machine.on_enter_waiting_for_order_listener_callback('waiting_for_order_listener_callback_thread')
         self.machine.on_enter_analysing_order('analysing_order_thread')
 
     def run(self):
-        self.start_trigger()
+        self.start_wakeon()
 
-    def start_trigger_process(self):
+    def start_wakeon_process(self):
         """
-        This function will start the trigger thread that listen for the hotword
+        This function will start the wakeon thread that listen for the hotword
         """
         logger.debug("[MainController] Entering state: %s" % self.state)
-        self.trigger_instance = TriggerLauncher.get_trigger(settings=self.settings, callback=self.trigger_callback)
-        self.trigger_callback_called = False
-        self.trigger_instance.daemon = True
-        # Wait that the odie trigger is pronounced by the user
-        self.trigger_instance.start()
+        self.wakeon_instance = WakeonLauncher.get_wakeon(settings=self.settings, callback=self.wakeon_callback)
+        self.wakeon_callback_called = False
+        self.wakeon_instance.daemon = True
+        # Wait that the odie wakeon is pronounced by the user
+        self.wakeon_instance.start()
         self.next_state()
 
     def play_ready_sound_process(self):
@@ -119,18 +119,18 @@ class Order(Thread):
                 self.player_instance.play(random_sound_to_play)
         self.next_state()
 
-    def waiting_for_trigger_callback_thread(self):
+    def waiting_for_wakeon_callback_thread(self):
         """
-        Method to print in debug that the main process is waiting for a trigger detection
+        Method to print in debug that the main process is waiting for a wakeon detection
         """
         logger.debug("[MainController] Entering state: %s" % self.state)
-        if self.is_trigger_muted:  # the user asked to mute inside the mute action
+        if self.is_wakeon_muted:  # the user asked to mute inside the mute action
             Utils.print_info("Odie is muted")
-            self.trigger_instance.pause()
+            self.wakeon_instance.pause()
         else:
-            Utils.print_info("Waiting for trigger detection")
+            Utils.print_info("Waiting for wakeon detection")
         # this loop is used to keep the main thread alive
-        while not self.trigger_callback_called:
+        while not self.wakeon_callback_called:
             sleep(0.1)
         self.next_state()
 
@@ -147,21 +147,21 @@ class Order(Thread):
                 RpiUtils.switch_pin_to_off(self.settings.rpi_settings.pin_led_listening)
         self.next_state()
 
-    def trigger_callback(self):
+    def wakeon_callback(self):
         """
-        we have detected the hotword, we can now pause the Trigger for a while
+        we have detected the hotword, we can now pause the Wakeon for a while
         The user can speak out loud his order during this time.
         """
-        logger.debug("[MainController] Trigger callback called, switching to the next state")
-        self.trigger_callback_called = True
+        logger.debug("[MainController] Wakeon callback called, switching to the next state")
+        self.wakeon_callback_called = True
 
-    def stop_trigger_process(self):
+    def stop_wakeon_process(self):
         """
-        The trigger has been awaken, we don't needed it anymore
+        The wakeon has been awaken, we don't needed it anymore
         :return:
         """
         logger.debug("[MainController] Entering state: %s" % self.state)
-        self.trigger_instance.stop()
+        self.wakeon_instance.stop()
         self.next_state()
 
     def start_order_listener_thread(self):
@@ -210,8 +210,8 @@ class Order(Thread):
                                                       self.settings,
                                                       is_api_call=False)
 
-        # return to the state "unpausing_trigger"
-        self.start_trigger()
+        # return to the state "unpausing_wakeon"
+        self.start_wakeon()
 
     @staticmethod
     def _get_random_sound(random_wake_up_sounds):
@@ -229,25 +229,25 @@ class Order(Thread):
 
     def set_mute_status(self, muted=False):
         """
-        Define is the trigger is listening or not
+        Define is the wakeon is listening or not
         :param muted: Boolean. If true, odie is muted
         """
-        logger.debug("[MainController] Mute button pressed. Switch trigger process to muted: %s" % muted)
+        logger.debug("[MainController] Mute button pressed. Switch wakeon process to muted: %s" % muted)
         if muted:
-            self.trigger_instance.pause()
-            self.is_trigger_muted = True
+            self.wakeon_instance.pause()
+            self.is_wakeon_muted = True
             Utils.print_info("Odie now muted")
         else:
-            self.trigger_instance.unpause()
-            self.is_trigger_muted = False
-            Utils.print_info("Odie now listening for trigger detection")
+            self.wakeon_instance.unpause()
+            self.is_wakeon_muted = False
+            Utils.print_info("Odie now listening for wakeon detection")
 
     def get_mute_status(self):
         """
-        return the current state of the trigger (muted or not)
+        return the current state of the wakeon (muted or not)
         :return: Boolean
         """
-        return self.is_trigger_muted
+        return self.is_wakeon_muted
 
     def init_rpi_utils(self):
         """
