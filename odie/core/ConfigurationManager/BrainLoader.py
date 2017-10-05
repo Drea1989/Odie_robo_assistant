@@ -86,7 +86,7 @@ class BrainLoader(with_metaclass(Singleton, object)):
         neurons = list()
         for neurons_dict in dict_brain:
             if "includes" not in neurons_dict:     # we don't need to check includes as it's not a neuron
-                if ConfigurationChecker().check_synape_dict(neurons_dict):
+                if ConfigurationChecker().check_neuron_dict(neurons_dict):
                     name = neurons_dict["name"]
                     actions = self._get_actions(neurons_dict["actions"], self.settings)
                     cues = self._get_cues(neurons_dict["cues"])
@@ -98,7 +98,7 @@ class BrainLoader(with_metaclass(Singleton, object)):
         else:
             brain.brain_file = self.file_path
         # check that no neuron have the same name than another
-        if not ConfigurationChecker().check_synapes(neurons):
+        if not ConfigurationChecker().check_neurons(neurons):
             brain = None
 
         return brain
