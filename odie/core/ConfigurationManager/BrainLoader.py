@@ -86,7 +86,7 @@ class BrainLoader(with_metaclass(Singleton, object)):
         neurons = list()
         for neurons_dict in dict_brain:
             if "includes" not in neurons_dict:     # we don't need to check includes as it's not a neuron
-                if ConfigurationChecker().check_neuron_dict(neurons_dict):
+                if ConfigurationChecker().check_synape_dict(neurons_dict):
                     name = neurons_dict["name"]
                     actions = self._get_actions(neurons_dict["actions"], self.settings)
                     cues = self._get_cues(neurons_dict["cues"])
@@ -98,7 +98,7 @@ class BrainLoader(with_metaclass(Singleton, object)):
         else:
             brain.brain_file = self.file_path
         # check that no neuron have the same name than another
-        if not ConfigurationChecker().check_neurons(neurons):
+        if not ConfigurationChecker().check_synapes(neurons):
             brain = None
 
         return brain
@@ -171,36 +171,6 @@ class BrainLoader(with_metaclass(Singleton, object)):
 
         return cues
 
-    '''
-    DEPRECATED
-    @classmethod
-    def _get_event_or_order_from_dict(cls, cue_or_event_dict):
-        """
-        The cue is either an Event or an Order
-
-        :param cue_or_event_dict: A dict of event or cue
-        :type cue_or_event_dict: dict
-        :return: The object corresponding to An Order or an Event
-        :rtype: An Order or an Event
-
-        :Example:
-
-            event_or_order = cls._get_event_or_order_from_dict(cue_dict)
-
-        .. seealso:: Event, Order
-        .. warnings:: Static method and Private
-        """
-        if 'event' in cue_or_event_dict:
-            event = cue_or_event_dict["event"]
-            if ConfigurationChecker.check_event_dict(event):
-                return cls._get_event_object(event)
-
-        if 'order' in cue_or_event_dict:
-            order = cue_or_event_dict["order"]
-            if ConfigurationChecker.check_order_dict(order):
-                return Order(sentence=order)
-    '''
-
     @staticmethod
     def _get_root_brain_path():
         """
@@ -224,31 +194,7 @@ class BrainLoader(with_metaclass(Singleton, object)):
             return brain_path
         raise IOError("Default brain.yml file not found")
 
-    '''
-    DEPRECATED    
     @classmethod
-    def _get_event_object(cls, event_dict):
-        def get_key(key_name):
-            try:
-                return event_dict[key_name]
-            except KeyError:
-                return None
-
-        year = get_key("year")
-        month = get_key("month")
-        day = get_key("day")
-        week = get_key("week")
-        day_of_week = get_key("day_of_week")
-        hour = get_key("hour")
-        minute = get_key("minute")
-        second = get_key("second")
-
-        return Event(year=year, month=month, day=day, week=week,
-                     day_of_week=day_of_week, hour=hour, minute=minute, second=second)
-
-    @classmethod
-    '''
-
     def _replace_global_variables(cls, parameter, settings):
         """
         replace a parameter that contains bracket by the instantiated parameter from the var file

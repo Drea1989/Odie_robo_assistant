@@ -3,9 +3,8 @@ import unittest
 
 from odie.core.Models import Brain
 from odie.core.Models import Action
-from odie.core.Models import Order
 from odie.core.Models import Neuron
-from odie.core.Cue import Cue
+from odie.core.Models.Cue import Cue
 from odie.core.Models.MatchedNeuron import MatchedNeuron
 from odie.core.OrderAnalyser import OrderAnalyser
 

@@ -1,8 +1,9 @@
+#!/usr/bin/env python
 import collections
 from threading import Thread
 
 import pyaudio
-from odie.wakeon.snowboy import snowboydetect
+from . import snowboydetect
 import time
 import os
 import logging

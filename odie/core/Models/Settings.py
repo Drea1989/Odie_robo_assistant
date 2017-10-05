@@ -92,7 +92,7 @@ class Settings(object):
             'postgres': self.postgres,
             'alphabot': self.alphabot,
             'cloud': self.cloud,
-            'recognition_options': self.recognition_options.serialize() if self.recognition_options is not None else None,
+            'recognition_options': self.recognition_options.serialize() if self.recognition_options is not None else None
         }
 
     def __str__(self):
