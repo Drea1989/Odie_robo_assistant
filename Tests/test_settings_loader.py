@@ -37,7 +37,7 @@ class TestSettingLoader(unittest.TestCase):
                  'password_protected': True,
                  'password': 'secret', 'port': 5000},
             'postgres':
-                {'dbname': 'odie',
+                {'database': 'odie',
                  'user': 'admin',
                  'password': 'secret',
                  'host': 'localhost',

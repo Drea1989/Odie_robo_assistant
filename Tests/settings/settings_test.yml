@@ -124,7 +124,7 @@ default_neuron: "Default-neuron"
 # ---------------------------
 # Specify connection parameters to PostgreSQL
 postgres:
-  dbname: odie
+  database: odie
   user : admin
   password: secret
   host: localhost
@@ -136,6 +136,14 @@ postgres:
 # Specify parameters
 alphabot:
   enable: False 
+
+# ---------------------------
+# Cloud settings
+# ---------------------------
+# Specify parameters
+cloud:
+  - speech:
+    model: "/tmp/model.pmld"
 
 # ---------------------------
 # resource directory path

@@ -159,7 +159,7 @@ default_neuron: "default-neuron"
 postgres:
   host: localhost
   port: 5432
-  dbname: odie
+  database: odie
   user : admin
   password: secret
 

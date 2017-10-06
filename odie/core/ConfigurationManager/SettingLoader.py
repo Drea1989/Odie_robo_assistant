@@ -807,8 +807,8 @@ class SettingLoader(with_metaclass(Singleton, object)):
             if "port" in pg:
                 port = pg["port"]
 
-            if "dbname" in pg:
-                database = pg["dbname"]
+            if "database" in pg:
+                database = pg["database"]
 
             if "user" in pg:
                 user = pg["user"]
