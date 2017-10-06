@@ -3,7 +3,7 @@
 #
 # Do not make changes to this file unless you know what you are doing--modify
 # the SWIG interface file instead.
-from kalliope.core.ConfigurationManager import SettingLoader
+from odie.core.ConfigurationManager import SettingLoader
 from sys import version_info
 
 sl = SettingLoader()

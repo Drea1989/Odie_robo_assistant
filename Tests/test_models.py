@@ -427,7 +427,8 @@ class TestModels(unittest.TestCase):
         expected_result_serialize = {
             'cues': [
                 {
-                    'order': 'this is the sentence'
+                    'name': 'order',
+                    'parameters': 'this is the sentence'
                 }
             ],
             'actions': [
@@ -490,3 +491,10 @@ class TestModels(unittest.TestCase):
         self.assertFalse(tts1.__eq__(tts2))
 
 
+if __name__ == '__main__':
+    unittest.main()
+
+    # suite = unittest.TestSuite()
+    # suite.addTest(TestLIFOBuffer("test_process_neuron_list"))
+    # runner = unittest.TextTestRunner()
+    # runner.run(suite)

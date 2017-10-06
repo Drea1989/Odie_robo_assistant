@@ -46,7 +46,7 @@ class TestSettingLoader(unittest.TestCase):
             'default_wakeon': 'snowboy',
             'default_player': 'mplayer',
             'play_on_ready_notification': 'never',
-            'wakeons': [{'snowboy': {'pmdl_file': 'wakeon/snowboy/resources/odie-FR-6samples.pmdl'}}],
+            'wakeons': [{'snowboy': {'pmdl_file': 'wakeon/snowboy/resources/odie-EN-1samples.pmdl'}}],
             'players': [{'mplayer': {}}, {'pyalsaaudio': {"device": "default"}}],
             'speech_to_text': [{'google': {'language': 'en-US'}}],
             'on_ready_answers': ['Odie is ready'],

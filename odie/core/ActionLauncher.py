@@ -55,7 +55,7 @@ class ActionLauncher:
                 Utils.print_danger("Missing parameter in action %s. Execution skipped" % action.name)
                 return None
         try:
-            instantiated_action = ActionLauncher.launch_neuron(action)
+            instantiated_action = ActionLauncher.launch_action(action)
         except ActionExceptions as e:
             Utils.print_danger("ERROR: Fail to execute action '%s'. "
                                '%s' ". -> Execution skipped" % (action.name, e.message))

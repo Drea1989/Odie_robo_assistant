@@ -35,7 +35,7 @@ class MissingParameterException(ActionExceptions):
     """
     def __init__(self, message):
         # Call the base class constructor with the parameters it needs
-        super(InvalidParameterException, self).__init__(message)
+        super(MissingParameterException, self).__init__(message)
 
 
 class NoTemplateException(Exception):
@@ -148,8 +148,8 @@ class ActionModule(object):
 
         tts_message = None
 
-        # we can save parameters from the neuron in memory
-        Recordatio.save_neuron_parameter_in_memory(self.odie_memory, message)
+        # we can save parameters from the action in memory
+        Recordatio.save_action_parameter_in_memory(self.odie_memory, message)
 
         if isinstance(message, str) or isinstance(message, six.text_type):
             logger.debug("[ActionModule] message is string")

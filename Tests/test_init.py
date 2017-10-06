@@ -49,9 +49,6 @@ class TestInit(unittest.TestCase):
                 main()
                 mock_rest_api.assert_called()
                 mock_start_odie.assert_called()
-            mock_rest_api.return_value = None
-            main()
-            mock_rest_api.assert_called()
 
         # test start gui
         sys.argv = ['odie.py', 'gui']

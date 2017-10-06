@@ -43,16 +43,13 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
         self.no_voice = False
         self.is_running = False
         self.reset_lifo = False
-    
-    
+
     def set_answer(self, value):
         self.answer = value
 
-    
     def set_api_call(self, value):
         self.is_api_call = value
 
-    
     def add_neuron_list_to_lifo(self, matched_neuron_list, high_priority=False):
         """
         Add a neuron list to process to the lifo
