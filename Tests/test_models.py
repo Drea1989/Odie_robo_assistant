@@ -359,7 +359,8 @@ class TestModels(unittest.TestCase):
                                 variables={"key1": "val1"},
                                 postgres=None,
                                 alphabot=None,
-                                cloud=None)
+                                cloud=None,
+                                recognition_options=recognition_options)
             setting3.odie_version = "0.4.5"
 
             expected_result_serialize = {

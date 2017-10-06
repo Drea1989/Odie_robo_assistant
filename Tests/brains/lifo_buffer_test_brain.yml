@@ -1,4 +1,3 @@
----
 - name: "neuron1"
   cues:
     - order: "enter in neuron 1"
