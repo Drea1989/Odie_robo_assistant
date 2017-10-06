@@ -31,7 +31,6 @@ fi
 
 # install
 sudo python3 setup.py install
-
 # tests
 export LANG=C.UTF-8
-#python3 -m unittest discover
+
