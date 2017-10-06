@@ -664,7 +664,7 @@ class SettingLoader(with_metaclass(Singleton, object)):
 
             if "wakeon" in resource_dir:
                 wakeon_folder = resource_dir["wakeon"]
-                if not os.path.exists(wakeon_folder):
+                if os.path.exists(wakeon_folder):
                     logger.debug("[SettingLoader] Wakeon resource folder path loaded: %s" % wakeon_folder)
                     resource_object.wakeon_folder = wakeon_folder
                 else:
