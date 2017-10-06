@@ -180,7 +180,7 @@ class ResourcesManager(object):
                 logger.debug(message)
                 Utils.print_danger(message)
                 settings_ok = False
-            if dna.module_type == "cue" and resources.wakeon_folder is None:
+            if dna.module_type == "cue" and resources.cue_folder is None:
                 message = "Resources folder for cue installation not set in settings, cannot install."
                 logger.debug(message)
                 Utils.print_danger(message)

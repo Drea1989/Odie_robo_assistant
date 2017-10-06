@@ -139,7 +139,7 @@ class TestSettingLoader(unittest.TestCase):
         settings_object.postgres = postgres
         cl = Cloud(category='speech',
                    parameters={'model': '/tmp/model.pmld'})
-        settings_object.cloud = cl
+        settings_object.cloud = [cl]
         settings_object.alphabot = {'enable': True}
 
         sl = SettingLoader(file_path=self.settings_file_to_test)
@@ -255,7 +255,7 @@ class TestSettingLoader(unittest.TestCase):
         cl = Cloud(category='speech', parameters={'model': '/tmp/model.pmld'})
         expected_result = cl
         sl = SettingLoader(file_path=self.settings_file_to_test)
-        self.assertEqual(expected_result, sl._get_cloud(self.settings_dict))
+        self.assertEqual([expected_result], sl._get_cloud(self.settings_dict))
 
 
 if __name__ == '__main__':

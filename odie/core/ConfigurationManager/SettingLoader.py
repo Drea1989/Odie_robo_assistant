@@ -866,8 +866,10 @@ class SettingLoader(with_metaclass(Singleton, object)):
         for clSetting in clCategory:
             if isinstance(clSetting, dict):
                 for category in clSetting:
+                    name = category
                     parameters = clSetting[category]
-                    new_cl = Cloud(category=category, parameters=parameters)
+                    new_cl = Cloud(category=name, parameters=parameters)
+                    logger.debug('cloud object: {}'.format(new_cl))
                     cl.append(new_cl)
             else:
                 # wrong config file
