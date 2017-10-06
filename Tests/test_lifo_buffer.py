@@ -162,7 +162,7 @@ class TestLIFOBuffer(unittest.TestCase):
             self.assertEqual(response, expected_result)
 
         # --------------------------------------
-        # Test 2. The user doesn't answer correctly to the first neurotransmitter
+        # Test 2. The user doesn't answered correctly to the first neurotransmitter
         # --------------------------------------
 
         # we suppose that the first neuron has matched the first neuron
@@ -351,6 +351,7 @@ class TestLIFOBuffer(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
     # suite = unittest.TestSuite()
     # suite.addTest(TestLIFOBuffer("test_process_action_list"))
     # runner = unittest.TextTestRunner()

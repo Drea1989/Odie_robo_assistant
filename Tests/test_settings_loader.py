@@ -43,7 +43,7 @@ class TestSettingLoader(unittest.TestCase):
                  'host': 'localhost',
                  'port': 5432},
             'alphabot': {'enable': False},
-            'cloud': {'category': 'speech', "parameters": {'model': '/tmp/model.pmld'}},
+            'cloud': [{'speech': {'model': '/tmp/model.pmld'}}],
             'default_wakeon': 'snowboy',
             'default_player': 'mplayer',
             'play_on_ready_notification': 'never',
@@ -140,7 +140,7 @@ class TestSettingLoader(unittest.TestCase):
         cl = Cloud(category='speech',
                    parameters={'model': '/tmp/model.pmld'})
         settings_object.cloud = [cl]
-        settings_object.alphabot = {'enable': True}
+        settings_object.alphabot = {'enable': False}
 
         sl = SettingLoader(file_path=self.settings_file_to_test)
 

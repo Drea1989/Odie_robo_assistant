@@ -34,6 +34,7 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
     like with the Neurotransmitter action.
 
     """
+
     def __init__(self):
         logger.debug("[LIFOBuffer] LIFO buffer created")
         self.api_response = APIResponse()
@@ -54,7 +55,7 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
         """
         Add a neuron list to process to the lifo
         :param matched_neuron_list: List of Matched Neuron
-        :param high_priority: If True, the Neuron list added is executed directly
+        :param high_priority: If True, the neuron list added is executed directly
         :return:
         """
         logger.debug("[LIFOBuffer] Add a new neuron list to process to the LIFO")
@@ -85,9 +86,9 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
         """
         Process the LIFO list.
 
-        The LIFO list contains multiple list of matched neurons.       
-        For each list of matched neuron we process neurons inside       
-        For each neurons we process actions.       
+        The LIFO list contains multiple list of matched neurons.
+        For each list of matched neuron we process neurons inside
+        For each neurons we process actions.
         If a action add a Neuron list to the lifo, this neuron list is processed before executing the first list
         in which we were in.
 
@@ -153,7 +154,7 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
         Executing a Action creates a ActionModule object. This one can have 3 status:
         - waiting for an answer: The action wait for an answer from the caller. The api response object is returned.
                                  The action is not removed from the matched neuron to be executed again
-        - want to execute a neuron: The action add a list of neuron to execute to the lifo. 
+        - want to execute a neuron: The action add a list of neuron to execute to the lifo.
                                      The LIFO restart over to process it.The action is removed from the matched neuron
         - complete: The action has been executed and its not waiting for an answer and doesn't want to start a neuron
                     The action is removed from the matched neuron
@@ -185,6 +186,7 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
                 if instantiated_action.is_waiting_for_answer:  # the action is waiting for an answer
                     logger.debug("[LIFOBuffer] Wait for answer mode")
                     self.api_response.status = "waiting_for_answer"
+                    self.is_running = False
                     raise Serialize
                 else:
                     logger.debug("[LIFOBuffer] complete mode")
@@ -196,10 +198,9 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
 
                 if self.reset_lifo:  # the last executed action want to run a neuron
                     logger.debug("[LIFOBuffer] Last executed action want to run a neuron. Restart the LIFO")
-                    # add the neuron to the lifo (inside a list as expected by the lifo)
-                    self.reset_lifo = False
                     # we have added a list of neuron to the LIFO ! this one must start over.
                     # break all while loop until the execution is back to the LIFO loop
+                    self.reset_lifo = False
                     raise NeuronListAddedToLIFO
             else:
                 raise Serialize
