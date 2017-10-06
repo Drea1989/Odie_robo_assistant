@@ -22,5 +22,5 @@ libatlas3-base
 mplayer
 libav-tools
 postgresql-9.6
-postgresql-9.6-contrib
+postgresql-contrib-9.6
 python3-psycopg2
