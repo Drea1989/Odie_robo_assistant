@@ -6,6 +6,8 @@ from odie.core.Models.RpiSettings import RpiSettings
 from .YAMLLoader import YAMLLoader
 from odie.core.Models.Resources import Resources
 from odie.core.Models.Postgres import Postgres
+from odie.core.Models.Cloud import Cloud
+from odie.core.Models.RecognitionOptions import RecognitionOptions
 from odie.core.Utils.Utils import Utils
 from odie.core.Models import Singleton
 from odie.core.Models.RestAPI import RestAPI
@@ -121,6 +123,8 @@ class SettingLoader(with_metaclass(Singleton, object)):
         rpi_settings = self._get_rpi_settings(settings)
         postgres = self._get_postgres(settings)
         alphabot = self._get_alphabot(settings)
+        cloud = self._get_cloud(settings)
+        recognition_options = self._get_recognition_options(settings)
 
         # Load the setting singleton with the parameters
         setting_object.default_tts_name = default_tts_name
@@ -144,6 +148,8 @@ class SettingLoader(with_metaclass(Singleton, object)):
         setting_object.rpi_settings = rpi_settings
         setting_object.postgres = postgres
         setting_object.alphabot = alphabot
+        setting_object.cloud = cloud
+        setting_object.recognition_options = recognition_options
 
         return setting_object
 
@@ -620,6 +626,8 @@ class SettingLoader(with_metaclass(Singleton, object)):
         .. raises:: SettingNotFound, NullSettingException, SettingInvalidException
         .. warnings:: Class Method and Private
         """
+        # return an empty resource object anyway
+        resource_object = Resources()
         try:
             resource_dir = settings["resource_directory"]
             logger.debug("Resource directory neuron: %s" % resource_dir)
@@ -628,40 +636,55 @@ class SettingLoader(with_metaclass(Singleton, object)):
             stt_folder = None
             tts_folder = None
             wakeon_folder = None
+            cue_folder = None
+
             if "action" in resource_dir:
                 action_folder = resource_dir["action"]
-                if not os.path.exists(action_folder):
+                if os.path.exists(action_folder):
+                    logger.debug("[SettingLoader] Action resource folder path loaded: %s" % action_folder)
+                    resource_object.action_folder = action_folder
+                else:
                     raise SettingInvalidException("The path %s does not exist on the system" % action_folder)
 
             if "stt" in resource_dir:
                 stt_folder = resource_dir["stt"]
-                if not os.path.exists(stt_folder):
+                if os.path.exists(stt_folder):
+                    logger.debug("[SettingLoader] stt resource folder path loaded: %s" % stt_folder)
+                    resource_object.stt_folder = stt_folder
+                else:
                     raise SettingInvalidException("The path %s does not exist on the system" % stt_folder)
 
             if "tts" in resource_dir:
                 tts_folder = resource_dir["tts"]
-                if not os.path.exists(tts_folder):
+                if os.path.exists(tts_folder):
+                    logger.debug("[SettingLoader] tts resource folder path loaded: %s" % tts_folder)
+                    resource_object.tts_folder = tts_folder
+                else:
                     raise SettingInvalidException("The path %s does not exist on the system" % tts_folder)
 
             if "wakeon" in resource_dir:
                 wakeon_folder = resource_dir["wakeon"]
-                if not os.path.exists(wakeon_folder):
+                if os.path.exists(wakeon_folder):
+                    logger.debug("[SettingLoader] Wakeon resource folder path loaded: %s" % wakeon_folder)
+                    resource_object.wakeon_folder = wakeon_folder
+                else:
                     raise SettingInvalidException("The path %s does not exist on the system" % wakeon_folder)
 
-            if action_folder is None \
-                    and stt_folder is None \
-                    and tts_folder is None \
-                    and wakeon_folder is None:
-                raise SettingInvalidException("No required folder has been provided in the setting resource_directory. "
-                                              "Define : \'action\' or/and \'stt\' or/and \'tts\' or/and \'wakeon\'")
+            if "cue" in resource_dir:
+                cue_folder = resource_dir["cue"]
+                if os.path.exists(cue_folder):
+                    logger.debug("[SettingLoader] Cue resource folder path loaded: %s" % cue_folder)
+                    resource_object.cue_folder = cue_folder
+                else:
+                    raise SettingInvalidException("The path %s does not exist on the system" % cue_folder)
 
             resource_object = Resources(action_folder=action_folder,
                                         stt_folder=stt_folder,
                                         tts_folder=tts_folder,
-                                        wakeon_folder=wakeon_folder)
+                                        wakeon_folder=wakeon_folder,
+                                        cue_folder=cue_folder)
         except KeyError:
             logger.debug("Resource directory not found in settings")
-            resource_object = None
 
         return resource_object
 
@@ -777,15 +800,15 @@ class SettingLoader(with_metaclass(Singleton, object)):
         """
         try:
             pg = settings["postgres"]
-            
+
             if "host" in pg:
                 host = pg["host"]
 
             if "port" in pg:
                 port = pg["port"]
 
-            if "dbname" in pg:
-                database = pg["dbname"]
+            if "database" in pg:
+                database = pg["database"]
 
             if "user" in pg:
                 user = pg["user"]
@@ -825,3 +848,57 @@ class SettingLoader(with_metaclass(Singleton, object)):
         except KeyError:
             # User does not provide this settings
             return dict()
+
+    @staticmethod
+    def _get_cloud(settings):
+        """
+        Return the dict of cloud models from the settings.
+        :param settings: The YAML settings file
+        :return: dict
+        """
+        cl = list()
+        try:
+            clCategory = settings["cloud"]
+        except KeyError:
+            logger.debug("cloud settings not found")
+            return cl
+
+        for clSetting in clCategory:
+            if isinstance(clSetting, dict):
+                for category in clSetting:
+                    name = category
+                    parameters = clSetting[category]
+                    new_cl = Cloud(category=name, parameters=parameters)
+                    logger.debug('cloud object: {}'.format(new_cl))
+                    cl.append(new_cl)
+            else:
+                # wrong config file
+                logger.debug("cloud settings is invalid at: {}".format(clSetting))
+        return cl
+
+    @staticmethod
+    def _get_recognition_options(settings):
+        """
+        return the value of stt_threshold
+        :param settings: The loaded YAML settings file
+        :return: integer or 1200 by default if not set
+        """
+        recognition_options = RecognitionOptions()
+
+        try:
+            recognition_options_dict = settings["RecognitionOptions"]
+
+            if "energy_threshold" in recognition_options_dict:
+                recognition_options.energy_threshold = recognition_options_dict["energy_threshold"]
+                logger.debug("[SettingsLoader] energy_threshold set to %s" % recognition_options.energy_threshold)
+            if "adjust_for_ambient_noise_second" in recognition_options_dict:
+                recognition_options.adjust_for_ambient_noise_second = recognition_options_dict["adjust_for_ambient_noise_second"]
+                logger.debug("[SettingsLoader] adjust_for_ambient_noise_second set to %s"
+                             % recognition_options.adjust_for_ambient_noise_second)
+            return recognition_options
+
+        except KeyError:
+            logger.debug("[SettingsLoader] no recognition_options defined. Set to default")
+
+        logger.debug("[SettingsLoader] recognition_options: %s" % str(recognition_options))
+        return recognition_options

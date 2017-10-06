@@ -8,7 +8,7 @@ from flask import request
 from flask_cors import CORS
 from flask_restful import abort
 from werkzeug.utils import secure_filename
-
+from odie import CueLauncher
 from odie._version import version_str
 from odie.core.ConfigurationManager import SettingLoader, BrainLoader
 from odie.core.LIFOBuffer import LIFOBuffer
@@ -17,6 +17,7 @@ from odie.core.OrderListener import OrderListener
 from odie.core.RestAPI.utils import requires_auth
 from odie.core.NeuronLauncher import NeuronLauncher
 from odie.core.Utils.FileManager import FileManager
+from odie.cues.order import Order
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -72,6 +73,8 @@ class FlaskAPI(threading.Thread):
         self.app.add_url_rule('/neurons/start/order', view_func=self.run_neuron_by_order, methods=['POST'])
         self.app.add_url_rule('/neurons/start/audio', view_func=self.run_neuron_by_audio, methods=['POST'])
         self.app.add_url_rule('/shutdown/', view_func=self.shutdown_server, methods=['POST'])
+        self.app.add_url_rule('/mute/', view_func=self.get_mute, methods=['GET'])
+        self.app.add_url_rule('/mute/', view_func=self.set_mute, methods=['POST'])
 
     def run(self):
         self.app.run(host='0.0.0.0', port="%s" % int(self.port), debug=True, threaded=True, use_reloader=False)
@@ -157,7 +160,7 @@ class FlaskAPI(threading.Thread):
         neuron_target = BrainLoader().get_brain().get_neuron_by_name(neuron_name=neuron_name)
 
         # get no_voice_flag if present
-        no_voice = self.get_no_voice_flag_from_request(request)
+        no_voice = self.get_boolean_flag_from_request(request, boolean_flag_to_find="no_voice")
 
         # get parameters
         parameters = self.get_parameters_from_request(request)
@@ -204,16 +207,16 @@ class FlaskAPI(threading.Thread):
 
         order = request.get_json('order')
         # get no_voice_flag if present
-        no_voice = self.get_no_voice_flag_from_request(request)
+        no_voice = self.get_boolean_flag_from_request(request, boolean_flag_to_find="no_voice")
         if order is not None:
             # get the order
             order_to_run = order["order"]
             logger.debug("[FlaskAPI] run_neuron_by_order: order to run -> %s" % order_to_run)
             api_response = NeuronLauncher.run_matching_neuron_from_order(order_to_run,
-                                                                           self.brain,
-                                                                           self.settings,
-                                                                           is_api_call=True,
-                                                                           no_voice=no_voice)
+                                                                         self.brain,
+                                                                         self.settings,
+                                                                         is_api_call=True,
+                                                                         no_voice=no_voice)
 
             data = jsonify(api_response)
             return data, 201
@@ -307,6 +310,57 @@ class FlaskAPI(threading.Thread):
         func()
         return "Shutting down..."
 
+    @requires_auth
+    def get_mute(self):
+        """
+        Return the current trigger status
+        Curl test
+        curl -i --user admin:secret  -X GET  http://127.0.0.1:5000/mute
+        """
+
+        # find the order cue and call the mute method
+        cue_order = CueLauncher.get_order_instance()
+        if cue_order is not None:
+            data = {
+                "mute": cue_order.get_mute_status()
+            }
+            return jsonify(data), 200
+
+        # if no Order instance
+        data = {
+            "error": "Mute status unknow"
+        }
+        return jsonify(error=data), 400
+
+    @requires_auth
+    def set_mute(self):
+        """
+        Set the trigger status (muted or not)
+        Curl test:
+        curl -i -H "Content-Type: application/json" --user admin:secret  -X POST \
+        -d '{"mute": "True"}' http://127.0.0.1:5000/mute
+        """
+
+        if not request.get_json() or 'mute' not in request.get_json():
+            abort(400)
+
+        # get mute if present
+        mute = self.get_boolean_flag_from_request(request, boolean_flag_to_find="mute")
+
+        # find the order cue and call the mute method
+        cue_order = CueLauncher.get_order_instance()
+        if cue_order is not None:
+            cue_order.set_mute_status(mute)
+            data = {
+                "mute": cue_order.get_mute_status()
+            }
+            return jsonify(data), 200
+
+        data = {
+            "error": "Cannot switch mute status"
+        }
+        return jsonify(error=data), 400
+
     def audio_analyser_callback(self, order):
         """
         Callback of the OrderListener. Called after the processing of the audio file
@@ -320,32 +374,33 @@ class FlaskAPI(threading.Thread):
         """
         logger.debug("[FlaskAPI] audio_analyser_callback: order to process -> %s" % order)
         api_response = NeuronLauncher.run_matching_neuron_from_order(order,
-                                                                       self.brain,
-                                                                       self.settings,
-                                                                       is_api_call=True,
-                                                                       no_voice=self.no_voice)
+                                                                     self.brain,
+                                                                     self.settings,
+                                                                     is_api_call=True,
+                                                                     no_voice=self.no_voice)
         self.api_response = api_response
 
         # this boolean will notify the main process that the order have been processed
         self.order_analyser_return = True
 
-    def get_no_voice_flag_from_request(self, http_request):
+    def get_boolean_flag_from_request(self, http_request, boolean_flag_to_find):
         """
-        Get the no_voice flag from the request if exist
+        Get the boolean  flag from the request if exist
         :param http_request:
+        :param boolean_flag_to_find: json flag to find in the http_request
         :return:
         """
 
-        no_voice = False
+        boolean_flag = False
         try:
             received_json = http_request.get_json(force=True, silent=True, cache=True)
-            if 'no_voice' in received_json:
-                no_voice = self.str_to_bool(received_json['no_voice'])
+            if boolean_flag_to_find in received_json:
+                boolean_flag = self.str_to_bool(received_json[boolean_flag_to_find])
         except TypeError:
             # no json received
             pass
-        logger.debug("[FlaskAPI] no_voice: %s" % no_voice)
-        return no_voice
+        logger.debug("[FlaskAPI] boolean_flag: %s" % boolean_flag)
+        return boolean_flag
 
     @staticmethod
     def str_to_bool(s):

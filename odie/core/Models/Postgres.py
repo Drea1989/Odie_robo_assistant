@@ -4,7 +4,7 @@ class Postgres(object):
     """
     postgres ojbect
     """
-    def __init__(self,host='localhost',port=5432,database=None,user=None,password=None):
+    def __init__(self, host='localhost', port=5432, database=None, user=None, password=None):
         self.host = host
         self.port = port
         self.database = database

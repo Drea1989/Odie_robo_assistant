@@ -7,14 +7,14 @@ RUN sed -i -- 's/stretch main/stretch main contrib non-free/g' /etc/apt/sources.
 
 # install packages
 RUN apt-get update && apt-get install -y \
-    git python-dev libsmpeg0 libttspico-utils libsmpeg0 \
+    git python3-dev libsmpeg0 libttspico-utils libsmpeg0 \
     flac dialog portaudio19-dev build-essential libssl-dev \
     libffi-dev sox libatlas3-base mplayer wget vim sudo\
     && rm -rf /var/lib/apt/lists/*
 
 # Install the last PIP
 RUN wget https://bootstrap.pypa.io/get-pip.py
-RUN python get-pip.py
+RUN python3 get-pip.py
 
 RUN pip install --upgrade pip six
 RUN pip install --upgrade pip pyyaml

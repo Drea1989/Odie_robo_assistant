@@ -9,6 +9,9 @@ from jinja2 import Template
 from odie.core import OrderListener
 from odie.core.ConfigurationManager import SettingLoader, BrainLoader
 from odie.core.Models.MatchedNeuron import MatchedNeuron
+from odie.core.Recordatio import Recordatio
+from odie.core.LIFOBuffer import LIFOBuffer
+from odie.core.ActionExceptions import ActionExceptions
 from odie.core.OrderAnalyser import OrderAnalyser
 from odie.core.Utils.RpiUtils import RpiUtils
 from odie.core.Utils.Utils import Utils
@@ -17,18 +20,22 @@ logging.basicConfig()
 logger = logging.getLogger("odie")
 
 
-class InvalidParameterException(Exception):
+class InvalidParameterException(ActionExceptions):
     """
     Some Action parameters are invalid.
     """
-    pass
+    def __init__(self, message):
+        # Call the base class constructor with the parameters it needs
+        super(InvalidParameterException, self).__init__(message)
 
 
-class MissingParameterException(Exception):
+class MissingParameterException(ActionExceptions):
     """
     Some Action parameters are missing.
     """
-    pass
+    def __init__(self, message):
+        # Call the base class constructor with the parameters it needs
+        super(MissingParameterException, self).__init__(message)
 
 
 class NoTemplateException(Exception):
@@ -103,6 +110,10 @@ class ActionModule(object):
         self.is_waiting_for_answer = False
         # the neuron name to add the the buffer
         self.pending_neuron = None
+        # a dict of parameters the user ask to save in short term memory
+        self.odie_memory = kwargs.get('odie_memory', None)
+        # parameters loaded from the order can be save now
+        Recordatio.save_parameter_from_order_in_memory(self.odie_memory)
 
     def __str__(self):
         retuned_string = ""
@@ -136,6 +147,9 @@ class ActionModule(object):
         logger.debug("[ActionModule] Say() called with message: %s" % message)
 
         tts_message = None
+
+        # we can save parameters from the action in memory
+        Recordatio.save_action_parameter_in_memory(self.odie_memory, message)
 
         if isinstance(message, str) or isinstance(message, six.text_type):
             logger.debug("[ActionModule] message is string")
@@ -222,18 +236,28 @@ class ActionModule(object):
 
         return returned_message
 
-    def run_neuron_by_name(self, neuron_name, user_order=None, neuron_order=None):
+    def run_neuron_by_name(self, neuron_name, user_order=None, neuron_order=None, high_priority=False,
+                           is_api_call=False, overriding_parameter_dict=None):
         """
         call the lifo for adding a neuron to execute in the list of neuron list to process
         :param neuron_name: The name of the neuron to run
         :param user_order: The user order
         :param neuron_order: The neuron order
+        :param high_priority: If True, the neuron is executed before the end of the current neuron list
+        :param is_api_call: If true, the current call comes from the api
+        :param overriding_parameter_dict: dict of value to add to action parameters
         """
         neuron = BrainLoader().get_brain().get_neuron_by_name(neuron_name)
         matched_neuron = MatchedNeuron(matched_neuron=neuron,
-                                         matched_order=neuron_order,
-                                         user_order=user_order)
-        self.pending_neuron = matched_neuron
+                                       matched_order=neuron_order,
+                                       user_order=user_order,
+                                       overriding_parameter=overriding_parameter_dict)
+        list_neuron_to_process = list()
+        list_neuron_to_process.append(matched_neuron)
+        # get the singleton
+        lifo_buffer = LIFOBuffer()
+        lifo_buffer.add_neuron_list_to_lifo(list_neuron_to_process, high_priority=high_priority)
+        lifo_buffer.execute(is_api_call=is_api_call)
 
     @staticmethod
     def is_order_matching(order_said, order_match):

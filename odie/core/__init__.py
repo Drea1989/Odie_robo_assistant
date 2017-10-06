@@ -10,5 +10,3 @@ from odie.core.LIFOBuffer import LIFOBuffer
 from odie.core.ActionParameterLoader import ActionParameterLoader
 from odie.core.ActionModule import ActionModule
 from odie.core.PlayerModule import PlayerModule
-from odie.core.MainController import MainController
-from odie.core.EventManager import EventManager

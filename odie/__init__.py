@@ -2,16 +2,15 @@
 # coding: utf8
 import argparse
 import logging
+import time
 
 from odie.core import ShellGui
 from odie.core import Utils
 from odie.core.ConfigurationManager import SettingLoader
 from odie.core.ConfigurationManager.BrainLoader import BrainLoader
-from odie.core.EventManager import EventManager
-from odie.core.MainController import MainController
 from odie.core.Utils.RpiUtils import RpiUtils
-
-
+from odie.core.CueLauncher import CueLauncher
+from flask import Flask
 from ._version import version_str
 # to check keyboard input
 import signal
@@ -61,6 +60,7 @@ def parse_args(args):
     parser.add_argument("--stt-name", help="STT name to uninstall")
     parser.add_argument("--tts-name", help="TTS name to uninstall")
     parser.add_argument("--wakeon-name", help="Wakeon name to uninstall")
+    parser.add_argument("--cue-name", help="Cue name to uninstall")
     parser.add_argument('-v', '--version', action='version',
                         version='odie ' + version_str)
 
@@ -109,14 +109,25 @@ def main():
 
     # uninstall modules
     if parser.action == "uninstall":
-        if not parser.action_name and not parser.stt_name and not parser.tts_name and not parser.wakeon_name:
-            Utils.print_danger("You must specify a module name with --action-name or --stt-name or --tts-name "
-                               "or --wakeon-name")
+        if not parser.action_name \
+                and not parser.stt_name \
+                and not parser.tts_name \
+                and not parser.wakeon_name\
+                and not parser.cue_name:
+            Utils.print_danger("You must specify a module name with "
+                               "--action-name "
+                               "or --stt-name "
+                               "or --tts-name "
+                               "or --wakeon-name "
+                               "or --cue-name")
             sys.exit(1)
         else:
             res_manager = ResourcesManager()
-            res_manager.uninstall(action_name=parser.action_name, stt_name=parser.stt_name,
-                                  tts_name=parser.tts_name, wakeon_name=parser.wakeon_name)
+            res_manager.uninstall(action_name=parser.action_name,
+                                  stt_name=parser.stt_name,
+                                  tts_name=parser.tts_name,
+                                  wakeon_name=parser.wakeon_name,
+                                  cue_name=parser.cue_name)
         return
 
     # load the brain once
@@ -156,25 +167,9 @@ def main():
                                                           is_api_call=False)
 
         if (parser.run_neuron is None) and (parser.run_order is None):
-            # first, load events in event manager
-            EventManager(brain.neurons)
-            Utils.print_success("Events loaded")
-            # then start odie
-            Utils.print_success("Starting odie")
-            Utils.print_info("Press Ctrl+C for stopping")
-            # catch signal for killing on Ctrl+C pressed
-            signal.signal(signal.SIGINT, signal_handler)
-            # start the state machine
-            try:
-                MainController(brain=brain)
-            except (KeyboardInterrupt, SystemExit):
-                Utils.print_info("Ctrl+C pressed. Killing odie")
-            finally:
-                # we need to switch GPIO pin to default status if we are using a Rpi
-                if settings.rpi_settings:
-                    logger.debug("Clean GPIO")
-                    import RPi.GPIO as GPIO
-                    GPIO.cleanup()
+            # start rest api
+            start_rest_api(settings, brain)
+            start_odie(settings, brain)
 
     if parser.action == "gui":
         try:
@@ -185,13 +180,12 @@ def main():
 
     if parser.action == "cloud":
         # Cloud API
-        from flask import Flask
         from odie_cloud.CloudFlaskAPI import CloudFlaskAPI
         if settings.rpi_settings:
             # init GPIO once
             RpiUtils(settings.rpi_settings)
 
-        Utils.print_info("Starting Cloud REST API Listening port: %s" % settings.rest_api.port)    
+        Utils.print_info("Starting Cloud REST API Listening port: %s" % settings.rest_api.port)
         # then start odie
         Utils.print_success("Starting odie Cloud")
         Utils.print_info("Press Ctrl+C for stopping")
@@ -215,6 +209,15 @@ def main():
                 GPIO.cleanup()
 
 
+class AppFilter(logging.Filter):
+    """
+    Class used to add a custom entry into the logger
+    """
+    def filter(self, record):
+        record.app_version = "odie-%s" % version_str
+        return True
+
+
 def configure_logging(debug=None):
     """
     Prepare log folder in current home directory.
@@ -223,18 +226,89 @@ def configure_logging(debug=None):
 
     """
     logger = logging.getLogger("odie")
+    logger.addFilter(AppFilter())
     logger.propagate = False
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s')
-    ch.setFormatter(formatter)
-
-    # add the handlers to logger
-    logger.addHandler(ch)
+    syslog = logging.StreamHandler()
+    syslog .setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s :: %(app_version)s :: %(message)s', "%Y-%m-%d %H:%M:%S")
+    syslog .setFormatter(formatter)
 
     if debug:
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)
 
+    # add the handlers to logger
+    logger.addHandler(syslog)
     logger.debug("Logger ready")
+
+
+def get_list_cue_class_to_load(brain):
+    """
+    Return a list of cue class name
+    For all neuron, each cue type is added to a list only if the cue is not yet present in the list
+    :param brain: Brain object
+    :type brain: Brain
+    :return: set of cue class
+    """
+    list_cue_class_name = set()
+
+    for neuron in brain.neurons:
+        for cue_object in neuron.cues:
+            list_cue_class_name.add(cue_object.name)
+    logger.debug("[Odie entrypoint] List of cue class to load: %s" % list_cue_class_name)
+    return list_cue_class_name
+
+
+def start_rest_api(settings, brain):
+    """
+    Start the Rest API if asked in the user settings
+    """
+    # run the api if the user want it
+    from odie.core.RestAPI.FlaskAPI import FlaskAPI
+    if settings.rest_api.active:
+        Utils.print_info("Starting REST API Listening port: %s" % settings.rest_api.port)
+        app = Flask(__name__)
+        flask_api = FlaskAPI(app=app,
+                             port=settings.rest_api.port,
+                             brain=brain,
+                             allowed_cors_origin=settings.rest_api.allowed_cors_origin)
+        flask_api.daemon = True
+        flask_api.start()
+
+
+def start_odie(settings, brain):
+    """
+    Start all cues declared in the brain
+    """
+    # start odiee
+    Utils.print_success("Starting Odiee")
+    Utils.print_info("Press Ctrl+C for stopping")
+    # catch signal for killing on Ctrl+C pressed
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # get a list of cue class to load from declared neuron in the brain
+    # this list will contain string of cue class type.
+    # For example, if the brain contains multiple time the cue type "order", the list will be ["order"]
+    # If the brain contains some neuron with "order" and "event", the list will be ["order", "event"]
+    list_cues_class_to_load = get_list_cue_class_to_load(brain)
+
+    # start each class name
+    try:
+        for cue_class_name in list_cues_class_to_load:
+            cue_instance = CueLauncher.launch_cue_class_by_name(cue_name=cue_class_name,
+                                                                settings=settings)
+            if cue_instance is not None:
+                cue_instance.daemon = True
+                cue_instance.start()
+
+        while True:  # keep main thread alive
+            time.sleep(0.1)
+
+    except (KeyboardInterrupt, SystemExit):
+        # we need to switch GPIO pin to default status if we are using a Rpi
+        if settings.rpi_settings:
+            Utils.print_info("GPIO cleaned")
+            logger.debug("Clean GPIO")
+            import RPi.GPIO as GPIO
+            GPIO.cleanup()

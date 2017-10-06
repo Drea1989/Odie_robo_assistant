@@ -54,14 +54,13 @@ class DeepSpeechPredict(object):
         be = gen_backend(backend='gpu')
 
         # Setup dataloader
-        eval_manifest = file_path
+        eval_manifest = file_path.lsplit('.', 1)[1]+".tsv"
         if not os.path.exists(eval_manifest):
             raise IOError("Manifest file {} not found".format(eval_manifest))
 
         # Setup required dataloader parameters
         nbands = 13
         max_utt_len = 30
-        max_tscrpt_len = 1300
 
         # Audio transformation parameters
         feats_config = dict(sample_freq_hz=16000,
@@ -70,20 +69,13 @@ class DeepSpeechPredict(object):
                             frame_stride=".01 seconds",
                             feature_type="mfsc",
                             num_filters=nbands)
-
-        # Transcript transformation parameters
-        transcripts_config = dict(
-            alphabet=alphabet,
-            max_length=max_tscrpt_len,
-            pack_for_ctc=True)
-
         # Initialize dataloader
-        eval_cfg_dict = dict(type="audio,transcription",
+        eval_cfg_dict = dict(type="audio",
                              audio=feats_config,
-                             transcription=transcripts_config,
                              manifest_filename=eval_manifest,
                              macrobatch_size=be.bsz,
                              minibatch_size=be.bsz)
+
         eval_set = DataLoader(backend=be, config=eval_cfg_dict)
         eval_set = data_transform(eval_set)
 

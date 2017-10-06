@@ -1,68 +1,49 @@
 import logging
 import random
+from threading import Thread
 from time import sleep
 
-from transitions import Machine
-from odie.core import Utils
-from odie.core.ConfigurationManager import SettingLoader
+from odie.core.Utils.RpiUtils import RpiUtils
+
+from odie.core.NeuronLauncher import NeuronLauncher
+
 from odie.core.OrderListener import OrderListener
 
-# API
-from flask import Flask
-from odie.core.RestAPI.FlaskAPI import FlaskAPI
+from odie import Utils, BrainLoader
+from odie.actions.say import Say
 
-# Launchers
-from odie.core.ActionLauncher import ActionLauncher
 from odie.core.WakeonLauncher import WakeonLauncher
-from odie.core.Utils.RpiUtils import RpiUtils
+from transitions import Machine
+
 from odie.core.PlayerLauncher import PlayerLauncher
 
-# Actions
-from odie.actions.say.say import Say
+from odie.core.ConfigurationManager import SettingLoader
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
 
-class MainController:
-    """
-    This Class is the global controller of the application.
-    """
+class Order(Thread):
     states = ['init',
               'starting_wakeon',
               'playing_ready_sound',
               'waiting_for_wakeon_callback',
               'stopping_wakeon',
-              'start_order_listener',
               'playing_wake_up_answer',
+              'start_order_listener',
               'waiting_for_order_listener_callback',
               'analysing_order']
 
-    def __init__(self, brain=None):
-        self.brain = brain
-        # get global configuration
+    def __init__(self):
+        super(Order, self).__init__()
+        Utils.print_info('Starting voice order manager')
+        # load settings and brain from singleton
         sl = SettingLoader()
         self.settings = sl.settings
+        self.brain = BrainLoader().get_brain()
+
         # keep in memory the order to process
         self.order_to_process = None
-
-        # Starting the rest API
-        self._start_rest_api()
-
-        # rpi setting for led and mute button
-        self.rpi_utils = None
-        if self.settings.rpi_settings:
-            # the useer set GPIO pin, we need to instantiate the RpiUtils class in order to setup GPIO
-            self.rpi_utils = RpiUtils(self.settings.rpi_settings, self.muted_button_pressed)
-            if self.settings.rpi_settings.pin_mute_button:
-                # start the listening for button pressed thread only if the user set a pin
-                self.rpi_utils.daemon = True
-                self.rpi_utils.start()
-        # switch high the start led, as odie is started. Only if the setting exist
-        if self.settings.rpi_settings:
-            if self.settings.rpi_settings.pin_led_started:
-                logger.debug("[MainController] Switching pin_led_started to ON")
-                RpiUtils.switch_pin_to_on(self.settings.rpi_settings.pin_led_started)
 
         # get the player instance
         self.player_instance = PlayerLauncher.get_player(settings=self.settings)
@@ -70,6 +51,7 @@ class MainController:
         # save an instance of the wakeon
         self.wakeon_instance = None
         self.wakeon_callback_called = False
+        self.is_wakeon_muted = False
 
         # save the current order listener
         self.order_listener = None
@@ -78,17 +60,20 @@ class MainController:
         # boolean used to know id we played the on ready notification at least one time
         self.on_ready_notification_played_once = False
 
+        # rpi setting for led and mute button
+        self.init_rpi_utils()
+
         # Initialize the state machine
-        self.machine = Machine(model=self, states=MainController.states, initial='init', queued=True)
+        self.machine = Machine(model=self, states=Order.states, initial='init', queued=True)
 
         # define transitions
         self.machine.add_transition('start_wakeon', ['init', 'analysing_order'], 'starting_wakeon')
         self.machine.add_transition('play_ready_sound', 'starting_wakeon', 'playing_ready_sound')
         self.machine.add_transition('wait_wakeon_callback', 'playing_ready_sound', 'waiting_for_wakeon_callback')
         self.machine.add_transition('stop_wakeon', 'waiting_for_wakeon_callback', 'stopping_wakeon')
-        self.machine.add_transition('play_wake_up_answer', 'waiting_for_wakeon_callback', 'playing_wake_up_answer')
+        self.machine.add_transition('play_wake_up_answer', 'stopping_wakeon', 'playing_wake_up_answer')
         self.machine.add_transition('wait_for_order', 'playing_wake_up_answer', 'waiting_for_order_listener_callback')
-        self.machine.add_transition('analyse_order', 'waiting_for_order_listener_callback', 'analysing_order')
+        self.machine.add_transition('analyse_order', 'playing_wake_up_answer', 'analysing_order')
 
         self.machine.add_ordered_transitions()
 
@@ -102,6 +87,7 @@ class MainController:
         self.machine.on_enter_waiting_for_order_listener_callback('waiting_for_order_listener_callback_thread')
         self.machine.on_enter_analysing_order('analysing_order_thread')
 
+    def run(self):
         self.start_wakeon()
 
     def start_wakeon_process(self):
@@ -118,11 +104,11 @@ class MainController:
 
     def play_ready_sound_process(self):
         """
-        Play a sound when odie is ready to be awaken at the first start
+        Play a sound when Odie is ready to be awaken at the first start
         """
         logger.debug("[MainController] Entering state: %s" % self.state)
         if (not self.on_ready_notification_played_once and self.settings.play_on_ready_notification == "once") or \
-                        self.settings.play_on_ready_notification == "always":
+                self.settings.play_on_ready_notification == "always":
             # we remember that we played the notification one time
             self.on_ready_notification_played_once = True
             # here we tell the user that we are listening
@@ -138,7 +124,11 @@ class MainController:
         Method to print in debug that the main process is waiting for a wakeon detection
         """
         logger.debug("[MainController] Entering state: %s" % self.state)
-        Utils.print_info("Waiting for wakeon detection")
+        if self.is_wakeon_muted:  # the user asked to mute inside the mute action
+            Utils.print_info("Odie is muted")
+            self.wakeon_instance.pause()
+        else:
+            Utils.print_info("Waiting for wakeon detection")
         # this loop is used to keep the main thread alive
         while not self.wakeon_callback_called:
             sleep(0.1)
@@ -168,7 +158,7 @@ class MainController:
     def stop_wakeon_process(self):
         """
         The wakeon has been awaken, we don't needed it anymore
-        :return: 
+        :return:
         """
         logger.debug("[MainController] Entering state: %s" % self.state)
         self.wakeon_instance.stop()
@@ -188,7 +178,7 @@ class MainController:
 
     def play_wake_up_answer_thread(self):
         """
-        Play a sound or make odie say something to notify the user that she has been awaken and now
+        Play a sound or make Odie say something to notify the user that she has been awaken and now
         waiting for order
         """
         logger.debug("[MainController] Entering state: %s" % self.state)
@@ -203,8 +193,6 @@ class MainController:
     def order_listener_callback(self, order):
         """
         Receive an order, try to retrieve it in the brain.yml to launch to attached plugins
-        here to add postgres full text search
-        TODO: in future release catch exception and run text summariser to try the search a second time
         :param order: the sentence received
         :type order: str
         """
@@ -217,10 +205,10 @@ class MainController:
         Start the order analyser with the caught order to process
         """
         logger.debug("[MainController] order in analysing_order_thread %s" % self.order_to_process)
-        ActionLauncher.run_matching_Action_from_order(self.order_to_process,
-                                                        self.brain,
-                                                        self.settings,
-                                                        is_api_call=False)
+        NeuronLauncher.run_matching_neuron_from_order(self.order_to_process,
+                                                      self.brain,
+                                                      self.settings,
+                                                      is_api_call=False)
 
         # return to the state "unpausing_wakeon"
         self.start_wakeon()
@@ -239,26 +227,41 @@ class MainController:
         logger.debug("[MainController] Selected sound: %s" % random_path)
         return Utils.get_real_file_path(random_path)
 
-    def _start_rest_api(self):
+    def set_mute_status(self, muted=False):
         """
-        Start the Rest API if asked in the user settings
+        Define is the wakeon is listening or not
+        :param muted: Boolean. If true, odie is muted
         """
-        # run the api if the user want it
-        if self.settings.rest_api.active:
-            Utils.print_info("Starting REST API Listening port: %s" % self.settings.rest_api.port)
-            app = Flask(__name__)
-            flask_api = FlaskAPI(app=app,
-                                 port=self.settings.rest_api.port,
-                                 brain=self.brain,
-                                 allowed_cors_origin=self.settings.rest_api.allowed_cors_origin)
-            flask_api.daemon = True
-            flask_api.start()
-
-    def muted_button_pressed(self, muted=False):
         logger.debug("[MainController] Mute button pressed. Switch wakeon process to muted: %s" % muted)
         if muted:
             self.wakeon_instance.pause()
-            Utils.print_info("odie now muted")
+            self.is_wakeon_muted = True
+            Utils.print_info("Odie now muted")
         else:
             self.wakeon_instance.unpause()
-            Utils.print_info("odie now listening for wakeon detection")
+            self.is_wakeon_muted = False
+            Utils.print_info("Odie now listening for wakeon detection")
+
+    def get_mute_status(self):
+        """
+        return the current state of the wakeon (muted or not)
+        :return: Boolean
+        """
+        return self.is_wakeon_muted
+
+    def init_rpi_utils(self):
+        """
+        Start listening on GPIO if defined in settings
+        """
+        if self.settings.rpi_settings:
+            # the user set GPIO pin, we need to instantiate the RpiUtils class in order to setup GPIO
+            rpi_utils = RpiUtils(self.settings.rpi_settings, self.set_mute_status)
+            if self.settings.rpi_settings.pin_mute_button:
+                # start the listening for button pressed thread only if the user set a pin
+                rpi_utils.daemon = True
+                rpi_utils.start()
+        # switch high the start led, as odie is started. Only if the setting exist
+        if self.settings.rpi_settings:
+            if self.settings.rpi_settings.pin_led_started:
+                logger.debug("[MainController] Switching pin_led_started to ON")
+                RpiUtils.switch_pin_to_on(self.settings.rpi_settings.pin_led_started)

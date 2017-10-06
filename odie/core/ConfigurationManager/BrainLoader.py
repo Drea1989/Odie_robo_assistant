@@ -4,15 +4,14 @@ import os
 from six import with_metaclass
 import six
 
+from odie.core.Models.Cue import Cue
 from .YAMLLoader import YAMLLoader
 from odie.core.Utils import Utils
 from odie.core.ConfigurationManager import SettingLoader
 from odie.core.ConfigurationManager.ConfigurationChecker import ConfigurationChecker
 from odie.core.Models import Singleton
 from odie.core.Models.Brain import Brain
-from odie.core.Models.Event import Event
 from odie.core.Models.Action import Action
-from odie.core.Models.Order import Order
 from odie.core.Models.Neuron import Neuron
 
 logging.basicConfig()
@@ -166,37 +165,11 @@ class BrainLoader(with_metaclass(Singleton, object)):
         cues = list()
         for cue_dict in cues_dict:
             if ConfigurationChecker().check_cue_dict(cue_dict):
-                event_or_order = cls._get_event_or_order_from_dict(cue_dict)
-                cues.append(event_or_order)
+                for cue_name in cue_dict:
+                    new_cue = Cue(name=cue_name, parameters=cue_dict[cue_name])
+                    cues.append(new_cue)
 
         return cues
-
-    @classmethod
-    def _get_event_or_order_from_dict(cls, cue_or_event_dict):
-        """
-        The cue is either an Event or an Order
-
-        :param cue_or_event_dict: A dict of event or cue
-        :type cue_or_event_dict: dict
-        :return: The object corresponding to An Order or an Event
-        :rtype: An Order or an Event
-
-        :Example:
-
-            event_or_order = cls._get_event_or_order_from_dict(cue_dict)
-
-        .. seealso:: Event, Order
-        .. warnings:: Static method and Private
-        """
-        if 'event' in cue_or_event_dict:
-            event = cue_or_event_dict["event"]
-            if ConfigurationChecker.check_event_dict(event):
-                return cls._get_event_object(event)
-
-        if 'order' in cue_or_event_dict:
-            order = cue_or_event_dict["order"]
-            if ConfigurationChecker.check_order_dict(order):
-                return Order(sentence=order)
 
     @staticmethod
     def _get_root_brain_path():
@@ -220,26 +193,6 @@ class BrainLoader(with_metaclass(Singleton, object)):
         if os.path.isfile(brain_path):
             return brain_path
         raise IOError("Default brain.yml file not found")
-
-    @classmethod
-    def _get_event_object(cls, event_dict):
-        def get_key(key_name):
-            try:
-                return event_dict[key_name]
-            except KeyError:
-                return None
-
-        year = get_key("year")
-        month = get_key("month")
-        day = get_key("day")
-        week = get_key("week")
-        day_of_week = get_key("day_of_week")
-        hour = get_key("hour")
-        minute = get_key("minute")
-        second = get_key("second")
-
-        return Event(year=year, month=month, day=day, week=week,
-                     day_of_week=day_of_week, hour=hour, minute=minute, second=second)
 
     @classmethod
     def _replace_global_variables(cls, parameter, settings):

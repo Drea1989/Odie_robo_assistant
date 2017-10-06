@@ -1,8 +1,9 @@
+#!/usr/bin/env python
 import collections
 from threading import Thread
 
 import pyaudio
-from odie.wakeon.snowboy import snowboydetect
+from . import snowboydetect
 import time
 import os
 import logging
@@ -18,7 +19,7 @@ DETECT_DONG = os.path.join(TOP_DIR, "resources/dong.wav")
 
 class RingBuffer(object):
     """Ring buffer to hold audio from PortAudio"""
-    def __init__(self, size = 4096):
+    def __init__(self, size=4096):
         self._buf = collections.deque(maxlen=size)
 
     def extend(self, data):
@@ -145,7 +146,7 @@ class HotwordDetector(Thread):
                     message = "Keyword " + str(ans) + " detected at time: "
                     message += time.strftime("%Y-%m-%d %H:%M:%S",
                                              time.localtime(time.time()))
-                    logger.info(message)
+                    logger.debug(message)
                     callback = self.detected_callback[ans-1]
                     if callback is not None:
                         callback()

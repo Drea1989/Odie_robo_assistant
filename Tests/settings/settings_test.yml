@@ -15,7 +15,7 @@ default_wakeon: "snowboy"
 # - snowboy
 wakeons:
   - snowboy:
-      pmdl_file: "wakeon/snowboy/resources/odie-FR-6samples.pmdl"
+      pmdl_file: "wakeon/snowboy/resources/odie-EN-1samples.pmdl"
 
 
 # ---------------------------
@@ -124,7 +124,7 @@ default_neuron: "Default-neuron"
 # ---------------------------
 # Specify connection parameters to PostgreSQL
 postgres:
-  dbname: odie
+  database: odie
   user : admin
   password: secret
   host: localhost
@@ -136,6 +136,14 @@ postgres:
 # Specify parameters
 alphabot:
   enable: False 
+
+# ---------------------------
+# Cloud settings
+# ---------------------------
+# Specify parameters
+cloud:
+  - speech:
+      model: "/tmp/model.pmld"
 
 # ---------------------------
 # resource directory path

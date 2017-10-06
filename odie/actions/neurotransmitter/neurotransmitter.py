@@ -21,7 +21,7 @@ class Neurotransmitter(ActionModule):
         if self._is_parameters_ok():
             if self.direct_link is not None:
                 logger.debug("Neurotransmitter directly call to the neuron name: %s" % self.direct_link)
-                self.run_neuron_by_name(self.direct_link)
+                self.run_neuron_by_name(self.direct_link, high_priority=True)
             else:
                 if self.is_api_call:
                     if self.answer is not None:
@@ -42,7 +42,7 @@ class Neurotransmitter(ActionModule):
         # print self.links
         # set a bool to know if we have found a valid answer
         if audio is None:
-            self.run_neuron_by_name(self.default)
+            self.run_neuron_by_name(self.default, high_priority=True, is_api_call=self.is_api_call)
         else:
             found = False
             for el in self.from_answer_link:
@@ -50,12 +50,14 @@ class Neurotransmitter(ActionModule):
                     if self.is_order_matching(audio, answer):
                         logger.debug("Neurotransmitter: match answer: %s" % answer)
                         self.run_neuron_by_name(neuron_name=el["neuron"],
-                                                 user_order=audio,
-                                                 neuron_order=answer)
+                                                user_order=audio,
+                                                neuron_order=answer,
+                                                high_priority=True,
+                                                is_api_call=self.is_api_call)
                         found = True
                         break
             if not found:  # the answer do not correspond to any answer. We run the default neuron
-                self.run_neuron_by_name(self.default)
+                self.run_neuron_by_name(self.default, high_priority=True, is_api_call=self.is_api_call)
 
     def _is_parameters_ok(self):
         """

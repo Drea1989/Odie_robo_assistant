@@ -4,11 +4,10 @@ import mock
 
 from odie.core.Models.Player import Player
 from odie.core.Models.Tts import Tts
-
 from odie.core.Models.Wakeon import Wakeon
-
+from odie.core.Models.Cue import Cue
 from odie.core.Models.Stt import Stt
-
+from odie.core.Models.RecognitionOptions import RecognitionOptions
 from odie.core.Models.RestAPI import RestAPI
 
 from odie.core.Models.Dna import Dna
@@ -16,7 +15,7 @@ from odie.core.Models.Dna import Dna
 from odie.core import LIFOBuffer
 from odie.core.Models.Settings import Settings
 
-from odie.core.Models import Action, Order, Neuron, Brain, Event, Resources, Singleton
+from odie.core.Models import Action, Neuron, Brain, Resources, Singleton
 
 from odie.core.Models.APIResponse import APIResponse
 from odie.core.Models.MatchedNeuron import MatchedNeuron
@@ -34,20 +33,20 @@ class TestModels(unittest.TestCase):
         action3 = Action(name='actione3', parameters={'var3': 'val3'})
         action4 = Action(name='actione4', parameters={'var4': 'val4'})
 
-        cue1 = Order(sentence="this is the sentence")
-        cue2 = Order(sentence="this is the second sentence")
-        cue3 = Order(sentence="that is part of the third sentence")
+        cue1 = Cue(name="order", parameters="this is the sentence")
+        cue2 = Cue(name="order", parameters="this is the second sentence")
+        cue3 = Cue(name="order", parameters="that is part of the third sentence")
 
         self.neuron1 = Neuron(name="Neuron1", actions=[action1, action2], cues=[cue1])
         self.neuron2 = Neuron(name="Neuron2", actions=[action3, action4], cues=[cue2])
         self.neuron3 = Neuron(name="Neuron3", actions=[action2, action4], cues=[cue3])
 
         self.all_neuron_list1 = [self.neuron1,
-                                  self.neuron2,
-                                  self.neuron3]
+                                 self.neuron2,
+                                 self.neuron3]
 
         self.all_neuron_list2 = [self.neuron2,
-                                  self.neuron3]
+                                 self.neuron3]
 
         self.brain_test1 = Brain(neurons=self.all_neuron_list1)
         self.brain_test2 = Brain(neurons=self.all_neuron_list2)
@@ -119,6 +118,8 @@ class TestModels(unittest.TestCase):
         self.assertTrue(dna1.__eq__(dna3))
         self.assertFalse(dna1.__eq__(dna2))
 
+    '''
+    DEPRECATED
     def test_Event(self):
         event1 = Event(year=2017, month=12, day=31, week=53, day_of_week=2,
                        hour=8, minute=30, second=0)
@@ -147,6 +148,7 @@ class TestModels(unittest.TestCase):
 
         self.assertTrue(event1.__eq__(event3))
         self.assertFalse(event1.__eq__(event2))
+    '''
 
     def test_MatchedNeuron(self):
         user_order = "user order"
@@ -215,6 +217,8 @@ class TestModels(unittest.TestCase):
 
         self.assertDictEqual(ast.literal_eval(action.__str__()), ast.literal_eval(expected_result_str))
 
+    '''
+    DEPRECATED
     def test_Order(self):
         order1 = Order(sentence="this is an order")
         order2 = Order(sentence="this is an other order")
@@ -228,6 +232,7 @@ class TestModels(unittest.TestCase):
 
         self.assertTrue(order1.__eq__(order3))
         self.assertFalse(order1.__eq__(order2))
+    '''
 
     def test_Resources(self):
         resource1 = Resources(action_folder="/path/action", stt_folder="/path/stt",
@@ -243,7 +248,8 @@ class TestModels(unittest.TestCase):
             'tts_folder': '/path/tts',
             'action_folder': '/path/action',
             'stt_folder': '/path/stt',
-            'wakeon_folder': '/path/wakeon'
+            'wakeon_folder': '/path/wakeon',
+            'cue_folder': None
         }
 
         self.assertDictEqual(expected_result_serialize, resource1.serialize())
@@ -284,6 +290,8 @@ class TestModels(unittest.TestCase):
                                 active=True,
                                 port=5000, allowed_cors_origin="*")
 
+            recognition_options = RecognitionOptions()
+
             setting1 = Settings(default_tts_name="pico2wav",
                                 default_stt_name="google",
                                 default_wakeon_name="swoyboy",
@@ -303,7 +311,9 @@ class TestModels(unittest.TestCase):
                                 resources=None,
                                 variables={"key1": "val1"},
                                 postgres=None,
-                                alphabot=None)
+                                alphabot=None,
+                                recognition_options=recognition_options,
+                                cloud=None)
             setting1.odie_version = "0.4.5"
 
             setting2 = Settings(default_tts_name="accapela",
@@ -324,7 +334,9 @@ class TestModels(unittest.TestCase):
                                 resources=None,
                                 variables={"key1": "val1"},
                                 postgres=None,
-                                alphabot=None)
+                                alphabot=None,
+                                recognition_options=recognition_options,
+                                cloud=None)
             setting2.odie_version = "0.4.5"
 
             setting3 = Settings(default_tts_name="pico2wav",
@@ -346,7 +358,9 @@ class TestModels(unittest.TestCase):
                                 resources=None,
                                 variables={"key1": "val1"},
                                 postgres=None,
-                                alphabot=None)
+                                alphabot=None,
+                                cloud=None,
+                                recognition_options=recognition_options)
             setting3.odie_version = "0.4.5"
 
             expected_result_serialize = {
@@ -357,7 +371,7 @@ class TestModels(unittest.TestCase):
                 'ttss': ['ttts'],
                 'stts': ['stts'],
                 'random_wake_up_answers': ['yes'],
-                'random_wake_up_sounds' : None,
+                'random_wake_up_sounds': None,
                 'play_on_ready_notification': False,
                 'on_ready_answers': None,
                 'on_ready_sounds': None,
@@ -374,13 +388,15 @@ class TestModels(unittest.TestCase):
                     },
                 'cache_path': '/tmp/odie',
                 'default_neuron': 'default_neuron',
-                'resources': None,    
+                'resources': None,
                 'variables': {'key1': 'val1'},
                 'machine': 'pumpkins',
                 'odie_version': '0.4.5',
                 'rpi_settings': None,
-                'postgres':None,
-                'alphabot':None
+                'postgres': None,
+                'alphabot': None,
+                'recognition_options': {'energy_threshold': 4000, 'adjust_for_ambient_noise_second': 0},
+                'cloud': None
             }
 
             self.assertDictEqual(expected_result_serialize, setting1.serialize())
@@ -406,8 +422,8 @@ class TestModels(unittest.TestCase):
         action3 = Action(name='actione3', parameters={'var3': 'val3'})
         action4 = Action(name='actione4', parameters={'var4': 'val4'})
 
-        cue1 = Order(sentence="this is the sentence")
-        cue2 = Order(sentence="this is the second sentence")
+        cue1 = Cue(name="order", parameters="this is the sentence")
+        cue2 = Cue(name="order", parameters="this is the second sentence")
 
         neuron1 = Neuron(name="Neuron1", actions=[action1, action2], cues=[cue1])
         neuron2 = Neuron(name="Neuron2", actions=[action3, action4], cues=[cue2])
@@ -416,13 +432,14 @@ class TestModels(unittest.TestCase):
         expected_result_serialize = {
             'cues': [
                 {
-                    'order': 'this is the sentence'
+                    'name': 'order',
+                    'parameters': 'this is the sentence'
                 }
             ],
             'actions': [
                 {
                     'name': 'actione1',
-                     'parameters': {
+                    'parameters': {
                          'var1': 'val1'
                      }
                 },
@@ -479,3 +496,10 @@ class TestModels(unittest.TestCase):
         self.assertFalse(tts1.__eq__(tts2))
 
 
+if __name__ == '__main__':
+    unittest.main()
+
+    # suite = unittest.TestSuite()
+    # suite.addTest(TestLIFOBuffer("test_process_neuron_list"))
+    # runner = unittest.TextTestRunner()
+    # runner.run(suite)

@@ -2,15 +2,11 @@
 
 import locale
 import logging
-import signal
-import sys
-
 from dialog import Dialog
 
 from odie.core import OrderListener
 from odie.core.ConfigurationManager import SettingLoader
 from odie.core.NeuronLauncher import NeuronLauncher
-from odie.core.Utils.Utils import Utils
 from odie.actions.say.say import Say
 
 logging.basicConfig()

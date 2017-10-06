@@ -23,11 +23,12 @@ class NeuronNameNotFound(Exception):
 class NeuronLauncher(object):
 
     @classmethod
-    def start_neuron_by_name(cls, name, brain=None):
+    def start_neuron_by_name(cls, name, brain=None, overriding_parameter_dict=None):
         """
         Start a neuron by it's name
         :param name: Name (Unique ID) of the neuron to launch
         :param brain: Brain instance
+        :param overriding_parameter_dict: parameter to pass to actions
         """
         logger.debug("[NeuronLauncher] start_neuron_by_name called with neuron name: %s " % name)
         # check if we have found and launched the neuron
@@ -40,8 +41,9 @@ class NeuronLauncher(object):
             lifo_buffer = LIFOBuffer()
             list_neuron_to_process = list()
             new_matching_neuron = MatchedNeuron(matched_neuron=neuron,
-                                                  matched_order=None,
-                                                  user_order=None)
+                                                matched_order=None,
+                                                user_order=None,
+                                                overriding_parameter=overriding_parameter_dict)
             list_neuron_to_process.append(new_matching_neuron)
             lifo_buffer.add_neuron_list_to_lifo(list_neuron_to_process)
             return lifo_buffer.execute(is_api_call=True)
@@ -49,7 +51,6 @@ class NeuronLauncher(object):
     @classmethod
     def run_matching_neuron_from_order(cls, order_to_process, brain, settings, is_api_call=False, no_voice=False):
         """
-        
         :param order_to_process: the spoken order sent by the user
         :param brain: Brain object
         :param settings: Settings object
@@ -77,8 +78,8 @@ class NeuronLauncher(object):
                     # get the default neuron
                     default_neuron = brain.get_neuron_by_name(settings.default_neuron)
                     new_matching_neuron = MatchedNeuron(matched_neuron=default_neuron,
-                                                          matched_order=None,
-                                                          user_order=order_to_process)
+                                                        matched_order=None,
+                                                        user_order=order_to_process)
                     list_neuron_to_process.append(new_matching_neuron)
                 else:
                     logger.debug("[NeuronLauncher] No matching Neuron and no default neuron ")

@@ -1,10 +1,11 @@
 import logging
 import six
 import jinja2
-import sys
 
 from odie.core.Utils.Utils import Utils
 from odie.core.ConfigurationManager.SettingLoader import SettingLoader
+from odie.core.ActionExceptions import ActionExceptions
+from odie.core.Recordatio import Recordatio
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -28,8 +29,7 @@ class ActionLauncher:
         :return:
         """
         logger.debug("Run action: \"%s\"" % (action.__str__()))
-        sl = SettingLoader()
-        settings = sl.settings
+        settings = cls.load_settings()
         action_folder = None
         if settings.resources:
             action_folder = settings.resources.action_folder
@@ -52,9 +52,14 @@ class ActionLauncher:
             try:
                 action.parameters = cls._replace_brackets_by_loaded_parameter(action.parameters, parameters_dict)
             except ActionParameterNotAvailable:
-                Utils.print_danger("The action %s cannot be launched" % action.name)
+                Utils.print_danger("Missing parameter in action %s. Execution skipped" % action.name)
                 return None
-        instantiated_action = ActionLauncher.launch_action(action)
+        try:
+            instantiated_action = ActionLauncher.launch_action(action)
+        except ActionExceptions as e:
+            Utils.print_danger("ERROR: Fail to execute action '%s'. "
+                               '%s' ". -> Execution skipped" % (action.name, e.message))
+            return None
         return instantiated_action
 
     @classmethod
@@ -67,11 +72,21 @@ class ActionLauncher:
         :param loaded_parameters: dict of parameters
         """
         logger.debug("[ActionLauncher] replacing brackets from %s, using %s" % (action_parameters, loaded_parameters))
+        # add variables from the short term memory to the list of loaded parameters that can be used in a template
+        # the final dict is added into a key "odie_memory" to not override existing keys loaded form the order
+        memory_dict = dict()
+        memory_dict["odie_memory"] = Recordatio.get_memory()
+        if loaded_parameters is None:
+            loaded_parameters = dict()  # instantiate an empty dict in order to be able to add memory in it
+        loaded_parameters.update(memory_dict)
         if isinstance(action_parameters, str) or isinstance(action_parameters, six.text_type):
             # replace bracket parameter only if the str contains brackets
             if Utils.is_containing_bracket(action_parameters):
                 # check that the parameter to replace is available in the loaded_parameters dict
                 if cls._action_parameters_are_available_in_loaded_parameters(action_parameters, loaded_parameters):
+                    # add parameters from global variable into the final loaded parameter dict
+                    settings = cls.load_settings()
+                    loaded_parameters.update(settings.variables)
                     action_parameters = jinja2.Template(action_parameters).render(loaded_parameters)
                     action_parameters = Utils.encode_text_utf8(action_parameters)
                     return str(action_parameters)
@@ -82,7 +97,7 @@ class ActionLauncher:
         if isinstance(action_parameters, dict):
             returned_dict = dict()
             for key, value in action_parameters.items():
-                if key in "say_template" or key in "file_template":  # those keys are reserved for the TTS.
+                if key in "say_template" or key in "file_template" or key in "odie_memory" or key in "from_answer_link":  # keys reserved for the TTS.
                     returned_dict[key] = value
                 else:
                     returned_dict[key] = cls._replace_brackets_by_loaded_parameter(value, loaded_parameters)
@@ -101,13 +116,13 @@ class ActionLauncher:
     def _action_parameters_are_available_in_loaded_parameters(string_parameters, loaded_parameters):
         """
         Check that all parameters in brackets are available in the loaded_parameters dict
-        
+
         E.g:
         string_parameters = "this is a {{ parameter1 }}"
-        
+
         Will return true if the loaded_parameters looks like the following
-        loaded_parameters { "parameter1": "a value"}        
-        
+        loaded_parameters { "parameter1": "a value"}
+
         :param string_parameters: The string that contains one or more parameters in brace brackets
         :param loaded_parameters: Dict of parameter
         :return: True if all parameters in brackets have an existing key in loaded_parameters dict
@@ -121,3 +136,12 @@ class ActionLauncher:
                 Utils.print_danger("The parameter %s is not available in the order" % str(parameter))
                 return False
         return True
+
+    @staticmethod
+    def load_settings():
+        """
+        Return loaded kalliope settings
+        :return: setting object
+        """
+        sl = SettingLoader()
+        return sl.settings

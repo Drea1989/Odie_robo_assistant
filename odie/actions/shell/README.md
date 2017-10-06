@@ -100,7 +100,7 @@ If you want to add argument to your shell command, you can use an input value fr
       - order: "remove file {{ query }}"
     actions:
       - shell:
-          cmd: "rm { query }}"
+          cmd: "rm {{ query }}"
           file_template: remove_file.j2          
 ```
 In the example above, Odie will remove the file you asked for in the query.

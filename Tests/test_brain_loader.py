@@ -2,13 +2,11 @@
 import os
 import unittest
 
-from odie.core.Models import Singleton
+from odie.core.Models import Singleton, Cue
 
 from odie.core.ConfigurationManager import BrainLoader
-from odie.core.Models import Event
 from odie.core.Models import Action
 from odie.core.Models import Neuron
-from odie.core.Models import Order
 from odie.core.Models.Brain import Brain
 from odie.core.Models.Settings import Settings
 
@@ -57,10 +55,10 @@ class TestBrainLoader(unittest.TestCase):
         action = Action(name='say', parameters={'message': ['test message']})
         action2 = Action(name='sleep', parameters={'seconds': 60})
 
-        cue1 = Order(sentence="test_order")
-        cue2 = Order(sentence="test_order_2")
-        cue3 = Order(sentence="test_order_3")
-        cue4 = Order(sentence="order_for_int")
+        cue1 = Cue(name="order", parameters="test_order")
+        cue2 = Cue(name="order", parameters="test_order_2")
+        cue3 = Cue(name="order", parameters="test_order_3")
+        cue4 = Cue(name="order", parameters="order_for_int")
 
         neuron1 = Neuron(name="test", actions=[action], cues=[cue1])
         neuron2 = Neuron(name="test2", actions=[action], cues=[cue2])
@@ -74,8 +72,6 @@ class TestBrainLoader(unittest.TestCase):
         brain.brain_yaml = self.expected_result
 
         brain_loader = BrainLoader(file_path=self.brain_to_test)
-        print (brain)
-        print (brain_loader)
         self.assertEqual(brain, brain_loader.brain)
 
     def test_get_actions(self):
@@ -129,13 +125,14 @@ class TestBrainLoader(unittest.TestCase):
     def test_get_cues(self):
         cues = [{'order': 'test_order'}]
 
-        cue = Order(sentence='test_order')
+        cue = Cue(name="order", parameters="test_order")
 
         bl = BrainLoader(file_path=self.brain_to_test)
         cues_from_brain_loader = bl._get_cues(cues)
 
         self.assertEqual([cue], cues_from_brain_loader)
 
+    '''
     def test_get_event_or_order_from_dict(self):
 
         order_object = Order(sentence="test_order")
@@ -150,7 +147,7 @@ class TestBrainLoader(unittest.TestCase):
 
         self.assertEqual(order_from_bl, order_object)
         self.assertEqual(event_from_bl, event_object)
-
+    '''
     def test_singleton(self):
         bl1 = BrainLoader(file_path=self.brain_to_test)
         bl2 = BrainLoader(file_path=self.brain_to_test)
@@ -186,7 +183,7 @@ class TestBrainLoader(unittest.TestCase):
         }
 
         self.assertEqual(BrainLoader._replace_global_variables(parameter=parameters,
-                                                                settings=st),
+                                                               settings=st),
                          expected_parameters,
                          "Fail to assign a single global variable to parameters")
 
@@ -205,7 +202,7 @@ class TestBrainLoader(unittest.TestCase):
         }
 
         self.assertEqual(BrainLoader._replace_global_variables(parameter=parameters,
-                                                                settings=st),
+                                                               settings=st),
                          expected_parameters,
                          "Fail to assign a global variable with string after to parameters")
 
@@ -224,7 +221,7 @@ class TestBrainLoader(unittest.TestCase):
         }
 
         self.assertEqual(BrainLoader._replace_global_variables(parameter=parameters,
-                                                                settings=st),
+                                                               settings=st),
                          expected_parameters,
                          "Fail to assign global variable with int after to parameters")
 
@@ -243,7 +240,7 @@ class TestBrainLoader(unittest.TestCase):
         }
 
         self.assertEqual(BrainLoader._replace_global_variables(parameter=parameters,
-                                                                settings=st),
+                                                               settings=st),
                          expected_parameters,
                          "Fail to assign multiple global variables to parameters")
 
@@ -262,7 +259,7 @@ class TestBrainLoader(unittest.TestCase):
         }
 
         self.assertEqual(BrainLoader._replace_global_variables(parameter=parameters,
-                                                                settings=st),
+                                                               settings=st),
                          expected_parameters,
                          "Fail to assign a single global when parameter value is a list to action")
 
@@ -282,7 +279,7 @@ class TestBrainLoader(unittest.TestCase):
         }
 
         self.assertEqual(BrainLoader._replace_global_variables(parameter=parameters,
-                                                                settings=st),
+                                                               settings=st),
                          expected_parameters,
                          "Fail to assign a single global when parameter value is a list to action")
 
@@ -302,7 +299,7 @@ class TestBrainLoader(unittest.TestCase):
         expected_result = "i am odie"
 
         self.assertEqual(BrainLoader._get_global_variable(sentence=sentence,
-                                                           settings=st),
+                                                          settings=st),
                          expected_result)
 
         # test with accent
@@ -310,7 +307,7 @@ class TestBrainLoader(unittest.TestCase):
         expected_result = u"i am Odie"
 
         self.assertEqual(BrainLoader._get_global_variable(sentence=sentence,
-                                                           settings=st),
+                                                          settings=st),
                          expected_result)
 
         # test with int
@@ -318,7 +315,7 @@ class TestBrainLoader(unittest.TestCase):
         expected_result = "i am 1"
 
         self.assertEqual(BrainLoader._get_global_variable(sentence=sentence,
-                                                           settings=st),
+                                                          settings=st),
                          expected_result)
 
 

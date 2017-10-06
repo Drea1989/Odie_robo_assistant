@@ -25,6 +25,12 @@ wakeons:
 # This is the STT that will be used by default
 default_speech_to_text: "odie_stt"
 
+# Speech to text options
+#recognition_options:
+#  energy_threshold: 4000
+#  adjust_for_ambient_noise_second: 1
+
+
 # Speech to Text engines configuration
 # Available engine are:
 # - odie_stt (via remote server)
@@ -153,7 +159,7 @@ default_neuron: "default-neuron"
 postgres:
   host: localhost
   port: 5432
-  dbname: odie
+  database: odie
   user : admin
   password: secret
 
@@ -163,6 +169,17 @@ postgres:
 # Specify parameters
 alphabot:
   enable: True 
+# ---------------------------
+# Cloud settings
+# ---------------------------
+# Specify parameters
+cloud:
+  - speech:
+    model: "/usr/home/odie_cloud/models/speech.pmld"
+  - caption:
+    TFhost: "localhost"
+    TFport: 9001
+
 
 # ---------------------------
 # Resource directory path
@@ -172,13 +189,14 @@ alphabot:
 #   - stt
 #   - tts
 #   - wakeon  /!\ wakeon is still beta...
+#   - cue
 # ---------------------------
 #resource_directory:
 #  neuron: "/var/tmp/resources/neurons"
 #  stt: "resources/stt"
 #  tts: "resources/tts"
 #  wakeon: "resources/wakeon"
-
+#  cue: "resources/cue"
 
 # ---------------------------
 # Global files variables

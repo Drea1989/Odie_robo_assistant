@@ -30,7 +30,7 @@ class MatchedNeuron(object):
         if overriding_parameter is not None:
             # we suppose that we don't have any parameters.
             # We replace the current parameter object with the received one
-            self.parameters = overriding_parameter
+            self.parameters.update(overriding_parameter)
 
         # list of Action Module
         self.action_module_list = list()

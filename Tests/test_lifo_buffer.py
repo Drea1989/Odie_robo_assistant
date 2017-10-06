@@ -39,8 +39,8 @@ class TestLIFOBuffer(unittest.TestCase):
         neuron = BrainLoader().brain.get_neuron_by_name("neuron1")
         order = "enter in neuron 1"
         matched_neuron = MatchedNeuron(matched_neuron=neuron,
-                                         user_order=order,
-                                         matched_order=order)
+                                       user_order=order,
+                                       matched_order=order)
         list_matched_neuron = list()
         list_matched_neuron.append(matched_neuron)
         self.lifo_buffer.add_neuron_list_to_lifo(list_matched_neuron)
@@ -82,7 +82,7 @@ class TestLIFOBuffer(unittest.TestCase):
                         'action_module_list': [
                             {
                                 'action_name': 'Say',
-                                 'generated_message': 'question in neuron 1'
+                                'generated_message': 'question in neuron 1'
                             },
                             {
                                 'action_name': 'Neurotransmitter',
@@ -99,7 +99,7 @@ class TestLIFOBuffer(unittest.TestCase):
                                 'generated_message': 'enter neuron 2'
                             }
                         ],
-                    'neuron_name': 'neuron2'
+                        'neuron_name': 'neuron2'
                     }
                 ],
                 'user_order': None
@@ -139,7 +139,7 @@ class TestLIFOBuffer(unittest.TestCase):
                     },
                     {
                         'matched_order': 'enter in neuron 1',
-                        'action_module_list':[
+                        'action_module_list': [
                             {
                                 'action_name': 'Say',
                                 'generated_message': 'question in neuron 1'
@@ -169,8 +169,8 @@ class TestLIFOBuffer(unittest.TestCase):
         neuron = BrainLoader().brain.get_neuron_by_name("neuron1")
         order = "enter in neuron 1"
         matched_neuron = MatchedNeuron(matched_neuron=neuron,
-                                         user_order=order,
-                                         matched_order=order)
+                                       user_order=order,
+                                       matched_order=order)
         list_matched_neuron = list()
         list_matched_neuron.append(matched_neuron)
         self.lifo_buffer.add_neuron_list_to_lifo(list_matched_neuron)
@@ -246,8 +246,8 @@ class TestLIFOBuffer(unittest.TestCase):
         neuron = BrainLoader().brain.get_neuron_by_name("neuron1")
         order = "enter in neuron 1"
         matched_neuron = MatchedNeuron(matched_neuron=neuron,
-                                         user_order=order,
-                                         matched_order=order)
+                                       user_order=order,
+                                       matched_order=order)
         list_matched_neuron = list()
         list_matched_neuron.append(matched_neuron)
         self.lifo_buffer.add_neuron_list_to_lifo(list_matched_neuron)
@@ -261,8 +261,8 @@ class TestLIFOBuffer(unittest.TestCase):
         neuron = BrainLoader().brain.get_neuron_by_name("neuron1")
         order = "enter in neuron 1"
         matched_neuron = MatchedNeuron(matched_neuron=neuron,
-                                         user_order=order,
-                                         matched_order=order)
+                                       user_order=order,
+                                       matched_order=order)
         list_matched_neuron = list()
         list_matched_neuron.append(matched_neuron)
         self.lifo_buffer.add_neuron_list_to_lifo(list_matched_neuron)
@@ -287,8 +287,8 @@ class TestLIFOBuffer(unittest.TestCase):
         neuron = BrainLoader().brain.get_neuron_by_name("neuron1")
         order = "enter in neuron 1"
         matched_neuron = MatchedNeuron(matched_neuron=neuron,
-                                         user_order=order,
-                                         matched_order=order)
+                                       user_order=order,
+                                       matched_order=order)
         list_matched_neuron = list()
         list_matched_neuron.append(matched_neuron)
 
@@ -313,8 +313,8 @@ class TestLIFOBuffer(unittest.TestCase):
         neuron = BrainLoader().brain.get_neuron_by_name("neuron5")
         order = "neuron5"
         matched_neuron = MatchedNeuron(matched_neuron=neuron,
-                                         user_order=order,
-                                         matched_order=order)
+                                       user_order=order,
+                                       matched_order=order)
 
         with mock.patch("odie.core.TTS.TTSModule.generate_and_play"):
             self.lifo_buffer.set_api_call(True)
@@ -326,8 +326,8 @@ class TestLIFOBuffer(unittest.TestCase):
         neuron = BrainLoader().brain.get_neuron_by_name("neuron6")
         order = "neuron6"
         matched_neuron = MatchedNeuron(matched_neuron=neuron,
-                                         user_order=order,
-                                         matched_order=order)
+                                       user_order=order,
+                                       matched_order=order)
 
         self.lifo_buffer.set_api_call(True)
         with mock.patch("odie.core.TTS.TTSModule.generate_and_play"):
@@ -339,14 +339,14 @@ class TestLIFOBuffer(unittest.TestCase):
         neuron = BrainLoader().brain.get_neuron_by_name("neuron6")
         order = "neuron6"
         matched_neuron = MatchedNeuron(matched_neuron=neuron,
-                                         user_order=order,
-                                         matched_order=order)
+                                       user_order=order,
+                                       matched_order=order)
 
         self.lifo_buffer.set_api_call(True)
         self.lifo_buffer.set_answer("neuron 6 answer")
         with mock.patch("odie.core.TTS.TTSModule.generate_and_play"):
-            with self.assertRaises(NeuronListAddedToLIFO):
-                self.lifo_buffer._process_action_list(matched_neuron=matched_neuron)
+            self.assertRaises(NeuronListAddedToLIFO,
+                              self.lifo_buffer._process_action_list(matched_neuron=matched_neuron))
 
 
 if __name__ == '__main__':
