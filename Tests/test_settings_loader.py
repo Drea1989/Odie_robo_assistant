@@ -8,7 +8,8 @@ from odie.core.ConfigurationManager import SettingLoader
 from odie.core.Models.RecognitionOptions import RecognitionOptions
 from odie.core.Models import Singleton
 from odie.core.Models import Resources
-from odie.core.Models import Postgres, Cloud
+from odie.core.Models.Postgres import Postgres
+from odie.core.Models.Cloud import Cloud
 from odie.core.Models.Player import Player
 from odie.core.Models.RestAPI import RestAPI
 from odie.core.Models.Settings import Settings
@@ -240,11 +241,8 @@ class TestSettingLoader(unittest.TestCase):
                          sl._get_variables(self.settings_dict))
 
     def test_get_postgres(self):
-        expected_result = {'dbname': 'odie',
-                           'user': 'admin',
-                           'password': 'secret',
-                           'host': 'localhost',
-                           'port': 5432}
+        pg = Postgres(host='localhost', port=5432, database='odie', user='admin', password='secret')
+        expected_result = pg
         sl = SettingLoader(file_path=self.settings_file_to_test)
         self.assertEqual(expected_result, sl._get_postgres(self.settings_dict))
 
@@ -254,7 +252,8 @@ class TestSettingLoader(unittest.TestCase):
         self.assertEqual(expected_result, sl._get_alphabot(self.settings_dict))
 
     def test_get_cloud(self):
-        expected_result = {'category': 'speech', "parameters": {'model': '/tmp/model.pmld'}}
+        cl = Cloud(category='speech', parameters={'model': '/tmp/model.pmld'})
+        expected_result = cl
         sl = SettingLoader(file_path=self.settings_file_to_test)
         self.assertEqual(expected_result, sl._get_cloud(self.settings_dict))
 

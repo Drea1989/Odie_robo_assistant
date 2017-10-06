@@ -870,9 +870,8 @@ class SettingLoader(with_metaclass(Singleton, object)):
                     new_cl = Cloud(category=category, parameters=parameters)
                     cl.append(new_cl)
             else:
-                # the stt does not have parameter
-                new_cl = Cloud(category=category, parameters=dict())
-                cl.append(new_cl)
+                # wrong config file
+                logger.debug("cloud settings is invalid at: {}".format(clSetting))
         return cl
 
     @staticmethod
