@@ -312,7 +312,8 @@ class TestModels(unittest.TestCase):
                                 variables={"key1": "val1"},
                                 postgres=None,
                                 alphabot=None,
-                                recognition_options=recognition_options)
+                                recognition_options=recognition_options,
+                                cloud=None)
             setting1.odie_version = "0.4.5"
 
             setting2 = Settings(default_tts_name="accapela",
@@ -334,7 +335,8 @@ class TestModels(unittest.TestCase):
                                 variables={"key1": "val1"},
                                 postgres=None,
                                 alphabot=None,
-                                recognition_options=recognition_options)
+                                recognition_options=recognition_options,
+                                cloud=None)
             setting2.odie_version = "0.4.5"
 
             setting3 = Settings(default_tts_name="pico2wav",
@@ -356,7 +358,8 @@ class TestModels(unittest.TestCase):
                                 resources=None,
                                 variables={"key1": "val1"},
                                 postgres=None,
-                                alphabot=None)
+                                alphabot=None,
+                                cloud=None)
             setting3.odie_version = "0.4.5"
 
             expected_result_serialize = {
@@ -391,7 +394,8 @@ class TestModels(unittest.TestCase):
                 'rpi_settings': None,
                 'postgres': None,
                 'alphabot': None,
-                'recognition_options': {'energy_threshold': 4000, 'adjust_for_ambient_noise_second': 0}
+                'recognition_options': {'energy_threshold': 4000, 'adjust_for_ambient_noise_second': 0},
+                'cloud': None
             }
 
             self.assertDictEqual(expected_result_serialize, setting1.serialize())

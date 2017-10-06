@@ -678,18 +678,11 @@ class SettingLoader(with_metaclass(Singleton, object)):
                 else:
                     raise SettingInvalidException("The path %s does not exist on the system" % cue_folder)
 
-            if action_folder is None \
-                    and stt_folder is None \
-                    and tts_folder is None \
-                    and wakeon_folder is None\
-                    and cue_folder is None:
-                raise SettingInvalidException("No required folder has been provided in the setting resource_directory. "
-                                              "Define : \'action\' or/and \'stt\' or/and \'tts\' or/and \'wakeon\'or/and \'cue\'")
-
             resource_object = Resources(action_folder=action_folder,
                                         stt_folder=stt_folder,
                                         tts_folder=tts_folder,
-                                        wakeon_folder=wakeon_folder)
+                                        wakeon_folder=wakeon_folder,
+                                        cue_folder=cue_folder)
         except KeyError:
             logger.debug("Resource directory not found in settings")
 
