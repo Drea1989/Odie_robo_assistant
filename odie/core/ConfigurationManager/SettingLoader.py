@@ -856,12 +856,13 @@ class SettingLoader(with_metaclass(Singleton, object)):
         :param settings: The YAML settings file
         :return: dict
         """
+        cl = list()
         try:
             clCategory = settings["cloud"]
         except KeyError:
-            raise SettingNotFound("cloud settings not found")
+            logger.debug("cloud settings not found")
+            return cl
 
-        cl = list()
         for clSetting in clCategory:
             if isinstance(clSetting, dict):
                 for category in clSetting:

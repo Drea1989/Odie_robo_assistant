@@ -68,10 +68,10 @@ class TestSettingLoader(unittest.TestCase):
         }
 
         # Init the folders, otherwise it raises an exceptions
+        os.makedirs("/tmp/odie/tests/odie_resources_dir/wakeon")
         os.makedirs("/tmp/odie/tests/odie_resources_dir/actions")
         os.makedirs("/tmp/odie/tests/odie_resources_dir/stt")
         os.makedirs("/tmp/odie/tests/odie_resources_dir/tts")
-        os.makedirs("/tmp/odie/tests/odie_resources_dir/wakeon")
         os.makedirs("/tmp/odie/tests/odie_resources_dir/cue")
 
     def tearDown(self):
