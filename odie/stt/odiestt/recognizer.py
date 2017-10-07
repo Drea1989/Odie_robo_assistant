@@ -1,5 +1,5 @@
 """Library for performing speech recognition, with support for several engines and APIs, online and offline."""
-
+import logging
 import json
 from speech_recognition import AudioData, AudioSource
 
@@ -10,6 +10,9 @@ except ImportError:  # use the Python 3 modules
     from urllib.parse import urlencode
     from urllib.request import Request, urlopen
     from urllib.error import URLError, HTTPError
+
+logging.basicConfig()
+logger = logging.getLogger("odie")
 
 
 class WaitTimeoutError(Exception):
@@ -29,6 +32,7 @@ class Recognizer(AudioSource):
         """
         Creates a new ``Recognizer`` instance, which represents a collection of speech recognition functionality.
         """
+        logger.debug("[OdieSTT recognizer] init")
         self.energy_threshold = 300  # minimum audio energy to consider for recording
         self.dynamic_energy_threshold = True
         self.dynamic_energy_adjustment_damping = 0.15
@@ -57,6 +61,7 @@ class Recognizer(AudioSource):
         Raises a ``speech_recognition.UnknownValueError`` exception if the speech is unintelligible. Raises a ``speech_recognition.RequestError``
         exception if the speech recognition operation failed, if the key isn't valid, or if there is no internet connection.
         """
+        logger.debug("[OdieSTT recognizer] start recognizer")
         assert isinstance(audio_data, AudioData), "``audio_data`` must be audio data"
         assert key is None or isinstance(key, str), "``key`` must be ``None`` or a string"
         assert isinstance(language, str), "``language`` must be a string"
@@ -65,15 +70,18 @@ class Recognizer(AudioSource):
             convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz
             convert_width=2  # audio samples must be 16-bit
         )
+        logger.debug("[OdieSTT recognizer] audio ok")
         if key is None:
             key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw"
         url = "http://192.168.1.112:5000/speech/recognize?{}".format(urlencode({
             "lang": language
         }))
+        logger.debug("[OdieSTT recognizer] sending request")
         request = Request(url, data=flac_data, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
-
+        logger.debug("[OdieSTT recognizer] request back")
         # obtain audio transcription results
         try:
+            logger.debug("[OdieSTT recognizer] getting response")
             response = urlopen(request, timeout=self.operation_timeout)
         except HTTPError as e:
             raise RequestError("recognition request failed: {}".format(e.reason))
@@ -90,6 +98,6 @@ class Recognizer(AudioSource):
             if len(result) != 0:
                 actual_result = result[0]
                 break
-
+        logger.debug("[OdieSTT recognizer] returning result")
         # return results
         return actual_result

@@ -1,8 +1,13 @@
+import logging
+
 import speech_recognition as sr
 
 from odie.core import Utils
 from odie.stt.Utils import SpeechRecognition
 from odie.stt.odiestt.recognizer import Recognizer
+
+logging.basicConfig()
+logger = logging.getLogger("odie")
 
 
 class Odiestt(SpeechRecognition):
@@ -15,6 +20,8 @@ class Odiestt(SpeechRecognition):
         """
         # give the audio file path to process directly to the mother class if exist
         SpeechRecognition.__init__(self, kwargs.get('audio_file_path', None))
+
+        logger.debug("[OdieSTT] init")
 
         # callback function to call after the translation speech/tex
         self.main_controller_callback = callback
@@ -33,6 +40,7 @@ class Odiestt(SpeechRecognition):
         called from the background thread
         """
         rz = Recognizer()
+        logger.debug("[OdieSTT] starting callback")
         try:
             captured_audio = rz.recognize_odie(audio,
                                                key=self.key,
