@@ -2,7 +2,7 @@ import speech_recognition as sr
 
 from odie.core import Utils
 from odie.stt.Utils import SpeechRecognition
-from odie.stt.odie_stt.recognizer import Recognizer
+from odie.stt.odiestt.recognizer import Recognizer
 
 
 class Odiestt(SpeechRecognition):

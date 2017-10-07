@@ -1,1 +1,1 @@
-from .odie_stt import Odiestt
+from .odiestt import Odiestt
