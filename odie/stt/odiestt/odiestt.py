@@ -2,7 +2,7 @@ import speech_recognition as sr
 
 from odie.core import Utils
 from odie.stt.Utils import SpeechRecognition
-from odie.stt.Odiestt.recognizer import Recognizer
+from odie.stt.odiestt.recognizer import Recognizer
 
 
 class Odiestt(SpeechRecognition):
@@ -32,9 +32,9 @@ class Odiestt(SpeechRecognition):
         """
         called from the background thread
         """
-        rs = Recognizer()
+        rz = Recognizer()
         try:
-            captured_audio = rs.recognize_odie(audio,
+            captured_audio = rz.recognize_odie(audio,
                                                key=self.key,
                                                language=self.language)
             Utils.print_success("Odie Speech Recognition thinks you said %s" % captured_audio)

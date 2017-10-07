@@ -68,8 +68,7 @@ class Recognizer(AudioSource):
         if key is None:
             key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw"
         url = "http://192.168.1.112:5000/speech/recognize?{}".format(urlencode({
-            "lang": language,
-            "key": key,
+            "lang": language
         }))
         request = Request(url, data=flac_data, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
 
