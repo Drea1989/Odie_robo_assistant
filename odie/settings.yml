@@ -23,7 +23,7 @@ wakeons:
 # ---------------------------
 
 # This is the STT that will be used by default
-default_speech_to_text: "odie_stt"
+default_speech_to_text: "odiestt"
 
 # Speech to text options
 #recognition_options:
@@ -36,7 +36,7 @@ default_speech_to_text: "odie_stt"
 # - odie_stt (via remote server)
 
 speech_to_text:
-  - Odie_stt:
+  - odiestt:
       language: "en-US"
 
 # ---------------------------
@@ -175,10 +175,10 @@ alphabot:
 # Specify parameters
 cloud:
   - speech:
-    model: "/usr/home/odie_cloud/models/speech.pmld"
+      model: "/home/drea/odie_cloud/deepspeech/new_speech_33.prm"
   - caption:
-    TFhost: "localhost"
-    TFport: 9001
+      TFhost: "localhost"
+      TFport: 9000
 
 
 # ---------------------------
