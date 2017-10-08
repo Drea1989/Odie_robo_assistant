@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ----------------------------------------------------------------------------
-
+import logging
 import os
 import numpy as np
 
@@ -24,6 +24,10 @@ from neon.data.dataloader_transformers import TypeCast, Retuple
 
 from odie_cloud.speech.decoder import ArgMaxDecoder
 from odie_cloud.speech.utils import get_predictions
+
+
+logging.basicConfig()
+logger = logging.getLogger("odie")
 
 
 def data_transform(dl):
@@ -38,6 +42,7 @@ def data_transform(dl):
 
 class DeepSpeechPredict(object):
     def __init__(self, model_file=None, file_path=None):
+        logger.debug("[Deepspeech] init")
 
         if model_file is None:
             raise Exception("A model file is required for evaluation")
@@ -48,12 +53,15 @@ class DeepSpeechPredict(object):
         # Setup parameters for argmax decoder
         alphabet = "_'ABCDEFGHIJKLMNOPQRSTUVWXYZ "
         nout = len(alphabet)
+        logger.debug("[Deepspeech] setting decoder")
         argmax_decoder = ArgMaxDecoder(alphabet, space_index=alphabet.index(" "))
 
+        logger.debug("[Deepspeech] Initialize gpu backend")
         # Initialize our backend
         be = gen_backend(backend='gpu')
 
         # Setup dataloader
+        logger.debug("[Deepspeech] get manifest")
         eval_manifest = file_path.lsplit('.', 1)[1]+".tsv"
         if not os.path.exists(eval_manifest):
             raise IOError("Manifest file {} not found".format(eval_manifest))
@@ -61,7 +69,7 @@ class DeepSpeechPredict(object):
         # Setup required dataloader parameters
         nbands = 13
         max_utt_len = 30
-
+        logger.debug("[Deepspeech] audio transform")
         # Audio transformation parameters
         feats_config = dict(sample_freq_hz=16000,
                             max_duration="{} seconds".format(max_utt_len),
@@ -75,12 +83,15 @@ class DeepSpeechPredict(object):
                              manifest_filename=eval_manifest,
                              macrobatch_size=be.bsz,
                              minibatch_size=be.bsz)
-
+        logger.debug("[Deepspeech] Setup dataloader")
         eval_set = DataLoader(backend=be, config=eval_cfg_dict)
+        logger.debug("[Deepspeech] data transformation")
         eval_set = data_transform(eval_set)
 
         # Load the model
+        logger.debug("[Deepspeech] load model: {}".format(model_file))
         model = Model(model_file)
 
         # Process data and compute stats
+        logger.debug("[Deepspeech] get predictions")
         return get_predictions(model, be, eval_set, argmax_decoder, nout)

@@ -141,7 +141,7 @@ on_ready_sounds:
 rest_api:
   active: False
   port: 5000
-  password_protected: True
+  password_protected: False
   login: admin
   password: secret
   allowed_cors_origin: False
