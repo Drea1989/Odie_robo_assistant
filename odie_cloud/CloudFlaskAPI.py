@@ -98,7 +98,7 @@ class CloudFlaskAPI(threading.Thread):
 
     @requires_auth
     def get_main_page(self):
-        logger.debug("[FlaskAPI] get_main_page")
+        logger.debug("[CloudFlaskAPI] get_main_page")
         data = {
             "Odie Cloud Version": "%s" % version_str
         }
@@ -116,7 +116,7 @@ class CloudFlaskAPI(threading.Thread):
         test with curl:
         curl -i --user admin:secret  -X GET  http://127.0.0.1:5000/image
         """
-        logger.debug("[FlaskAPI] get_models: all")
+        logger.debug("[CloudFlaskAPI] get_models: all")
         models = []
         for cl_object in self.settings.cloud:
             models.append(cl_object.category)
@@ -133,7 +133,7 @@ class CloudFlaskAPI(threading.Thread):
         :param model_name: name(id) of the model to execute
         :return:
         """
-        logger.debug("[FlaskAPI] run_image_by_model: model_name name -> %s" % model_name)
+        logger.debug("[CloudFlaskAPI] run_image_by_model: model_name name -> %s" % model_name)
 
         # get parameters
         # parameters = self.get_parameters_from_request(request)
@@ -163,7 +163,7 @@ class CloudFlaskAPI(threading.Thread):
 
         # now start analyse the audio with STT engine
         video_path = base_path + os.sep + filename
-        logger.debug("[FlaskAPI] run_image_by_model: with file path %s" % video_path)
+        logger.debug("[CloudFlaskAPI] run_image_by_model: with file path %s" % video_path)
         if not self.allowed_file(video_path):
             video_path = self._convert_to_wav(audio_file_path=video_path)
 
@@ -182,7 +182,7 @@ class CloudFlaskAPI(threading.Thread):
 
         tfclient = TFClient(modelHost, modelPort)
         response = tfclient.make_prediction(input_data=video_path, timeout=10, model_name=model_name)
-        logger.debug("[FlaskAPI] run_image_by_model prediction: {}".format(response))
+        logger.debug("[CloudFlaskAPI] run_image_by_model prediction: {}".format(response))
 
         data = jsonify(response)
         return data, 201
@@ -202,7 +202,8 @@ class CloudFlaskAPI(threading.Thread):
         In case of quotes in the order or accents, use a file
         :return:
         """
-        assert request.path == 'speech/recognise'
+        logger.debug("[CloudFlaskAPI] run_speech_recognition")
+        assert request.path == '/speech/recognize'
         assert request.method == 'POST'
         # check if the post request has the file part
         # uploaded_file = request.form['data']
@@ -231,22 +232,24 @@ class CloudFlaskAPI(threading.Thread):
 
         # uploaded_file = request.files['file']
         # if user does not select file, browser also
-
+        logger.debug("[CloudFlaskAPI] saving file")
         # save the file
         filename = secure_filename(uploaded_file.filename)
         base_path = os.path.join(self.app.config['UPLOAD_AUDIO'])
         uploaded_file.save(os.path.join(base_path, filename))
         # write aeon manifest file
+        logger.debug("[CloudFlaskAPI] writing manifest")
         with open(os.path.join(base_path, filename), 'w') as tsvfile:
             writer = csv.writer(tsvfile, delimiter='\t', newline='\n')
             writer.writerow([filename])
 
         audio_path = base_path + os.sep + filename
-        logger.debug("[FlaskAPI] run_speech_recognition: with file path %s" % audio_path)
+        logger.debug("[CloudFlaskAPI] run_speech_recognition: with file path %s" % audio_path)
         if not self.allowed_file(audio_path):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
         # get model file
+        logger.debug("[CloudFlaskAPI] getting model")
         model_file = None
 
         for cl_object in self.settings.cloud:
@@ -258,13 +261,20 @@ class CloudFlaskAPI(threading.Thread):
             }
             return jsonify(error=data), 404
 
+        logger.debug("[CloudFlaskAPI] calling deepspech")
         # now start analyse the audio with STT engine
-        self.response = DeepSpeechPredict(model_file, audio_path)
+        try:
+            self.response = DeepSpeechPredict(model_file, audio_path)
+        except:
+            data = {
+                "prediction model": "exception"
+            }
+            return jsonify(error=data), 404
 
         if self.response is not None and self.response:
             data = jsonify(self.response)
             self.response = None
-            logger.debug("[FlaskAPI] run_speech_recognition: data %s" % data)
+            logger.debug("[CloudFlaskAPI] run_speech_recognition: data %s" % data)
             return data, 201
         else:
             data = {
@@ -325,6 +335,6 @@ class CloudFlaskAPI(threading.Thread):
                 parameters = received_json['parameters']
         except TypeError:
             pass
-        logger.debug("[FlaskAPI] Overridden parameters: %s" % parameters)
+        logger.debug("[CloudFlaskAPI] Overridden parameters: %s" % parameters)
 
         return parameters
