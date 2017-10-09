@@ -10,6 +10,8 @@ except ImportError:  # use the Python 3 modules
     from urllib.parse import urlencode
     from urllib.request import Request, urlopen
     from urllib.error import URLError, HTTPError
+import requests
+
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -73,18 +75,20 @@ class Recognizer(AudioSource):
         logger.debug("[OdieSTT recognizer] audio ok")
         if key is None:
             key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw"
-        url = "http://192.168.1.112:5000/speech/recognize?{}".format(urlencode({
-            "lang": language
-        }))
+        url = "http://192.168.1.112:5000/speech/recognize"
+
         logger.debug("[OdieSTT recognizer] sending request")
         files = {'file': flac_data}
-        # request = requests.post(url, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
-        request = Request(url, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
+        payload = {"lang": language}
+        request = requests.post(url, params=payload, data=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
+
+        # request = Request(url, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
         logger.debug("[OdieSTT recognizer] request back")
         # obtain audio transcription results
         try:
             logger.debug("[OdieSTT recognizer] getting response")
-            response = urlopen(request, timeout=self.operation_timeout)
+            # response = urlopen(request, timeout=self.operation_timeout)
+            response = request.json()
         except HTTPError as e:
             raise RequestError("recognition request failed: {}".format(e.reason))
         except URLError as e:
