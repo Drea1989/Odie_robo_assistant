@@ -16,7 +16,7 @@
 import logging
 import numpy as np
 from tqdm import tqdm
-from odie_cloud.speech.decoder import decoder
+from odie_cloud.speech.decoder import Decoder
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -39,12 +39,12 @@ def eval_model(model, dataset, nout, bsz):
               y[0]), y[2]) for (x, y) in dataset]
 
 
-def decrypt(decoder, message):
-    msg = decoder.convert_to_string(message)
-    return decoder.process_string(msg, remove_repetitions=False)
+def decrypt(Decoder, message):
+    msg = Decoder.convert_to_string(message)
+    return Decoder.process_string(msg, remove_repetitions=False)
 
 
-def get_wer(model, be, dataset, decoder, nout, use_wer=False, print_examples=False):
+def get_wer(model, be, dataset, Decoder, nout, use_wer=False, print_examples=False):
     wer = 0
     batchcount = 0
     predictions = list()
@@ -63,16 +63,16 @@ def get_wer(model, be, dataset, decoder, nout, use_wer=False, print_examples=Fal
         tscrpt_lens = y[1].get().ravel()
         utt_lens = strided_tmax * y[2].get().ravel() / 100
         for mu in range(be.bsz):
-            prediction = decoder.decode(probs[mu, :, :int(utt_lens[mu])])
+            prediction = Decoder.decode(probs[mu, :, :int(utt_lens[mu])])
             start = int(np.sum(tscrpt_lens[:mu]))
             target = flat_labels[start:start + tscrpt_lens[mu]].tolist()
-            target = decrypt(decoder, target)
+            target = decrypt(Decoder, target)
             predictions.append(prediction)
             targets.append(target)
             if not use_wer:
-                wer += decoder.cer(prediction, target) / float(len(target))
+                wer += Decoder.cer(prediction, target) / float(len(target))
             else:
-                wer += decoder.wer(prediction, target) / \
+                wer += Decoder.wer(prediction, target) / \
                         float(len(target.split()))
 
         if use_wer:
@@ -106,7 +106,7 @@ def get_predictions(model, be, dataset, nout):
         utt_lens = strided_tmax * y[2].get().ravel() / 100
         for mu in range(be.bsz):
             logger.debug("[deepspeech utils] decoding")
-            prediction = decoder.decode(probs[mu, :, :int(utt_lens[mu])])
+            prediction = Decoder.decode(probs[mu, :, :int(utt_lens[mu])])
             predictions.append(prediction)
     logger.debug("[deepspeech utils] get_predictions")
     return predictions

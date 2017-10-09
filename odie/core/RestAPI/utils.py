@@ -3,6 +3,7 @@ from flask import request, Response
 
 from odie.core.ConfigurationManager import SettingLoader
 
+# TODO: split settings for cloud and rest api
 
 def check_auth(username, password):
     """This function is called to check if a username /
