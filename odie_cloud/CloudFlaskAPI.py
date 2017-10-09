@@ -206,10 +206,9 @@ class CloudFlaskAPI(threading.Thread):
         assert request.path == '/speech/recognize'
         assert request.method == 'POST'
         # check if the post request has the file part
-        # uploaded_file = request.form['data']
-
         # check if the post request has the file part
         if 'file' not in request.files:
+            logger.debug("[CloudFlaskAPI] file not in request.files")
             data = {
                 "error": "No file provided"
             }
@@ -219,18 +218,11 @@ class CloudFlaskAPI(threading.Thread):
         # if user does not select file, browser also
         # submit a empty part without filename
         if uploaded_file.filename == '':
+            logger.debug("[CloudFlaskAPI] filename ==''")
             data = {
                 "error": "No file provided"
             }
             return jsonify(error=data), 400
-
-        if not uploaded_file:
-            data = {
-                "error": "No file provided"
-            }
-            return jsonify(error=data), 400
-
-        # uploaded_file = request.files['file']
         # if user does not select file, browser also
         logger.debug("[CloudFlaskAPI] saving file")
         # save the file
