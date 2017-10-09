@@ -15,6 +15,7 @@
 # ----------------------------------------------------------------------------
 import logging
 import os
+from os.path import splitext
 import numpy as np
 
 from aeon.dataloader import DataLoader
@@ -62,8 +63,10 @@ class DeepSpeechPredict(object):
 
         # Setup dataloader
         logger.debug("[Deepspeech] get manifest")
-        eval_manifest = file_path.lsplit('.', 1)[1]+".tsv"
+        eval_manifest = splitext(file_path)[0]+".tsv"
+        logger.debug("[Deepspeech] manifest: {}".format(eval_manifest))
         if not os.path.exists(eval_manifest):
+            logger.debug("[Deepspeech] Manifest file not found")
             raise IOError("Manifest file {} not found".format(eval_manifest))
 
         # Setup required dataloader parameters
