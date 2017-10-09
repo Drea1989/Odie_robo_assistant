@@ -205,8 +205,6 @@ class CloudFlaskAPI(threading.Thread):
         logger.debug("[CloudFlaskAPI] run_speech_recognition")
         assert request.path == '/speech/recognize'
         assert request.method == 'POST'
-        logger.debug("[CloudFlaskAPI] request files received: {}".format(request.files))
-        logger.debug("[CloudFlaskAPI] request received: {}".format(request))
         # check if the post request has the file part
         if 'file' not in request.files:
             logger.debug("[CloudFlaskAPI] no file in request.files")
@@ -232,8 +230,8 @@ class CloudFlaskAPI(threading.Thread):
         uploaded_file.save(os.path.join(base_path, filename))
         # write aeon manifest file
         logger.debug("[CloudFlaskAPI] writing manifest")
-        with open(os.path.join(base_path, filename), 'w') as tsvfile:
-            writer = csv.writer(tsvfile, delimiter='\t', newline='\n')
+        with open(os.path.join(base_path, filename), 'w', newline='') as tsvfile:
+            writer = csv.writer(tsvfile, delimiter='\t')
             writer.writerow([filename])
 
         audio_path = base_path + os.sep + filename
