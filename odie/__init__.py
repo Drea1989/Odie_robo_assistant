@@ -48,7 +48,7 @@ def parse_args(args):
     """
     # create arguments
     parser = argparse.ArgumentParser(description='odie')
-    parser.add_argument("action", help="[start|gui|install|uninstall]")
+    parser.add_argument("action", help="[start|gui|install|uninstall|cloud]")
     parser.add_argument("--run-neuron",
                         help="Name of a neuron to load surrounded by quote")
     parser.add_argument("--run-order", help="order surrounded by a quote")
