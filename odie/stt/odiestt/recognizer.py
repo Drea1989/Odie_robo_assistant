@@ -78,12 +78,12 @@ class Recognizer(AudioSource):
         url = "http://192.168.1.112:5000/speech/recognize"
 
         logger.debug("[OdieSTT recognizer] sending request")
-        files = {'file': flac_data}
+        files = {'file': ('file.flac', flac_data)}
         payload = {"lang": language}
-        request = requests.post(url, params=payload, data=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
+        request = requests.post(url, params=payload, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
 
         # request = Request(url, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
-        logger.debug("[OdieSTT recognizer] request back")
+        logger.debug("[OdieSTT recognizer] request back, sent: {}".format(request.text))
         # obtain audio transcription results
         try:
             logger.debug("[OdieSTT recognizer] getting response")
@@ -93,8 +93,8 @@ class Recognizer(AudioSource):
             raise RequestError("recognition request failed: {}".format(e.reason))
         except URLError as e:
             raise RequestError("recognition connection failed: {}".format(e.reason))
-        response_text = response.read().decode("utf-8")
-
+        # response_text = response.read().decode("utf-8")
+        response_text = response
         # ignore any blank blocks
         actual_result = []
         for line in response_text.split("\n"):

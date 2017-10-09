@@ -205,7 +205,8 @@ class CloudFlaskAPI(threading.Thread):
         logger.debug("[CloudFlaskAPI] run_speech_recognition")
         assert request.path == '/speech/recognize'
         assert request.method == 'POST'
-
+        logger.debug("[CloudFlaskAPI] request files received: {}".format(request.files))
+        logger.debug("[CloudFlaskAPI] request received: {}".format(request))
         # check if the post request has the file part
         if 'file' not in request.files:
             logger.debug("[CloudFlaskAPI] no file in request.files")
