@@ -15,7 +15,6 @@
 # ----------------------------------------------------------------------------
 import logging
 import os
-from os.path import splitext
 import numpy as np
 
 from aeon.dataloader import DataLoader
@@ -62,12 +61,10 @@ class DeepSpeechPredict(object):
         be = gen_backend(backend='gpu')
 
         # Setup dataloader
-        logger.debug("[Deepspeech] get manifest")
-        eval_manifest = splitext(file_path)[0]+".tsv"
-        logger.debug("[Deepspeech] manifest: {}".format(eval_manifest))
-        if not os.path.exists(eval_manifest):
+        logger.debug("[Deepspeech] manifest: {}".format(file_path))
+        if not os.path.exists(file_path):
             logger.debug("[Deepspeech] Manifest file not found")
-            raise IOError("Manifest file {} not found".format(eval_manifest))
+            raise IOError("Manifest file {} not found".format(file_path))
 
         # Setup required dataloader parameters
         nbands = 13
@@ -83,7 +80,7 @@ class DeepSpeechPredict(object):
         # Initialize dataloader
         eval_cfg_dict = dict(type="audio",
                              audio=feats_config,
-                             manifest_filename=eval_manifest,
+                             manifest_filename=file_path,
                              macrobatch_size=be.bsz,
                              minibatch_size=be.bsz)
         logger.debug("[Deepspeech] Setup dataloader")
