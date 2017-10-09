@@ -78,9 +78,9 @@ class Recognizer(AudioSource):
             "lang": language
         }))
         logger.debug("[OdieSTT recognizer] sending request")
-        files = {'file': flac_data}
-        request = requests.post(url, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
-        # request = Request(url, data=flac_data, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
+        # files = {'file': flac_data}
+        # request = requests.post(url, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
+        request = Request(url, data=flac_data, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
         logger.debug("[OdieSTT recognizer] request back")
         # obtain audio transcription results
         try:
