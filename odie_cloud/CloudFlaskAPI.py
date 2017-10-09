@@ -245,6 +245,7 @@ class CloudFlaskAPI(threading.Thread):
 
         for cl_object in self.settings.cloud:
             if cl_object.category == 'speech':
+                logger.debug("[CloudFlaskAPI] parameters : {}".format(cl_object.parameters))
                 model_file = cl_object.parameters['model']
         if model_file is None:
             data = {
@@ -258,7 +259,7 @@ class CloudFlaskAPI(threading.Thread):
             self.response = DeepSpeechPredict(model_file, audio_path)
         except:
             data = {
-                "prediction model": "exception"
+                "predicting": "exception"
             }
             return jsonify(error=data), 404
 
