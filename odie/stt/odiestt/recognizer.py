@@ -80,7 +80,7 @@ class Recognizer(AudioSource):
         logger.debug("[OdieSTT recognizer] sending request")
         files = {'file': ('file.flac', flac_data)}
         payload = {"lang": language}
-        request = requests.post(url, params=payload, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
+        request = requests.post(url, files=files, headers={"Content-Type": "audio/x-flac; rate: {}".format(audio_data.sample_rate)})
 
         # request = Request(url, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
         logger.debug("[OdieSTT recognizer] request back, sent: {}".format(request.text))
