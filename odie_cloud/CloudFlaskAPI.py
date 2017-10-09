@@ -2,6 +2,7 @@ import logging
 import os
 import threading
 import csv
+from os.path import splitext
 from odie.core.Utils.FileManager import FileManager
 
 from odie.core.ConfigurationManager import SettingLoader
@@ -223,14 +224,17 @@ class CloudFlaskAPI(threading.Thread):
             }
             return jsonify(error=data), 400
         # if user does not select file, browser also
-        logger.debug("[CloudFlaskAPI] saving file")
         # save the file
         filename = secure_filename(uploaded_file.filename)
         base_path = os.path.join(self.app.config['UPLOAD_AUDIO'])
-        uploaded_file.save(os.path.join(base_path, filename))
+        file_path = os.path.join(base_path, filename)
+        logger.debug("[CloudFlaskAPI] saving file to: {}".format(file_path))
+        uploaded_file.save(file_path)
         # write aeon manifest file
+
         logger.debug("[CloudFlaskAPI] writing manifest")
-        with open(os.path.join(base_path, filename), 'w', newline='') as tsvfile:
+        eval_manifest = splitext(file_path)[0]+".tsv"
+        with open(eval_manifest, 'w', newline='') as tsvfile:
             writer = csv.writer(tsvfile, delimiter='\t')
             writer.writerow([filename])
 
@@ -256,7 +260,7 @@ class CloudFlaskAPI(threading.Thread):
         logger.debug("[CloudFlaskAPI] calling deepspech")
         # now start analyse the audio with STT engine
         try:
-            self.response = DeepSpeechPredict(model_file, audio_path)
+            self.response = DeepSpeechPredict(model_file, eval_manifest)
         except:
             data = {
                 "predicting": "exception"
