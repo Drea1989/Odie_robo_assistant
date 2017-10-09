@@ -13,10 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ----------------------------------------------------------------------------
-
+import logging
 import numpy as np
 from tqdm import tqdm
 from odie_cloud.speech.decoder import decoder
+
+logging.basicConfig()
+logger = logging.getLogger("odie")
 
 
 def softmax(x):
@@ -86,7 +89,7 @@ def get_wer(model, be, dataset, decoder, nout, use_wer=False, print_examples=Fal
 
 
 def get_predictions(model, be, dataset, nout):
-
+    logger.debug("[deepspeech utils] get_predictions")
     batchcount = 0
     predictions = list()
     numitems = dataset.item_count
@@ -94,13 +97,16 @@ def get_predictions(model, be, dataset, nout):
 
     if not model.initialized:
         model.initialize(dataset)
-
+    logger.debug("[CloudFlaskAPI] starting {} batches".format(nbatches))
     progress_bar = tqdm(dataset, total=nbatches, unit="batches")
     for x, y in progress_bar:
+        logger.debug("[deepspeech utils] get probs")
         probs = get_outputs(model, be, x, nout)
         strided_tmax = probs.shape[-1]
         utt_lens = strided_tmax * y[2].get().ravel() / 100
         for mu in range(be.bsz):
+            logger.debug("[deepspeech utils] decoding")
             prediction = decoder.decode(probs[mu, :, :int(utt_lens[mu])])
             predictions.append(prediction)
+    logger.debug("[deepspeech utils] get_predictions")
     return predictions
