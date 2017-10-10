@@ -30,35 +30,40 @@ logging.basicConfig()
 logger = logging.getLogger("odie")
 
 
-def data_transform(dl):
-    """ Data is loaded from Aeon as a 4-tuple. We need to cast the audio
-    (index 0) from int8 to float32 and repack the data into (audio, 3-tuple).
-    """
-
-    dl = TypeCast(dl, index=0, dtype=np.float32)
-    dl = Retuple(dl, data=(0,), target=(1, 2, 3))
-    return dl
-
-
 class DeepSpeechPredict(object):
-    def __init__(self, model_file=None, file_path=None):
+    '''
+    the init function sets up the beckend so thatit is initialised at starting of the api and not each time it is called
+    '''
+    def __init__(self):
         logger.debug("[Deepspeech] init")
 
+        # Setup parameters for argmax decoder
+        alphabet = "_'ABCDEFGHIJKLMNOPQRSTUVWXYZ "
+        self.nout = len(alphabet)
+        logger.debug("[Deepspeech] setting decoder")
+        self.argmax_decoder = ArgMaxDecoder(alphabet, space_index=alphabet.index(" "))
+
+        logger.debug("[Deepspeech] Initialize gpu backend")
+        # Initialize our backend
+        try:
+            self.be = gen_backend(backend='gpu')
+        except:
+            logger.debug("[Deepspeech] gpu backend failed")
+            try:
+                self.be = gen_backend(backend='mkl')
+            except:
+                logger.debug("[Deepspeech] mkl backend failed using basic cpu")
+                self.be = gen_backend(backend='cpu')
+
+    def GetProbs(self, model_file=None, file_path=None):
+        '''
+        get the translation from the model using model file and manifest file
+        '''
         if model_file is None:
             raise Exception("A model file is required for evaluation")
 
         if file_path is None:
             raise Exception("Please provide a file to predict")
-
-        # Setup parameters for argmax decoder
-        alphabet = "_'ABCDEFGHIJKLMNOPQRSTUVWXYZ "
-        nout = len(alphabet)
-        logger.debug("[Deepspeech] setting decoder")
-        argmax_decoder = ArgMaxDecoder(alphabet, space_index=alphabet.index(" "))
-
-        logger.debug("[Deepspeech] Initialize gpu backend")
-        # Initialize our backend
-        be = gen_backend(backend='gpu')
 
         # Setup dataloader
         logger.debug("[Deepspeech] manifest: {}".format(file_path))
@@ -81,12 +86,12 @@ class DeepSpeechPredict(object):
         eval_cfg_dict = dict(type="audio",
                              audio=feats_config,
                              manifest_filename=file_path,
-                             macrobatch_size=be.bsz,
-                             minibatch_size=be.bsz)
+                             macrobatch_size=self.be.bsz,
+                             minibatch_size=self.be.bsz)
         logger.debug("[Deepspeech] Setup dataloader")
-        eval_set = DataLoader(backend=be, config=eval_cfg_dict)
+        eval_set = DataLoader(backend=self.be, config=eval_cfg_dict)
         logger.debug("[Deepspeech] data transformation")
-        eval_set = data_transform(eval_set)
+        eval_set = self.data_transform(eval_set)
 
         # Load the model
         logger.debug("[Deepspeech] load model: {}".format(model_file))
@@ -94,4 +99,13 @@ class DeepSpeechPredict(object):
 
         # Process data and compute stats
         logger.debug("[Deepspeech] get predictions")
-        return get_predictions(model, be, eval_set, argmax_decoder, nout)
+        return get_predictions(model, self.be, eval_set, self.argmax_decoder, self.nout)
+
+    def data_transform(dl):
+        """ Data is loaded from Aeon as a 4-tuple. We need to cast the audio
+        (index 0) from int8 to float32 and repack the data into (audio, 3-tuple).
+        """
+
+        dl = TypeCast(dl, index=0, dtype=np.float32)
+        dl = Retuple(dl, data=(0,), target=(1, 2, 3))
+        return dl
