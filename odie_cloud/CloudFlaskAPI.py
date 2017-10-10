@@ -86,6 +86,9 @@ class CloudFlaskAPI(threading.Thread):
         # no voice flag
         self.no_voice = False
 
+        # deepspeech beckend
+        self.deepspeech = DeepSpeechPredict()
+
         # Add routing rules
         self.app.add_url_rule('/', view_func=self.get_main_page, methods=['GET'])
         self.app.add_url_rule('/image', view_func=self.get_models, methods=['GET'])
@@ -234,9 +237,11 @@ class CloudFlaskAPI(threading.Thread):
 
         logger.debug("[CloudFlaskAPI] writing manifest")
         eval_manifest = splitext(file_path)[0]+".tsv"
+        header = "@FILE\t\n"
         with open(eval_manifest, 'w', newline='') as tsvfile:
+            tsvfile.write(header)
             writer = csv.writer(tsvfile, delimiter='\t')
-            writer.writerow([filename])
+            writer.writerow([file_path])
 
         audio_path = base_path + os.sep + filename
         logger.debug("[CloudFlaskAPI] run_speech_recognition: with file path %s" % audio_path)
@@ -259,8 +264,9 @@ class CloudFlaskAPI(threading.Thread):
 
         logger.debug("[CloudFlaskAPI] calling deepspech")
         # now start analyse the audio with STT engine
+        self.response = self.deepspeech.GetProbs(model_file, eval_manifest)
         try:
-            self.response = DeepSpeechPredict(model_file, eval_manifest)
+            self.response = self.deepspeech.GetProbs(model_file, eval_manifest)
         except:
             data = {
                 "predicting": "exception"
