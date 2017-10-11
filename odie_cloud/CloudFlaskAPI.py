@@ -264,6 +264,7 @@ class CloudFlaskAPI(threading.Thread):
 
         logger.debug("[CloudFlaskAPI] calling deepspech")
         # now start analyse the audio with STT engine
+        # added for debug purposes
         self.response = self.deepspeech.GetProbs(model_file, eval_manifest)
         try:
             self.response = self.deepspeech.GetProbs(model_file, eval_manifest)
