@@ -21,6 +21,8 @@ from odie_cloud.speech.decoder import Decoder
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
+Decoder = Decoder()
+
 
 def softmax(x):
     return (np.reciprocal(np.sum(
@@ -46,7 +48,6 @@ def decrypt(Decoder, message):
 
 def get_wer(model, be, dataset, Decoder, nout, use_wer=False, print_examples=False):
     wer = 0
-    batchcount = 0
     predictions = list()
     targets = list()
     numitems = dataset.item_count
@@ -90,7 +91,6 @@ def get_wer(model, be, dataset, Decoder, nout, use_wer=False, print_examples=Fal
 
 def get_predictions(model, be, dataset, nout):
     logger.debug("[deepspeech utils] get_predictions")
-    batchcount = 0
     predictions = list()
     numitems = dataset.item_count
     nbatches = int(np.ceil(numitems/be.bsz))
