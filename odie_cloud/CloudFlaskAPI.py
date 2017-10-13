@@ -238,10 +238,10 @@ class CloudFlaskAPI(threading.Thread):
 
         logger.debug("[CloudFlaskAPI] writing manifest")
         eval_manifest = splitext(file_path)[0]+".tsv"
-        header = "@FILE\n"
+        header = "@FILE\tFILE\n"
         with open(eval_manifest, 'w') as tsvfile:
             tsvfile.write(header)
-            tsvfile.write(file_path)
+            tsvfile.write(file_path+'\t'+os.path.join(base_path, 'text.txt'))
 
         audio_path = base_path + os.sep + filename
         logger.debug("[CloudFlaskAPI] run_speech_recognition: with file path %s" % audio_path)

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ----------------------------------------------------------------------------
-import os
 import logging
 
 import numpy as np
@@ -35,11 +34,16 @@ def common_config(manifest_file, batch_size,  nbands,  max_utt_len):
                     "emit_length": True,
                     "num_filters": nbands}
 
+    transcription_config = {"type": "char_map",
+                            "alphabet": "_'ABCDEFGHIJKLMNOPQRSTUVWXYZ ",
+                            "emit_length": True,
+                            "max_length": 1300}
+
     logger.debug("[Deepspeech] audio dictionary")
     return {'manifest_filename': manifest_file,
             'batch_size': batch_size,
             'block_size': batch_size,
-            'etl': [audio_config]}
+            'etl': [audio_config, transcription_config]}
 
 
 def wrap_dataloader(dl):
