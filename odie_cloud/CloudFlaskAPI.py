@@ -231,17 +231,17 @@ class CloudFlaskAPI(threading.Thread):
         filename = secure_filename(uploaded_file.filename)
         base_path = os.path.join(self.app.config['UPLOAD_AUDIO'])
         file_path = os.path.join(base_path, filename)
+        file_path = splitext(file_path)[0]+".flac"
         logger.debug("[CloudFlaskAPI] saving file to: {}".format(file_path))
         uploaded_file.save(file_path)
         # write aeon manifest file
 
         logger.debug("[CloudFlaskAPI] writing manifest")
         eval_manifest = splitext(file_path)[0]+".tsv"
-        header = "@FILE\t\n"
-        with open(eval_manifest, 'w', newline='') as tsvfile:
+        header = "@FILE\n"
+        with open(eval_manifest, 'w') as tsvfile:
             tsvfile.write(header)
-            writer = csv.writer(tsvfile, delimiter='\t')
-            writer.writerow([file_path])
+            tsvfile.write(file_path)
 
         audio_path = base_path + os.sep + filename
         logger.debug("[CloudFlaskAPI] run_speech_recognition: with file path %s" % audio_path)
