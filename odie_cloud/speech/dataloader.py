@@ -37,7 +37,6 @@ def common_config(manifest_file, batch_size,  nbands,  max_utt_len):
 
     logger.debug("[Deepspeech] audio dictionary")
     return {'manifest_filename': manifest_file,
-            'manifest_root': os.path.dirname(manifest_file),
             'batch_size': batch_size,
             'block_size': batch_size,
             'etl': [audio_config]}

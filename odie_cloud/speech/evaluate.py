@@ -44,14 +44,14 @@ class DeepSpeechPredict(object):
         logger.debug("[Deepspeech] Initialize gpu backend")
         # Initialize our backend
         try:
-            self.be = gen_backend(backend='gpu')
+            self.be = gen_backend(backend='gpu', batch_size=1)
         except:
             logger.debug("[Deepspeech] gpu backend failed")
             try:
-                self.be = gen_backend(backend='mkl')
+                self.be = gen_backend(backend='mkl', batch_size=1)
             except:
                 logger.debug("[Deepspeech] mkl backend failed using basic cpu")
-                self.be = gen_backend(backend='cpu')
+                self.be = gen_backend(backend='cpu', batch_size=1)
 
     def GetProbs(self, model_file=None, file_path=None):
         '''

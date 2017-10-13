@@ -16,12 +16,9 @@
 import logging
 import numpy as np
 from tqdm import tqdm
-from odie_cloud.speech.decoder import Decoder
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
-
-Decoder = Decoder()
 
 
 def softmax(x):
@@ -89,7 +86,7 @@ def get_wer(model, be, dataset, Decoder, nout, use_wer=False, print_examples=Fal
     return wer / nsamples, nsamples, results
 
 
-def get_predictions(model, be, dataset, nout):
+def get_predictions(model, be, dataset, Decoder, nout):
     logger.debug("[deepspeech utils] get_predictions")
     predictions = list()
     numitems = dataset.item_count
