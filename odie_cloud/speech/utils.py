@@ -47,8 +47,7 @@ def get_wer(model, be, dataset, Decoder, nout, use_wer=False, print_examples=Fal
     wer = 0
     predictions = list()
     targets = list()
-    numitems = dataset.item_count
-    nbatches = int(np.ceil(numitems/be.bsz))
+    nbatches = dataset.nbatches
 
     if not model.initialized:
         model.initialize(dataset)
@@ -89,8 +88,7 @@ def get_wer(model, be, dataset, Decoder, nout, use_wer=False, print_examples=Fal
 def get_predictions(model, be, dataset, Decoder, nout):
     logger.debug("[deepspeech utils] get_predictions")
     predictions = list()
-    numitems = dataset.item_count
-    nbatches = int(np.ceil(numitems/be.bsz))
+    nbatches = dataset.nbatches
 
     if not model.initialized:
         model.initialize(dataset)

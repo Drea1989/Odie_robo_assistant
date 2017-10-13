@@ -2,6 +2,7 @@
 import logging
 import json
 from speech_recognition import AudioData, AudioSource
+import soundfile as sf
 
 try:  # attempt to use the Python 2 modules
     from urllib import urlencode
@@ -77,18 +78,19 @@ class Recognizer(AudioSource):
             key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw"
         url = "http://192.168.1.112:5000/speech/recognize"
 
-        logger.debug("[OdieSTT recognizer] sending request")
-        files = {'file': ('file.flac', flac_data)}
+        logger.debug("[OdieSTT recognizer] sending request:")
+        # sf.write("/tmp/odie/tests/recognition.flac", flac_data, audio_data.samplerate)
+
+        files = {'file': ('recognition.flac', flac_data, 'audio/flac')}
         payload = {"lang": language}
-        request = requests.post(url, files=files, headers={"Content-Type": "audio/x-flac; rate: {}".format(audio_data.sample_rate)})
+        request = requests.post(url, files=files)
 
         # request = Request(url, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
-        logger.debug("[OdieSTT recognizer] request back, sent: {}".format(request.text))
         # obtain audio transcription results
         try:
-            logger.debug("[OdieSTT recognizer] getting response")
+            logger.debug("[OdieSTT recognizer] request back, response: {}".format(request.json()))
             # response = urlopen(request, timeout=self.operation_timeout)
-            response = request.json()
+            response = request.text
         except HTTPError as e:
             raise RequestError("recognition request failed: {}".format(e.reason))
         except URLError as e:
