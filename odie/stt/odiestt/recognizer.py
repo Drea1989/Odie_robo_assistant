@@ -2,14 +2,10 @@
 import logging
 import json
 from speech_recognition import AudioData, AudioSource
-import soundfile as sf
 
 try:  # attempt to use the Python 2 modules
-    from urllib import urlencode
-    from urllib2 import Request, urlopen, URLError, HTTPError
+    from urllib2 import URLError, HTTPError
 except ImportError:  # use the Python 3 modules
-    from urllib.parse import urlencode
-    from urllib.request import Request, urlopen
     from urllib.error import URLError, HTTPError
 import requests
 
@@ -42,11 +38,10 @@ class Recognizer(AudioSource):
         self.dynamic_energy_ratio = 1.5
         self.pause_threshold = 0.8  # seconds of non-speaking audio before a phrase is considered complete
         self.operation_timeout = None  # seconds after an internal operation (e.g., an API request) starts before it times out, or ``None`` for no timeout
-
         self.phrase_threshold = 0.3  # minimum seconds of speaking audio before we consider the speaking audio a phrase - values below this are ignored (for filtering out clicks and pops)
         self.non_speaking_duration = 0.5  # seconds of non-speaking audio to keep on both sides of the recording
 
-    def recognize_odie(self, audio_data, key=None, language="en-US"):
+    def recognize_odie(self, audio_data, key=None, language="en-US", host='localhost:5000'):
         """
         Performs speech recognition on ``audio_data`` (an ``AudioData`` instance), using the Odie Speech Recognition API.
 
@@ -69,28 +64,26 @@ class Recognizer(AudioSource):
         assert key is None or isinstance(key, str), "``key`` must be ``None`` or a string"
         assert isinstance(language, str), "``language`` must be a string"
 
-        flac_data = audio_data.get_flac_data(
+        wav_data = audio_data.get_wav_data(
             convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz
             convert_width=2  # audio samples must be 16-bit
         )
         logger.debug("[OdieSTT recognizer] audio ok")
         if key is None:
             key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw"
-        url = "http://192.168.1.112:5000/speech/recognize"
+        url = "http://"+host+"/speech/recognize"
 
-        logger.debug("[OdieSTT recognizer] sending request:")
-        # sf.write("/tmp/odie/tests/recognition.flac", flac_data, audio_data.samplerate)
+        logger.debug("[OdieSTT recognizer] sending request")
 
-        files = {'file': ('recognition.flac', flac_data, 'audio/flac')}
+        files = {'file': ('recognition.wav', wav_data, 'audio/wav')}
         payload = {"lang": language}
-        request = requests.post(url, files=files)
-
-        # request = Request(url, files=files, headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
+        request = requests.post(url, files=files, data=payload)
         # obtain audio transcription results
         try:
             logger.debug("[OdieSTT recognizer] request back, response: {}".format(request.json()))
             # response = urlopen(request, timeout=self.operation_timeout)
             response = request.text
+            err_code = request.status()
         except HTTPError as e:
             raise RequestError("recognition request failed: {}".format(e.reason))
         except URLError as e:
@@ -98,14 +91,17 @@ class Recognizer(AudioSource):
         # response_text = response.read().decode("utf-8")
         response_text = response
         # ignore any blank blocks
-        actual_result = []
-        for line in response_text.split("\n"):
-            if not line:
-                continue
-            result = json.loads(line)["result"]
-            if len(result) != 0:
-                actual_result = result[0]
-                break
-        logger.debug("[OdieSTT recognizer] returning result")
-        # return results
-        return actual_result
+        if err_code in ['200', '201']:
+            actual_result = []
+            for line in response_text.split("\n"):
+                if not line:
+                    continue
+                result = json.loads(line)["result"]
+                if len(result) != 0:
+                    actual_result = result[0]
+                    break
+            logger.debug("[OdieSTT recognizer] returning result")
+            # return results
+            return actual_result
+        else:
+            raise RequestError("recognition request failed with: {}".format(err_code))

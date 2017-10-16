@@ -27,7 +27,7 @@ class Odiestt(SpeechRecognition):
         self.main_controller_callback = callback
         self.key = kwargs.get('key', None)
         self.language = kwargs.get('language', "en-US")
-        self.host = kwargs.get('host', "localhost:5000")
+        self.host = kwargs.get('host', "192.168.1.112:5000")
         self.show_all = kwargs.get('show_all', False)
 
         # start listening in the background
@@ -44,7 +44,7 @@ class Odiestt(SpeechRecognition):
         try:
             captured_audio = rz.recognize_odie(audio,
                                                key=self.key,
-                                               language=self.language)
+                                               language=self.language, host=self.host)
             Utils.print_success("Odie Speech Recognition thinks you said %s" % captured_audio)
             self._analyse_audio(captured_audio)
 
