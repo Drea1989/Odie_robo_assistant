@@ -1,8 +1,6 @@
 import logging
 import os
 import threading
-import csv
-from os.path import splitext
 from odie.core.Utils.FileManager import FileManager
 
 from odie.core.ConfigurationManager import SettingLoader
@@ -17,7 +15,6 @@ from odie.core.RestAPI.utils import requires_auth
 from odie._version import version_str
 
 # cloud Models
-from odie_cloud.speech.evaluate import DeepSpeechPredict
 from tensorflow_serving_client import TensorflowServingClient as TFClient
 '''
 tensorflow serving configuration
@@ -85,9 +82,6 @@ class CloudFlaskAPI(threading.Thread):
 
         # no voice flag
         self.no_voice = False
-
-        # deepspeech beckend
-        self.deepspeech = DeepSpeechPredict()
 
         # Add routing rules
         self.app.add_url_rule('/', view_func=self.get_main_page, methods=['GET'])
@@ -165,11 +159,14 @@ class CloudFlaskAPI(threading.Thread):
         base_path = os.path.join(self.app.config['UPLOAD_VIDEO'])
         uploaded_file.save(os.path.join(base_path, filename))
 
-        # now start analyse the audio with STT engine
+        # now start analyse image with model
         video_path = base_path + os.sep + filename
         logger.debug("[CloudFlaskAPI] run_image_by_model: with file path %s" % video_path)
         if not self.allowed_file(video_path):
-            video_path = self._convert_to_wav(audio_file_path=video_path)
+            data = {
+                "image format not supported": "%s" % video_path
+            }
+            return jsonify(error=data), 404
 
         modelHost = None
         modelPort = None
@@ -185,8 +182,16 @@ class CloudFlaskAPI(threading.Thread):
             return jsonify(error=data), 404
 
         tfclient = TFClient(modelHost, modelPort)
-        response = tfclient.make_prediction(input_data=video_path, timeout=10, model_name=model_name)
-        logger.debug("[CloudFlaskAPI] run_image_by_model prediction: {}".format(response))
+        try:
+            response = tfclient.make_prediction(input_data=video_path, timeout=10, model_name=model_name)
+            logger.debug("[CloudFlaskAPI] run_image_by_model prediction: {}".format(response))
+        except:
+            data = {
+                "predicting": "exception"
+            }
+            base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
+            uploaded_file.save(os.path.join(base_path, filename))
+            return jsonify(error=data), 404
 
         data = jsonify(response)
         return data, 201
@@ -231,61 +236,44 @@ class CloudFlaskAPI(threading.Thread):
         filename = secure_filename(uploaded_file.filename)
         base_path = os.path.join(self.app.config['UPLOAD_AUDIO'])
         file_path = os.path.join(base_path, filename)
-        file_path = splitext(file_path)[0]+".flac"
+        # file_path = splitext(file_path)[0]+".wav"
         logger.debug("[CloudFlaskAPI] saving file to: {}".format(file_path))
         uploaded_file.save(file_path)
-        # write aeon manifest file
-
-        logger.debug("[CloudFlaskAPI] writing manifest")
-        eval_manifest = splitext(file_path)[0]+".tsv"
-        header = "@FILE\tFILE\n"
-        with open(eval_manifest, 'w') as tsvfile:
-            tsvfile.write(header)
-            tsvfile.write(file_path+'\t'+os.path.join(base_path, 'text.txt'))
-
         audio_path = base_path + os.sep + filename
         logger.debug("[CloudFlaskAPI] run_speech_recognition: with file path %s" % audio_path)
+
         if not self.allowed_file(audio_path):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
         # get model file
         logger.debug("[CloudFlaskAPI] getting model")
-        model_file = None
 
+        modelHost = None
+        modelPort = None
+        model_name = 'speech'
         for cl_object in self.settings.cloud:
-            if cl_object.category == 'speech':
-                logger.debug("[CloudFlaskAPI] parameters : {}".format(cl_object.parameters))
-                model_file = cl_object.parameters['model']
-        if model_file is None:
+            if cl_object.category == model_name:
+                modelHost = cl_object.parameters['tfhost']
+                modelPort = cl_object.parameters['tfport']
+
+        if modelHost is None or modelPort is None:
             data = {
-                "model category not found": "exception"
+                "speech model not found": ""
             }
             return jsonify(error=data), 404
 
+        tfclient = TFClient(modelHost, modelPort)
         logger.debug("[CloudFlaskAPI] calling deepspech")
-        # now start analyse the audio with STT engine
-        # added for debug purposes
-        self.response = self.deepspeech.GetProbs(model_file, eval_manifest)
         try:
-            self.response = self.deepspeech.GetProbs(model_file, eval_manifest)
+            response = tfclient.make_prediction(input_data=audio_path, timeout=10, model_name=model_name)
+            logger.debug("[CloudFlaskAPI] prediction: {}".format(response))
         except:
             data = {
                 "predicting": "exception"
             }
-            return jsonify(error=data), 404
-
-        if self.response is not None and self.response:
-            data = jsonify(self.response)
-            self.response = None
-            logger.debug("[CloudFlaskAPI] run_speech_recognition: data %s" % data)
-            return data, 201
-        else:
-            data = {
-                "error": "failed to process the given file"
-            }
             base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
             uploaded_file.save(os.path.join(base_path, filename))
-            return jsonify(error=data), 400
+            return jsonify(error=data), 404
 
     @staticmethod
     def _convert_to_wav(audio_file_path):
