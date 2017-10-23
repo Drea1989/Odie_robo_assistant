@@ -65,7 +65,7 @@ class Recognizer(AudioSource):
         assert isinstance(language, str), "``language`` must be a string"
 
         wav_data = audio_data.get_wav_data(
-            convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz
+            convert_rate=None if audio_data.sample_rate == 16000 else 16000,  # audio samples must be at 16 kHz
             convert_width=2  # audio samples must be 16-bit
         )
         logger.debug("[OdieSTT recognizer] audio ok")

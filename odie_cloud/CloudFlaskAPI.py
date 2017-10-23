@@ -15,7 +15,13 @@ from odie.core.RestAPI.utils import requires_auth
 from odie._version import version_str
 
 # cloud Models
-from tensorflow_serving_client import TensorflowServingClient as TFClient
+import soundfile as sf
+from odie_cloud.speech.client import Speech
+# only one thread can go on gpu
+# os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+# from tensorflow_serving_client import TensorflowServingClient as TFClient
+TFClient = ()
 '''
 tensorflow serving configuration
 model_config_list: {
@@ -245,32 +251,38 @@ class CloudFlaskAPI(threading.Thread):
         if not self.allowed_file(audio_path):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
+        # audio_data = self.spectrogram_from_file(audio_path)
+        audio_data, samplerate = sf.read(audio_path)
+        # logger.debug("[CloudFlaskAPI] audio array shape: {} dtype: {}".format(audio_data.shape[1], audio_data.dtype))
+        # audio_data = audio_data.astype('float32')
+        # logger.debug("[CloudFlaskAPI] audio array 32 float: {}".format(audio_data[0]))
         # get model file
         logger.debug("[CloudFlaskAPI] getting model")
 
-        modelHost = None
-        modelPort = None
-        model_name = 'speech'
+        # to implement in settings
+        '''
         for cl_object in self.settings.cloud:
             if cl_object.category == model_name:
                 modelHost = cl_object.parameters['tfhost']
                 modelPort = cl_object.parameters['tfport']
-
-        if modelHost is None or modelPort is None:
-            data = {
-                "speech model not found": ""
-            }
-            return jsonify(error=data), 404
-
-        tfclient = TFClient(modelHost, modelPort)
+        '''
         logger.debug("[CloudFlaskAPI] calling deepspech")
+        dp = Speech()
         try:
-            response = tfclient.make_prediction(input_data=audio_path, timeout=10, model_name=model_name)
+            response = dp.predict(audio_path)
             logger.debug("[CloudFlaskAPI] prediction: {}".format(response))
+            if response != "":
+                data = {
+                    "predict": response
+                }
+                return jsonify(data), 201
+            else:
+                data = {"predict": "predicted empty string"}
+                base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
+                uploaded_file.save(os.path.join(base_path, filename))
+                return jsonify(error=data), 404
         except:
-            data = {
-                "predicting": "exception"
-            }
+            data = {"predict": "exception"}
             base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
             uploaded_file.save(os.path.join(base_path, filename))
             return jsonify(error=data), 404
