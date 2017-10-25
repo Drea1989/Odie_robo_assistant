@@ -1,6 +1,6 @@
 model_config_list:{
                     config: {
-                        name: "speech",
-                        base_path: "/home/drea/odie_cloud/keras",
+                        name: "caption",
+                        base_path: "/home/drea/odie_cloud/caption",
                         model_platform: "tensorflow"},
                     }
