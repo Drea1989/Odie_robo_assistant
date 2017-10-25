@@ -18,7 +18,7 @@ class Speech(object):
 
         N_FEATURES = 26
         N_CONTEXT = 9
-
+        # TODO: move this config to a file
         MODEL_PATH = "/home/drea/odie_cloud/keras/output_graph.pb"
         ALPHABET_CONFIG_PATH = "/home/drea/odie_cloud/tensorflow/DeepSpeech/data/alphabet.txt"
         LM_PATH = "/home/drea/odie_cloud/tensorflow/DeepSpeech/data/lm/lm.binary"

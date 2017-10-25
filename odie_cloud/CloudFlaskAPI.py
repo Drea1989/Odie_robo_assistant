@@ -16,12 +16,17 @@ from odie._version import version_str
 
 # cloud Models
 import soundfile as sf
-from odie_cloud.speech.client import Speech
-# only one thread can go on gpu
-# os.environ["CUDA_VISIBLE_DEVICES"] = ""
+from PIL import Image
 
-# from tensorflow_serving_client import TensorflowServingClient as TFClient
-TFClient = ()
+from tensorflow_serving_client import TensorflowServingClient as TFClient
+
+logging.basicConfig()
+logger = logging.getLogger("odie")
+# only one thread can go on gpu
+logger.debug("[TensorflowSetUp] cuda device: {}".format(os.environ["CUDA_VISIBLE_DEVICES"]))
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+logger.debug("[TensorflowSetUp] cuda device deactivated: {}".format(os.environ["CUDA_VISIBLE_DEVICES"]))
+from odie_cloud.speech.client import Speech
 '''
 tensorflow serving configuration
 model_config_list: {
@@ -37,8 +42,6 @@ model_config_list: {
 /serving/bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_config_file=/serving/model_config/model_config.conf
 '''
 
-logging.basicConfig()
-logger = logging.getLogger("odie")
 
 AUDIO_UPLOAD_FOLDER = '/tmp/odie_cloud/tmp_uploaded_audio'
 VIDEO_UPLOAD_FOLDER = '/tmp/odie_cloud/tmp_uploaded_video'
@@ -138,27 +141,28 @@ class CloudFlaskAPI(threading.Thread):
         :return:
         """
         logger.debug("[CloudFlaskAPI] run_image_by_model: model_name name -> %s" % model_name)
-
-        # get parameters
-        # parameters = self.get_parameters_from_request(request)
-
+        assert request.method == 'POST'
         # check if the post request has the file part
-        uploaded_file = request.form['data']
-
-        if not uploaded_file:
+        if 'file' not in request.files:
+            logger.debug("[CloudFlaskAPI] no file in request.files")
             data = {
                 "error": "No file provided"
             }
             return jsonify(error=data), 400
 
-        # uploaded_file = request.files['file']
+        uploaded_file = request.files['file']
         # if user does not select file, browser also
         # submit a empty part without filename
         if uploaded_file.filename == '':
+            logger.debug("[CloudFlaskAPI] filename == ''")
             data = {
-                "error": "No file provided"
+                "error": "file non valid"
             }
             return jsonify(error=data), 400
+
+        # get parameters
+        parameters = self.get_parameters_from_request(request)
+        logger.debug("[CloudFlaskAPI] run_image_by_model: request parameters %s" % parameters)
 
         # save the file
         filename = secure_filename(uploaded_file.filename)
@@ -174,8 +178,11 @@ class CloudFlaskAPI(threading.Thread):
             }
             return jsonify(error=data), 404
 
+        video_data = Image.open(video_path)
+
         modelHost = None
         modelPort = None
+        # TODO: add settings config
         for cl_object in self.settings.cloud:
             if cl_object.category == model_name:
                 modelHost = cl_object.parameters['tfhost']
@@ -189,7 +196,7 @@ class CloudFlaskAPI(threading.Thread):
 
         tfclient = TFClient(modelHost, modelPort)
         try:
-            response = tfclient.make_prediction(input_data=video_path, timeout=10, model_name=model_name)
+            response = tfclient.make_prediction(input_data=video_data, input_tensor_name="inputs", timeout=10, model_name=model_name)
             logger.debug("[CloudFlaskAPI] run_image_by_model prediction: {}".format(response))
         except:
             data = {
@@ -210,11 +217,9 @@ class CloudFlaskAPI(threading.Thread):
         The recognition language is determined by ``language``,
         an RFC5646 language tag like ``"en-US"`` (US English) or ``"fr-FR"`` (International French), defaulting to US English.
 
-        Returns the most likely transcription if ``show_all`` is false (the default). Otherwise, returns the raw API response as a JSON dictionary.
         Test with curl
         curl -i --user admin:secret -H "Content-Type: audio/x-flac" -X POST /
-        -d '{"client":"odie","lang":"eng","key":"asdfg12345"}' http://localhost:5000/speech/recognise
-        In case of quotes in the order or accents, use a file
+        -d '{"client":"odie","lang":"eng","key":"asdfg12345"}' http://localhost:5000/speech/recognize
         :return:
         """
         logger.debug("[CloudFlaskAPI] run_speech_recognition")
@@ -234,7 +239,7 @@ class CloudFlaskAPI(threading.Thread):
         if uploaded_file.filename == '':
             logger.debug("[CloudFlaskAPI] filename == ''")
             data = {
-                "error": "No file provided"
+                "error": "file non valid"
             }
             return jsonify(error=data), 400
         # if user does not select file, browser also
@@ -251,24 +256,11 @@ class CloudFlaskAPI(threading.Thread):
         if not self.allowed_file(audio_path):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
-        # audio_data = self.spectrogram_from_file(audio_path)
         audio_data, samplerate = sf.read(audio_path)
-        # logger.debug("[CloudFlaskAPI] audio array shape: {} dtype: {}".format(audio_data.shape[1], audio_data.dtype))
-        # audio_data = audio_data.astype('float32')
-        # logger.debug("[CloudFlaskAPI] audio array 32 float: {}".format(audio_data[0]))
-        # get model file
-        logger.debug("[CloudFlaskAPI] getting model")
 
-        # to implement in settings
-        '''
-        for cl_object in self.settings.cloud:
-            if cl_object.category == model_name:
-                modelHost = cl_object.parameters['tfhost']
-                modelPort = cl_object.parameters['tfport']
-        '''
         logger.debug("[CloudFlaskAPI] calling deepspech")
-        dp = Speech()
         try:
+            dp = Speech()
             response = dp.predict(audio_path)
             logger.debug("[CloudFlaskAPI] prediction: {}".format(response))
             if response != "":
@@ -281,8 +273,9 @@ class CloudFlaskAPI(threading.Thread):
                 base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
                 uploaded_file.save(os.path.join(base_path, filename))
                 return jsonify(error=data), 404
-        except:
-            data = {"predict": "exception"}
+        except Exception as e:
+            data = {"predict": str(e)}
+            logger.error(e, exc_info=True)
             base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
             uploaded_file.save(os.path.join(base_path, filename))
             return jsonify(error=data), 404
