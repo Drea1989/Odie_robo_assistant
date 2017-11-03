@@ -41,7 +41,7 @@ class Recognizer(AudioSource):
         self.phrase_threshold = 0.3  # minimum seconds of speaking audio before we consider the speaking audio a phrase - values below this are ignored (for filtering out clicks and pops)
         self.non_speaking_duration = 0.5  # seconds of non-speaking audio to keep on both sides of the recording
 
-    def recognize_odie(self, audio_data, key=None, language="en-US", host='localhost:5000'):
+    def recognize_odie(self, audio_data, key=None, language="en-US", host='192.168.1.112:5001'):
         """
         Performs speech recognition on ``audio_data`` (an ``AudioData`` instance), using the Odie Speech Recognition API.
 
@@ -77,9 +77,9 @@ class Recognizer(AudioSource):
 
         files = {'file': ('recognition.wav', wav_data, 'audio/wav')}
         payload = {"lang": language}
-        request = requests.post(url, files=files, data=payload)
         # obtain audio transcription results
         try:
+            request = requests.post(url, files=files, data=payload, timeout=10)
             logger.debug("[OdieSTT recognizer] request back, response: {}".format(request.json()))
             # response = urlopen(request, timeout=self.operation_timeout)
             response = request.text

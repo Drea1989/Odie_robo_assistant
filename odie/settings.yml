@@ -26,9 +26,9 @@ wakeons:
 default_speech_to_text: "odiestt"
 
 # Speech to text options
-#recognition_options:
-#  energy_threshold: 4000
-#  adjust_for_ambient_noise_second: 1
+recognition_options:
+  energy_threshold: 300
+  adjust_for_ambient_noise_second: 1
 
 
 # Speech to Text engines configuration

@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function
 import logging
 import scipy.io.wavfile as wav
 from deepspeech.model import Model
-
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
@@ -23,7 +22,6 @@ class Speech(object):
         ALPHABET_CONFIG_PATH = "/home/drea/odie_cloud/tensorflow/DeepSpeech/data/alphabet.txt"
         LM_PATH = "/home/drea/odie_cloud/tensorflow/DeepSpeech/data/lm/lm.binary"
         TRIE_PATH = "/home/drea/odie_cloud/tensorflow/DeepSpeech/data/lm/trie"
-
         self.ds = Model(MODEL_PATH, N_FEATURES, N_CONTEXT, ALPHABET_CONFIG_PATH)
 
         if LM_PATH != "":
