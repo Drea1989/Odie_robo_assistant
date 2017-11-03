@@ -37,7 +37,7 @@ def signal_handler(signal, frame):
 
 
 # actions available
-ACTION_LIST = ["start", "gui", "install", "uninstall", "cloud"]
+ACTION_LIST = ["start", "gui", "install", "uninstall", "cloud", "stt"]
 
 
 def parse_args(args):
@@ -48,7 +48,7 @@ def parse_args(args):
     """
     # create arguments
     parser = argparse.ArgumentParser(description='odie')
-    parser.add_argument("action", help="[start|gui|install|uninstall|cloud]")
+    parser.add_argument("action", help="[start|gui|install|uninstall|cloud|stt]")
     parser.add_argument("--run-neuron",
                         help="Name of a neuron to load surrounded by quote")
     parser.add_argument("--run-order", help="order surrounded by a quote")
@@ -201,12 +201,29 @@ def main():
             flask_api.start()
         except (KeyboardInterrupt, SystemExit):
             Utils.print_info("Ctrl+C pressed. Killing odie Cloud")
-        finally:
-            # we need to switch GPIO pin to default status if we are using a Rpi
-            if settings.rpi_settings:
-                logger.debug("Clean GPIO")
-                import RPi.GPIO as GPIO
-                GPIO.cleanup()
+
+    if parser.action == "stt":
+        # Cloud API
+        from odie_cloud.CloudSpeechAPI import CloudSpeechAPI
+        if settings.rpi_settings:
+            # init GPIO once
+            RpiUtils(settings.rpi_settings)
+
+        Utils.print_info("Starting STT REST API Listening port: %s" % 5001)
+        # then start odie
+        Utils.print_success("Starting odie STT")
+        Utils.print_info("Press Ctrl+C for stopping")
+        # catch signal for killing on Ctrl+C pressed
+        signal.signal(signal.SIGINT, signal_handler)
+        # start the state machine
+        try:
+            app = Flask(__name__)
+            stt_api = CloudSpeechAPI(app=app,
+                                     port=5001,
+                                     allowed_cors_origin=settings.rest_api.allowed_cors_origin)
+            stt_api.start()
+        except (KeyboardInterrupt, SystemExit):
+            Utils.print_info("Ctrl+C pressed. Killing odie STT")
 
 
 class AppFilter(logging.Filter):

@@ -27,7 +27,7 @@ class Odiestt(SpeechRecognition):
         self.main_controller_callback = callback
         self.key = kwargs.get('key', None)
         self.language = kwargs.get('language', "en-US")
-        self.host = kwargs.get('host', "192.168.1.112:5000")
+        self.host = kwargs.get('host', "192.168.1.112:5001")
         self.show_all = kwargs.get('show_all', False)
 
         # start listening in the background
