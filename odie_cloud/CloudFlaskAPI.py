@@ -14,19 +14,22 @@ from flask_cors import CORS
 from odie.core.RestAPI.utils import requires_auth
 from odie._version import version_str
 
+logging.basicConfig()
+logger = logging.getLogger("odie")
+
 # cloud Models
 import soundfile as sf
 from PIL import Image
+try:
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    logger.debug("[TensorflowSetUp] cuda device: {}".format(os.environ["CUDA_VISIBLE_DEVICES"]))
+except:
+    pass
+from odie_cloud.tensorflow_serving_client.client import TensorflowServingClient as TFClient
 
-from tensorflow_serving_client import TensorflowServingClient as TFClient
 
-logging.basicConfig()
-logger = logging.getLogger("odie")
 # only one thread can go on gpu
-logger.debug("[TensorflowSetUp] cuda device: {}".format(os.environ["CUDA_VISIBLE_DEVICES"]))
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-logger.debug("[TensorflowSetUp] cuda device deactivated: {}".format(os.environ["CUDA_VISIBLE_DEVICES"]))
-from odie_cloud.speech.client import Speech
+# from odie_cloud.speech.client import Speech
 '''
 tensorflow serving configuration
 model_config_list: {
