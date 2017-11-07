@@ -1,1 +1,0 @@
-LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH ./deepspeech ~/odie_cloud/keras/output_graph.pb ~/docs/librispeech/LibriSpeech/dev-clean-wav/84-121123-0000.wav ~/odie_cloud/tensorflow/DeepSpeech/data/alphabet.txt ~/odie_cloud/tensorflow/DeepSpeech/data/lm/lm.binary ~/odie_cloud/tensorflow/DeepSpeech/data/lm/trie

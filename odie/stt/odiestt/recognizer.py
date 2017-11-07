@@ -82,26 +82,20 @@ class Recognizer(AudioSource):
             request = requests.post(url, files=files, data=payload, timeout=10)
             logger.debug("[OdieSTT recognizer] request back, response: {}".format(request.json()))
             # response = urlopen(request, timeout=self.operation_timeout)
-            response = request.text
-            err_code = request.status()
+            response = json.loads(request.text)["result"]
+            err_code = request.status_code
         except HTTPError as e:
             raise RequestError("recognition request failed: {}".format(e.reason))
+        except ConnectionError as e:
+            raise RequestError("recognition connection failed: {}".format(e.reason))
         except URLError as e:
             raise RequestError("recognition connection failed: {}".format(e.reason))
-        # response_text = response.read().decode("utf-8")
-        response_text = response
+        except Exception as e:
+            raise RequestError("recognition connection failed: {}".format(str(e)))
+        logger.debug("[OdieSTT recognizer] the response is {}".format(response))
         # ignore any blank blocks
-        if err_code in ['200', '201']:
-            actual_result = []
-            for line in response_text.split("\n"):
-                if not line:
-                    continue
-                result = json.loads(line)["result"]
-                if len(result) != 0:
-                    actual_result = result[0]
-                    break
+        if err_code in [200, 201]:
             logger.debug("[OdieSTT recognizer] returning result")
-            # return results
-            return actual_result
+            return response
         else:
             raise RequestError("recognition request failed with: {}".format(err_code))

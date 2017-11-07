@@ -13,16 +13,10 @@ from flask_cors import CORS
 
 from odie.core.RestAPI.utils import requires_auth
 from odie._version import version_str
+from odie_cloud.speech.inference import Inference
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
-
-# cloud Models
-import soundfile as sf
-
-from odie_cloud.speech.client import Speech
-
-
 
 AUDIO_UPLOAD_FOLDER = '/tmp/odie_cloud/tmp_uploaded_audio'
 FAIL_UPLOAD_FOLDER = '/tmp/odie_cloud/tmp_uploaded_failed_interactions'
@@ -142,35 +136,30 @@ class CloudSpeechAPI(threading.Thread):
         # save the file
         filename = secure_filename(uploaded_file.filename)
         base_path = os.path.join(self.app.config['UPLOAD_AUDIO'])
-        file_path = os.path.join(base_path, filename)
+        audio_path = os.path.join(base_path, filename)
         # file_path = splitext(file_path)[0]+".wav"
-        logger.debug("[CloudFlaskAPI] saving file to: {}".format(file_path))
-        uploaded_file.save(file_path)
-        audio_path = base_path + os.sep + filename
-        logger.debug("[CloudFlaskAPI] run_speech_recognition: with file path %s" % audio_path)
-
+        logger.debug("[CloudFlaskAPI] saving file to: {}".format(audio_path))
+        uploaded_file.save(audio_path)
         if not self.allowed_file(audio_path):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
-        audio_data, samplerate = sf.read(audio_path)
-
         logger.debug("[CloudFlaskAPI] calling deepspech")
         try:
-            dp = Speech()
+            dp = Inference('/home/drea/odie_cloud/deepspeech/librispeech_16_epochs.prm')
             response = dp.predict(audio_path)
             logger.debug("[CloudFlaskAPI] prediction: {}".format(response))
             if response != "":
                 data = {
-                    "predict": response
+                    "result": response
                 }
                 return jsonify(data), 201
             else:
-                data = {"predict": "predicted empty string"}
+                data = {"result": "predicted empty string"}
                 base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
                 uploaded_file.save(os.path.join(base_path, filename))
                 return jsonify(error=data), 404
         except Exception as e:
-            data = {"predict": str(e)}
+            data = {"result": str(e)}
             logger.error(e, exc_info=True)
             base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
             uploaded_file.save(os.path.join(base_path, filename))
