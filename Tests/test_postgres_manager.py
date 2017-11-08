@@ -67,7 +67,7 @@ class TestPostgreManager(unittest.TestCase):
         connect = PostgresManager.get_connection(pg.host, pg.database, pg.user, pg.password)
         try:
             match = PostgresManager.search_match_neuron(connect, 'hello')
-            self.assertEqual(match, 'say-hello')
+            self.assertEqual(match.name, 'say-hello')
         except:
             return False
 

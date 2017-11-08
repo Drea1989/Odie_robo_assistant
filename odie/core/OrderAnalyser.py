@@ -7,6 +7,7 @@ import six
 from odie.core.Models.MatchedNeuron import MatchedNeuron
 from odie.core.Utils.Utils import Utils
 from odie.core.ConfigurationManager import SettingLoader
+from odie.postgres.PostgreManager import PostgresManager as PgManager
 
 import logging
 
@@ -73,47 +74,48 @@ class OrderAnalyser:
         return list_neuron_to_process
 
     @classmethod
-    def get_matching_neuron_new(cls, order, brain=None):
+    def pg_get_matching_neuron(cls, order):
         """
         Return the list of matching neurons from the given order
         :param order: The user order
-        :param brain: The loaded brain param brain is deprecated
         :return: The List of neurons matching the given order
-        TODO: future release catch exception and run text summariser to try for a second time
         """
-        logger.debug("[OrderAnalyser] Received order: %s" % order)
+        logger.debug("[OrderAnalyser] PG Received order: %s" % order)
         if isinstance(order, six.binary_type):
             order = order.decode('utf-8')
 
+        # We use a named tuple to associate the neuron and the cue of the neuron
+        neuron_order_tuple = collections.namedtuple('tuple_neuron_matchingOrder',
+                                                    ['neuron', 'order'])
         list_match_neuron = list()
 
         # if the received order is None we can stop the process immediately
         if order is None:
             return list_match_neuron
 
-        #Get an order with bracket inside like: "hello my name is {{ name }}.
-        #return a string without bracket like "hello my name is "
+        # Get an order with bracket inside like: "hello my name is {{ name }}.
+        # return a string without bracket like "hello my name is "
         matches = Utils.find_all_matching_brackets(order)
         for match in matches:
             order = order.replace(match, "")
 
-        #connect to postgres
-        # pg = cls.settings.postgres
-        # conn = PostgresManager.get_connection(pg.host,pg.database,pg.user,pg.password)
+        pg = cls.settings.postgres
+        connect = PgManager.get_connection(pg.host, pg.database, pg.user, pg.password)
+        try:
+            match = PgManager.search_match_neuron(connect, order)
+            logger.debug("Order found! Run neuron name: %s" % match.name)
+            Utils.print_success("Order matched in the brain. Running neuron \"%s\"" % match.name)
+            list_match_neuron.append(neuron_order_tuple(neuron=match.name, order=match.cues))
+        except:
+            return list_match_neuron
 
-        #TODO make postgres work
-        #cur = conn.cursor()
-        #cur.execute("SELECT name FROM brain WHERE to_tsvector(cues) @@ to_tsquery(%s) order by ts_rank"),(order))
-        
-        #list_neuron_to_process = cur.fetchall() 
-
-        #close connection
-        #cur.close()
-        #cunn.close()
-
-        if list_neuron_to_process:
-            logger.debug("Order found! Run neuron name: %s" % list_neuron_to_process)
-            Utils.print_success("Order matched in the brain. Running neuron \"%s\"" % list_neuron_to_process)
+        # create a list of MatchedNeuron from the tuple list
+        list_neuron_to_process = list()
+        for tuple_el in list_match_neuron:
+            new_matching_neuron = MatchedNeuron(matched_neuron=tuple_el.neuron,
+                                                matched_order=tuple_el.order,
+                                                user_order=order)
+            list_neuron_to_process.append(new_matching_neuron)
 
         return list_neuron_to_process
 

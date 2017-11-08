@@ -35,7 +35,7 @@ class Inference(object):
             (nout, -1, be.bsz)).transpose((2, 0, 1))
 
     def predict(self, audio_files):
-        eval_manifest = tempfile.mktemp(prefix="manifest_", suffix=".tsv")
+        eval_manifest = tempfile.NamedTemporaryFile(prefix="manifest_", suffix=".tsv")
         logger.debug("[DeepSpeech] calling dataloader")
         eval_set = self.setup_dataloader(audio_files, eval_manifest)
         if not self.model.initialized:

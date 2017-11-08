@@ -202,29 +202,6 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             Utils.print_info("Ctrl+C pressed. Killing odie Cloud")
 
-    if parser.action == "stt":
-        # Cloud API
-        from odie_cloud.CloudSpeechAPI import CloudSpeechAPI
-        if settings.rpi_settings:
-            # init GPIO once
-            RpiUtils(settings.rpi_settings)
-
-        Utils.print_info("Starting STT REST API Listening port: %s" % 5001)
-        # then start odie
-        Utils.print_success("Starting odie STT")
-        Utils.print_info("Press Ctrl+C for stopping")
-        # catch signal for killing on Ctrl+C pressed
-        signal.signal(signal.SIGINT, signal_handler)
-        # start the state machine
-        try:
-            app = Flask(__name__)
-            stt_api = CloudSpeechAPI(app=app,
-                                     port=5001,
-                                     allowed_cors_origin=settings.rest_api.allowed_cors_origin)
-            stt_api.start()
-        except (KeyboardInterrupt, SystemExit):
-            Utils.print_info("Ctrl+C pressed. Killing odie STT")
-
 
 class AppFilter(logging.Filter):
     """

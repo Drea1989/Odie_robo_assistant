@@ -78,11 +78,11 @@ class PostgresManager(object):
             #             ORDER BY ts_rank_cd(to_tsvector('english', order), to_tsquery('english', '{}') )
             #             DESC LIMIT 1;".format(term))
             # testing simple execution
-            con.execute("SELECT name FROM brain WHERE to_tsvector('english', order) @@ to_tsquery('english', '{}')LIMIT 1;".format(term))
+            con.execute("SELECT name, cues FROM brain WHERE to_tsvector('english', order) @@ to_tsquery('english', '{}')LIMIT 1;".format(term))
             return cur.fetchall()
         except:
             logger.debug("postgresql failed to retreive neuron from brain")
-            return None
+            return list()
 
     def save_brain_table(pg=None, brain=None):
         """
