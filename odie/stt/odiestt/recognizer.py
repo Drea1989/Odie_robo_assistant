@@ -37,7 +37,7 @@ class Recognizer(AudioSource):
         self.dynamic_energy_adjustment_damping = 0.15
         self.dynamic_energy_ratio = 1.5
         self.pause_threshold = 0.8  # seconds of non-speaking audio before a phrase is considered complete
-        self.operation_timeout = None  # seconds after an internal operation (e.g., an API request) starts before it times out, or ``None`` for no timeout
+        self.operation_timeout = 10  # seconds after an internal operation (e.g., an API request) starts before it times out, or ``None`` for no timeout
         self.phrase_threshold = 0.3  # minimum seconds of speaking audio before we consider the speaking audio a phrase - values below this are ignored (for filtering out clicks and pops)
         self.non_speaking_duration = 0.5  # seconds of non-speaking audio to keep on both sides of the recording
 
@@ -64,7 +64,7 @@ class Recognizer(AudioSource):
         assert key is None or isinstance(key, str), "``key`` must be ``None`` or a string"
         assert isinstance(language, str), "``language`` must be a string"
 
-        wav_data = audio_data.get_wav_data(
+        flac_data = audio_data.get_flac_data(
             convert_rate=None if audio_data.sample_rate == 16000 else 16000,  # audio samples must be at 16 kHz
             convert_width=2  # audio samples must be 16-bit
         )
@@ -75,13 +75,12 @@ class Recognizer(AudioSource):
 
         logger.debug("[OdieSTT recognizer] sending request")
 
-        files = {'file': ('recognition.wav', wav_data, 'audio/wav')}
+        files = {'file': ('recognition.flac', flac_data, 'audio/x-flac')}
         payload = {"lang": language}
         # obtain audio transcription results
         try:
-            request = requests.post(url, files=files, data=payload, timeout=10)
+            request = requests.post(url, files=files, data=payload, timeout=self.operation_timeout)
             logger.debug("[OdieSTT recognizer] request back, response: {}".format(request.json()))
-            # response = urlopen(request, timeout=self.operation_timeout)
             response = json.loads(request.text)["result"]
             err_code = request.status_code
         except HTTPError as e:
