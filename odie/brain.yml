@@ -16,3 +16,8 @@
             - "sorry i couldn't understand what you said"
             - "sorry could you repeat?"
             - "i didn't catch that"
+      - alphabot.Initialiserover
+      - servo.Initialiseservo
+
+  - includes:
+    - RPIbrain.yml

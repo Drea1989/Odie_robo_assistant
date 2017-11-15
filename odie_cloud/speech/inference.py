@@ -30,12 +30,15 @@ class Inference(object):
                 np.exp(x - np.max(x, axis=0)))
 
     def get_outputs(self, model, be, inputs, nout):
-        outputs = model.fprop(inputs, inference=False)
+        # outputs = model.get_outputs_beam(inputs, num_beams=10)
+        # testing beam search
+        outputs = model.fprop(inputs, inference=True)
         return self.softmax(outputs.get()).reshape(
             (nout, -1, be.bsz)).transpose((2, 0, 1))
+        # return outputs.get().reshape((nout, -1, be.bsz)).transpose((2, 0, 1))
 
     def predict(self, audio_files):
-        eval_manifest = tempfile.NamedTemporaryFile(prefix="manifest_", suffix=".tsv")
+        eval_manifest = tempfile.mktemp(prefix="manifest_", suffix=".tsv")
         logger.debug("[DeepSpeech] calling dataloader")
         eval_set = self.setup_dataloader(audio_files, eval_manifest)
         if not self.model.initialized:

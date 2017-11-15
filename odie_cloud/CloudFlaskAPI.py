@@ -16,7 +16,7 @@ from odie._version import version_str
 
 
 # cloud Models
-from PIL import Image
+import tensorflow as tf
 from odie_cloud.speech.inference import Inference
 
 logging.basicConfig()
@@ -74,9 +74,11 @@ class CloudFlaskAPI(threading.Thread):
         # configure the upload folder
         app.config['UPLOAD_VIDEO'] = VIDEO_UPLOAD_FOLDER
         app.config['UPLOAD_FAIL'] = FAIL_UPLOAD_FOLDER
+        app.config['UPLOAD_AUDIO'] = AUDIO_UPLOAD_FOLDER
         # create the temp folder
         FileManager.create_directory(VIDEO_UPLOAD_FOLDER)
         FileManager.create_directory(FAIL_UPLOAD_FOLDER)
+        FileManager.create_directory(AUDIO_UPLOAD_FOLDER)
 
         # Flask configuration remove default Flask behaviour to encode to ASCII
         self.app.url_map.strict_slashes = False
@@ -163,8 +165,8 @@ class CloudFlaskAPI(threading.Thread):
             return jsonify(error=data), 400
 
         # get parameters
-        parameters = self.get_parameters_from_request(request)
-        logger.debug("[CloudFlaskAPI] run_image_by_model: request parameters %s" % parameters)
+        # parameters = self.get_parameters_from_request(request)
+        # logger.debug("[CloudFlaskAPI] run_image_by_model: request parameters %s" % parameters)
 
         # save the file
         filename = secure_filename(uploaded_file.filename)
@@ -180,16 +182,15 @@ class CloudFlaskAPI(threading.Thread):
             }
             return jsonify(error=data), 404
 
-        video_data = Image.open(video_path)
-
-        modelHost = None
-        modelPort = None
+        modelHost = "localhost"
+        modelPort = 9000
         # TODO: add settings config
+        '''
         for cl_object in self.settings.cloud:
             if cl_object.category == model_name:
                 modelHost = cl_object.parameters['tfhost']
                 modelPort = cl_object.parameters['tfport']
-
+        '''
         if modelHost is None or modelPort is None:
             data = {
                 "model name not found": "%s" % model_name
@@ -197,8 +198,12 @@ class CloudFlaskAPI(threading.Thread):
             return jsonify(error=data), 404
 
         tfclient = TFClient(modelHost, modelPort)
+        with open(video_path, 'rb') as f:
+            # See prediction_service.proto for gRPC request/response details.
+            data = f.read()
+            img_input = tf.contrib.util.make_tensor_proto(data, shape=[1])
+        response = tfclient.make_prediction(input_data=img_input, input_tensor_name="image", timeout=10, model_name=model_name)
         try:
-            response = tfclient.make_prediction(input_data=video_data, input_tensor_name="inputs", timeout=10, model_name=model_name)
             logger.debug("[CloudFlaskAPI] run_image_by_model prediction: {}".format(response))
         except:
             data = {
