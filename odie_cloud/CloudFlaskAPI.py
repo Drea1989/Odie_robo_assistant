@@ -15,9 +15,17 @@ from odie.core.RestAPI.utils import requires_auth
 from odie._version import version_str
 
 
-# cloud Models
+# cloud Models requirements
 import tensorflow as tf
 from odie_cloud.speech.inference import Inference
+import math
+import numpy as np
+from odie_cloud.tensorflow_serving_client.client import TensorflowServingClient as TFClient
+from odie_cloud.tensorflow_serving_client.protos import predict_pb2
+from odie_cloud.tensorflow_serving_client.proto_util import copy_message
+from odie_cloud.tensorflow_serving_client.caption_generator import Caption, TopN
+from odie_cloud.tensorflow_serving_client import vocabulary
+
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
@@ -26,7 +34,6 @@ try:
     logger.debug("[TensorflowSetUp] cuda device: {}".format(os.environ["CUDA_VISIBLE_DEVICES"]))
 except:
     pass
-from odie_cloud.tensorflow_serving_client.client import TensorflowServingClient as TFClient
 
 '''
 tensorflow serving configuration
@@ -95,6 +102,7 @@ class CloudFlaskAPI(threading.Thread):
         self.app.add_url_rule('/image', view_func=self.get_models, methods=['GET'])
         self.app.add_url_rule('/enhance', view_func=self.get_models, methods=['GET'])
         self.app.add_url_rule('/image/<model_name>', view_func=self.run_image_with_model, methods=['POST'])
+        self.app.add_url_rule('/caption', view_func=self.run_caption, methods=['POST'])
         self.app.add_url_rule('/shutdown/', view_func=self.shutdown_server, methods=['POST'])
         self.app.add_url_rule('/speech/recognize', view_func=self.run_speech_recognition, methods=['POST'])
 
@@ -184,13 +192,11 @@ class CloudFlaskAPI(threading.Thread):
 
         modelHost = "localhost"
         modelPort = 9000
-        # TODO: add settings config
-        '''
         for cl_object in self.settings.cloud:
             if cl_object.category == model_name:
-                modelHost = cl_object.parameters['tfhost']
-                modelPort = cl_object.parameters['tfport']
-        '''
+                modelHost = cl_object.parameters['TFhost']
+                modelPort = cl_object.parameters['TFport']
+
         if modelHost is None or modelPort is None:
             data = {
                 "model name not found": "%s" % model_name
@@ -202,7 +208,7 @@ class CloudFlaskAPI(threading.Thread):
             # See prediction_service.proto for gRPC request/response details.
             data = f.read()
             img_input = tf.contrib.util.make_tensor_proto(data, shape=[1])
-        response = tfclient.make_prediction(input_data=img_input, input_tensor_name="image", timeout=10, model_name=model_name)
+        response = tfclient.make_prediction(input_data=img_input, input_tensor_name="image_feed:0", timeout=10, model_name=model_name)
         try:
             logger.debug("[CloudFlaskAPI] run_image_by_model prediction: {}".format(response))
         except:
@@ -214,6 +220,168 @@ class CloudFlaskAPI(threading.Thread):
             return jsonify(error=data), 404
 
         data = jsonify(response)
+        return data, 201
+
+    @requires_auth
+    def run_caption(self):
+        """
+        Run an image model by its name
+        test with curl:
+        curl -i --user admin:secret -X POST  http://127.0.0.1:5000/image/caption
+
+        :param model_name: name(id) of the model to execute
+        :return:
+        """
+        logger.debug("[CloudFlaskAPI] run caption")
+        assert request.method == 'POST'
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            logger.debug("[CloudFlaskAPI] no file in request.files")
+            data = {
+                "error": "No file provided"
+            }
+            return jsonify(error=data), 400
+
+        uploaded_file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if uploaded_file.filename == '':
+            logger.debug("[CloudFlaskAPI] filename == ''")
+            data = {
+                "error": "file non valid"
+            }
+            return jsonify(error=data), 400
+
+        # save the file
+        filename = secure_filename(uploaded_file.filename)
+        base_path = os.path.join(self.app.config['UPLOAD_VIDEO'])
+        uploaded_file.save(os.path.join(base_path, filename))
+
+        # now start analyse image with model
+        video_path = base_path + os.sep + filename
+        logger.debug("[CloudFlaskAPI] caption: with file path %s" % video_path)
+        if not self.allowed_file(video_path):
+            data = {
+                "image format not supported": "%s" % video_path
+            }
+            return jsonify(error=data), 404
+
+        modelHost = "localhost"
+        modelPort = 9000
+        for cl_object in self.settings.cloud:
+            if cl_object.category == 'caption':
+                modelHost = cl_object.parameters['TFhost']
+                modelPort = cl_object.parameters['TFport']
+
+        if modelHost is None or modelPort is None:
+            data = {
+                "model name not found": "caption"
+            }
+            return jsonify(error=data), 404
+
+        try:
+            tfclient = TFClient(modelHost, modelPort)
+            with open(video_path, 'rb') as f:
+                # See prediction_service.proto for gRPC request/response details.
+                data = f.read()
+                img_input = tf.contrib.util.make_tensor_proto(data, shape=[])
+            tfrequest = predict_pb2.PredictRequest()
+            logger.debug("[CloudFlaskAPI] preparing request")
+            tfrequest.model_spec.name = 'caption-part1'
+            copy_message(img_input, tfrequest.inputs["in"])
+
+            init = tfclient.execute(tfrequest, timeout=10)
+            for key in init.outputs:
+                tensor_proto = init.outputs[key]
+                init_state = tf.contrib.util.make_ndarray(tensor_proto)
+            # TODO: add vocab to settings
+            logger.debug("[CloudFlaskAPI] preparing part2")
+            vocab = vocabulary.Vocabulary('/home/drea/Odie_robo_assistant/odie_cloud/word_counts.txt')
+            beam_size = 3
+            max_caption_length = 20
+            length_normalization_factor = 0.0
+            initial_beam = Caption(sentence=[vocab.start_id],
+                                   state=init_state[0],
+                                   logprob=0.0,
+                                   score=0.0,
+                                   metadata=None)
+            partial_captions = TopN(beam_size)
+            partial_captions.push(initial_beam)
+            complete_captions = TopN(beam_size)
+            # Run beam search.
+            logger.debug("[CloudFlaskAPI] Run beam search")
+            for _ in range(max_caption_length - 1):
+                partial_captions_list = partial_captions.extract()
+                partial_captions.reset()
+                input_feed = np.array([c.sentence[-1] for c in partial_captions_list])
+                state_feed = np.array([c.state for c in partial_captions_list])
+                input_feed = tf.contrib.util.make_tensor_proto(input_feed)
+                state_feed = tf.contrib.util.make_tensor_proto(state_feed)
+                # sending next sequence in
+                tfrequest = predict_pb2.PredictRequest()
+                tfrequest.model_spec.name = 'caption-part2'
+                copy_message(input_feed, tfrequest.inputs["in"])
+                copy_message(state_feed, tfrequest.inputs["state"])
+                response = tfclient.execute(tfrequest, timeout=10)
+                for key in response.outputs:
+                    if key == 'softmax':
+                        tensor_proto = response.outputs[key]
+                        softmax = tf.contrib.util.make_ndarray(tensor_proto)
+                    if key == 'state':
+                        tensor_proto = response.outputs[key]
+                        new_states = tf.contrib.util.make_ndarray(tensor_proto)
+                for i, partial_caption in enumerate(partial_captions_list):
+                    word_probabilities = softmax[i]
+                    state = new_states[i]
+                    # For this partial caption, get the beam_size most probable next words.
+                    words_and_probs = list(enumerate(word_probabilities))
+                    words_and_probs.sort(key=lambda x: -x[1])
+                    words_and_probs = words_and_probs[0:beam_size]
+                    # Each next word gives a new partial caption.
+                    for w, p in words_and_probs:
+                        if p < 1e-12:
+                            logger.debug("[CloudFlaskAPI] avoiding log(0)")
+                            continue  # Avoid log(0).
+                        sentence = partial_caption.sentence + [w]
+                        logprob = partial_caption.logprob + math.log(p)
+                        score = logprob
+                        if w == vocab.end_id:
+                            if length_normalization_factor > 0:
+                                score /= len(sentence)**length_normalization_factor
+                            beam = Caption(sentence, state, logprob, score, None)
+                            complete_captions.push(beam)
+
+                        else:
+                            beam = Caption(sentence, state, logprob, score, None)
+                            partial_captions.push(beam)
+                    if partial_captions.size() == 0:
+                        # We have run out of partial candidates; happens when beam_size = 1.
+                        break
+                # If we have no complete captions then fall back to the partial captions.
+                # But never output a mixture of complete and partial captions because a
+                # partial caption could have a higher score than all the complete captions.
+            logger.debug("[CloudFlaskAPI] beam seach completed")
+            if not complete_captions.size():
+                complete_captions = partial_captions
+            captions = complete_captions.extract(sort=True)
+            data = {}
+            pred = {}
+            # Ignore begin and end words.
+            for i, caption in enumerate(captions):
+                sentence = [vocab.id_to_word(w) for w in caption.sentence[1:-1]]
+                sentence = " ".join(sentence)
+                pred[sentence] = math.exp(caption.logprob)
+                logger.debug("[CloudFlaskAPI]caption %d) %s (p=%f)" % (i, sentence, math.exp(caption.logprob)))
+            data['result'] = pred
+        except:
+            data = {
+                "predicting": "exception"
+            }
+            base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
+            uploaded_file.save(os.path.join(base_path, filename))
+            return jsonify(error=data), 404
+
+        data = jsonify(data)
         return data, 201
 
     @requires_auth

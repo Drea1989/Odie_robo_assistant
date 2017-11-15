@@ -23,7 +23,7 @@ def inference_config(manifest_file, batch_size, nbands, max_utt_len):
             'manifest_root': os.path.dirname(manifest_file),
             'batch_size': batch_size,
             'block_size': batch_size,
-            'etl': [audio_config, ]}
+            'etl': [audio_config,]}
 
 
 def wrap_dataloader(dl, target=True):
@@ -38,7 +38,7 @@ def wrap_dataloader(dl, target=True):
 
 
 def make_inference_loader(manifest_file, nbands, max_utt_len, backend_obj):
-    aeon_config = inference_config(manifest_file, 1, nbands,
+    aeon_config = inference_config(manifest_file, backend_obj.bsz, nbands,
                                    max_utt_len)
     logger.debug("[DeepSpeech] preprocessing config with: {}".format(manifest_file))
     return wrap_dataloader(AeonDataLoader(aeon_config), target=False)
