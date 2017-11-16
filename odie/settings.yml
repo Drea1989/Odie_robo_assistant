@@ -45,7 +45,7 @@ speech_to_text:
 # This is the default TTS that will be used by odie to talk.
 default_text_to_speech: "pico2wave"
 # where we store generated audio files from TTS engine to reuse them
-cache_path: "/tmp/odie_tts_cache"
+cache_path: "/tmp/odie_cache"
 
 # Text to Speech engines configuration
 # Available engine are:
@@ -175,7 +175,7 @@ alphabot:
 # Specify parameters
 cloud:
   - speech:
-      model: "/home/drea/odie_cloud/deepspeech/speech_step1000.prm"
+      model: "/home/drea/odie_cloud/deepspeech/speech_step4500.prm"
   - caption:
       TFhost: "localhost"
       TFport: 9000
