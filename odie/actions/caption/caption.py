@@ -1,5 +1,9 @@
 # import the necessary packages
-from picamera import PiCamera
+try:
+    # only on rpi
+    from picamera import PiCamera
+except:
+    pass
 import time
 import os
 import requests

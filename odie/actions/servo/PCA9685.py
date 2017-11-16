@@ -2,7 +2,11 @@
 
 import time
 import math
-import smbus
+try:
+    # only import if we are on a Rpi
+    import smbus
+except:
+    pass
 import logging
 
 logging.basicConfig()
