@@ -20,7 +20,7 @@
       - servo.Initialiseservo
       - alphabot.Initialiserover
       - say:
-        message:
+          message:
             - "initialisation completed"
 
   - name: "caption-this"
