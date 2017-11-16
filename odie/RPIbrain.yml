@@ -22,4 +22,9 @@
       - say:
         message:
             - "initialisation completed"
-        
+
+  - name: "caption-this"
+    cues:
+      - order: "what do you see"
+    actions:
+      - caption       

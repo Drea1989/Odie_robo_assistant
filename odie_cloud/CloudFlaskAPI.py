@@ -371,11 +371,11 @@ class CloudFlaskAPI(threading.Thread):
                 sentence = [vocab.id_to_word(w) for w in caption.sentence[1:-1]]
                 sentence = " ".join(sentence)
                 pred[sentence] = math.exp(caption.logprob)
-                logger.debug("[CloudFlaskAPI]caption %d) %s (p=%f)" % (i, sentence, math.exp(caption.logprob)))
+                logger.debug("[CloudFlaskAPI] caption %d) %s (p=%f)" % (i, sentence, math.exp(caption.logprob)))
             data['result'] = pred
         except:
             data = {
-                "predicting": "exception"
+                "result": "exception"
             }
             base_path = os.path.join(self.app.config['UPLOAD_FAIL'])
             uploaded_file.save(os.path.join(base_path, filename))
