@@ -28,7 +28,7 @@ default_speech_to_text: "odiestt"
 # Speech to text options
 recognition_options:
   energy_threshold: 300
-  adjust_for_ambient_noise_second: 1
+  adjust_for_ambient_noise_second: 2
 
 
 # Speech to Text engines configuration
@@ -175,7 +175,7 @@ alphabot:
 # Specify parameters
 cloud:
   - speech:
-      model: "/home/drea/odie_cloud/deepspeech/speech_step4500.prm"
+      model: "/home/drea/odie_cloud/deepspeech/speech_step7100.prm"
   - caption:
       TFhost: "localhost"
       TFport: 9000
