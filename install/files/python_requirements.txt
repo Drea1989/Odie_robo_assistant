@@ -29,4 +29,5 @@ pandas>=0.19
 sox>=1.3.0
 #snowboy>=1.2.0b1
 paho-mqtt>=1.3.0
-tensorflow_serving_client
+pythondialog>=3.4.0
+autocorrect>=0.3.0

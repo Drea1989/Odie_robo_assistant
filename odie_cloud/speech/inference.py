@@ -2,13 +2,13 @@ import os
 import logging
 import tempfile
 import numpy as np
-from tqdm import tqdm
 
 from neon.backends import gen_backend
 from neon.models import Model
-from odie_cloud.speech.decoder import ArgMaxDecoder
+from odie_cloud.speech.decoder import ArgMaxDecoder, BeamLMDecoder
 from odie_cloud.speech.DataLoader import make_inference_loader
-import pycuda
+# from odie_cloud.speech.spell import Corrector
+
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
@@ -21,6 +21,7 @@ class Inference(object):
         self.batch_size = 1
         self.argmax_decoder = ArgMaxDecoder(self.alphabet, space_index=self.alphabet.index(" "))
         self.model_file = model_file
+        # self.argmax_decoder.load_lm('/home/drea/odie_cloud/deepspeech/4-gram.arpa')
 
     def softmax(self, x):
         return (np.reciprocal(np.sum(
@@ -47,7 +48,6 @@ class Inference(object):
             logger.debug("[DeepSpeech] initializing")
             model.initialize(eval_set)
 
-        #for audio, audio_len in tqdm(eval_set, unit="files", total=eval_set.nbatches):
         try:
             for file in eval_set:
                 audio = file[0]
@@ -57,14 +57,16 @@ class Inference(object):
                 strided_tmax = output.shape[-1]
                 logger.debug("[DeepSpeech] adjusting output")
                 utt_lens = strided_tmax * audio_len.get().ravel() / 100
-                for ii in range(be.bsz):
-                    logger.debug("[DeepSpeech] transcripting")
-                    transcript = self.argmax_decoder.decode(output[ii, :, :int(utt_lens[ii])])
+                logger.debug("[DeepSpeech] transcripting with LM")
+                transcript = self.argmax_decoder.decode(output[0, :, :int(utt_lens[0])])
         except:
-            return None
+            return 'error" model failed'
         finally:
             be.cleanup_backend()
             be = None
+        # spell = Corrector()
+        # logger.debug("[DeepSpeech] transcript pre spell check: {}".format(transcript))
+        # new_transcript = spell.correction(spell.word(transcript))
         return transcript
 
     def setup_dataloader(self, be, audio_files, eval_manifest):
