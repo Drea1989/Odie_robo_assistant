@@ -1,5 +1,5 @@
 
-from odie.actions.trsensors.trsensor import TRSensor
+from odie.actions.utils.trsensor import TRSensor
 from odie.core.ActionModule import ActionModule
 import logging
 

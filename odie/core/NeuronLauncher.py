@@ -70,8 +70,8 @@ class NeuronLauncher(object):
         else:  # the LIFO is empty, this is a new call
             # get a list of matched neuron from the order
             # testing new Postgres brain
-            # list_neuron_to_process = OrderAnalyser.get_matching_neuron(order=order_to_process, brain=brain)
-            list_neuron_to_process = OrderAnalyser.pg_get_matching_neuron(order=order_to_process)
+            list_neuron_to_process = OrderAnalyser.get_matching_neuron(order=order_to_process, brain=brain)
+            # list_neuron_to_process = OrderAnalyser.pg_get_matching_neuron(order=order_to_process)
             if not list_neuron_to_process:  # the order analyser returned us an empty list
                 # add the default neuron if exist into the lifo
                 if settings.default_neuron:

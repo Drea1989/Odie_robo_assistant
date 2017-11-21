@@ -428,7 +428,7 @@ class CloudFlaskAPI(threading.Thread):
         if not self.allowed_file(audio_path):
             audio_path = self._convert_to_wav(audio_file_path=audio_path)
 
-        logger.debug("[CloudFlaskAPI] calling deepspech")
+        logger.debug("[CloudFlaskAPI] calling deepspeech")
         try:
             response = self.dp.predict(audio_path)
             if response != "":
