@@ -6,6 +6,8 @@
       - say:
           message:
             - "Hello"
+      - rover_initialise
+      - servo_initialise
 
   - name: "default-neuron"
     cues:
@@ -16,8 +18,6 @@
             - "sorry i couldn't understand what you said"
             - "sorry could you repeat?"
             - "i didn't catch that"
-      - alphabot.Initialiserover
-      - servo.Initialiseservo
 
   - includes:
     - RPIbrain.yml

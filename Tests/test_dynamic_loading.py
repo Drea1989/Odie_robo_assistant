@@ -32,7 +32,7 @@ class TestDynamicLoading(unittest.TestCase):
         # get wakeon dir
         self.wakeon_dir = os.path.normpath(root_dir + os.sep + "odie/wakeon")
         # skip composite actions
-        self.action_to_skip = ['alphabot', 'ultrasonic_ranging', 'trsensors', 'servo']
+        self.action_to_skip = ['utils']
 
     def test_packages_present(self):
         """

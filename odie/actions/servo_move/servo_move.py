@@ -1,17 +1,17 @@
 import logging
 
 from odie.core.ActionModule import ActionModule, MissingParameterException, InvalidParameterException
-from odie.actions.servo.PCA9685 import Servo
+from odie.actions.utils.PCA9685 import Servo
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
 
-class Movecommand(ActionModule):
+class Servo_move(ActionModule):
     "move the servo 1 step each direction based on speach"
     # check if parameters have been provided
     def __init__(self, **kwargs):
-        super(Movecommand, self).__init__(**kwargs)
+        super(Servo_move, self).__init__(**kwargs)
         self.direction = kwargs.get('direction', None)
         self.HStep = kwargs.get('HStep', 0)
         self.VStep = kwargs.get('VStep', 0)

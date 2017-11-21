@@ -3,22 +3,22 @@
     cues:
       - order: "move {{direction}}"
     actions:
-      - alphabot.Setrover:
+      - rover_set:
           direction: "{{direction}}"
 
   - name: "rover-look"
     cues:
       - order: "look {{direction}}"
     actions:
-      - servo.Movecommand:
+      - servo_move:
           direction: "{{direction}}"
 
   - name: "rover-startup"
     cues:
       - order: "initialise"
     actions:
-      - servo.Initialiseservo
-      - alphabot.Initialiserover
+      - rover_initialise
+      - servo_initialise
       - say:
           message:
             - "initialisation completed"

@@ -2,15 +2,15 @@ import logging
 import time
 
 from odie.core.ActionModule import ActionModule, MissingParameterException
-from odie.actions.alphabot.AlphaBot import AlphaBot
+from odie.actions.utils.AlphaBot import AlphaBot
 
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
 
-class Setrover(ActionModule):
+class Rover_set(ActionModule):
     def __init__(self, **kwargs):
-        super(Setrover, self).__init__(**kwargs)
+        super(Rover_set, self).__init__(**kwargs)
 
         self.direction = kwargs.get('direction', None)
 
