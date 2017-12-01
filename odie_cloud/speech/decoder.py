@@ -19,6 +19,7 @@ import Levenshtein as Lev
 import math
 import collections
 from autocorrect import spell
+import kenlm
 
 
 logging.basicConfig()
@@ -44,6 +45,9 @@ class Decoder(object):
         self.blank_index = blank_index
         self.space_index = space_index
         self.NEG_INF = -float("inf")
+        # self.LM = kenlm.Model('/home/drea/odie_cloud/deepspeech/4-gram.arpa')
+        self.LM = kenlm.Model('/home/drea/odie_cloud/tensorflow/DeepSpeech/data/lm/lm.binary')
+        logger.debug("[Decoder] {0}-gram model".format(self.LM.order))
 
     def convert_to_string(self, sequence):
         "Given a numeric sequence, returns the corresponding string"

@@ -15,7 +15,6 @@ class Servo_initialise(ActionModule):
         super(Servo_initialise, self).__init__(**kwargs)
         servo = Servo()
         # Set the Horizontal servo parameters
-        servo.setServoPulse(0, 1250)
-
+        servo.set_servo_pulse(0, 410)
         # Set the vertical servo parameters
-        servo.setServoPulse(1, 1250)
+        servo.set_servo_pulse(1, 410)

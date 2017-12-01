@@ -175,7 +175,7 @@ alphabot:
 # Specify parameters
 cloud:
   - speech:
-      model: "/home/drea/odie_cloud/deepspeech/speech_step7100.prm"
+      model: "/home/drea/odie_cloud/deepspeech/speech_step7744.prm"
   - caption:
       TFhost: "localhost"
       TFport: 9000

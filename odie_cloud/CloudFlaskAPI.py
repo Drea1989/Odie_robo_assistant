@@ -430,7 +430,7 @@ class CloudFlaskAPI(threading.Thread):
 
         logger.debug("[CloudFlaskAPI] calling deepspeech")
         try:
-            response = self.dp.predict(audio_path)
+            response = self.dp.predict_beam(audio_path)
             if response != "":
                 data = {
                     "result": response
