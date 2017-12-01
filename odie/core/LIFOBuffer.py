@@ -19,7 +19,7 @@ class Serialize(Exception):
 
 class NeuronListAddedToLIFO(Exception):
     """
-    When raised, a neuron list to process has been added to the LIFO list.
+    When raised, a neuron list to process has been added to the LIFO list. 
     The LIFO must start over and process the last neuron list added
     """
     pass
@@ -29,10 +29,10 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
     """
     This class is a LIFO list of neuron to process where the last neuron list to enter will be the first neuron
     list to be processed.
-    This design is needed in order to use Odie from the API.
+    This design is needed in order to use Odie from the API. 
     Because we want to return an information when a Action is still processing and waiting for an answer from the user
     like with the Neurotransmitter action.
-
+    
     """
 
     def __init__(self):
@@ -56,7 +56,7 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
         Add a neuron list to process to the lifo
         :param matched_neuron_list: List of Matched Neuron
         :param high_priority: If True, the neuron list added is executed directly
-        :return:
+        :return: 
         """
         logger.debug("[LIFOBuffer] Add a new neuron list to process to the LIFO")
         self.lifo_list.append(matched_neuron_list)
@@ -74,7 +74,7 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
         """
         Serialize Exception has been raised by the execute process somewhere, return the serialized API response
         to the caller. Clean up the APIResponse object for the next call
-        :return:
+        :return: 
         """
         # we prepare a json response
         returned_api_response = self.api_response.serialize()
@@ -85,13 +85,13 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
     def execute(self, answer=None, is_api_call=False, no_voice=False):
         """
         Process the LIFO list.
-
-        The LIFO list contains multiple list of matched neurons.
-        For each list of matched neuron we process neurons inside
-        For each neurons we process actions.
-        If a action add a Neuron list to the lifo, this neuron list is processed before executing the first list
+        
+        The LIFO list contains multiple list of matched neurons.        
+        For each list of matched neuron we process neurons inside        
+        For each neurons we process actions.        
+        If a action add a Neuron list to the lifo, this neuron list is processed before executing the first list 
         in which we were in.
-
+        
         :param answer: String answer to give the the last action which was waiting for an answer
         :param is_api_call: Boolean passed to all action in order to let them know if the current call comes from API
         :param no_voice: If true, the generated text will not be processed by the TTS engine
@@ -166,6 +166,7 @@ class LIFOBuffer(with_metaclass(Singleton, object)):
         while matched_neuron.action_fifo_list:
             # get the first action in the FIFO action list
             action = matched_neuron.action_fifo_list[0]
+            logger.debug("[LIFOBuffer] number of action to process: %s" % action)
             # from here, we are back into the last action we were processing.
             if self.answer is not None:  # we give the answer if exist to the first action
                 action.parameters["answer"] = self.answer

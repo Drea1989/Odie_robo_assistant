@@ -1,10 +1,9 @@
 # !/usr/bin/python
+from __future__ import division
 
-import time
-import math
 try:
     # only import if we are on a Rpi
-    import smbus
+    import Adafruit_PCA9685
 except:
     pass
 import logging
@@ -21,89 +20,55 @@ class Servo(object):
     """
     class to move the servo up/down and left/right
     """
-    def __init__(self, address=0x40):
-        self.bus = smbus.SMBus(1)
-        self.address = address
-        self.HPulse = 1500  # Sets the initial Pulse
-        self.VPulse = 1500  # Sets the initial Pulse
-        # Registers/etc.
-        __SUBADR1            = 0x02
-        __SUBADR2            = 0x03
-        __SUBADR3            = 0x04
-        __MODE1              = 0x00
-        __PRESCALE           = 0xFE
-        __LED0_ON_L          = 0x06
-        __LED0_ON_H          = 0x07
-        __LED0_OFF_L         = 0x08
-        __LED0_OFF_H         = 0x09
-        __ALLLED_ON_L        = 0xFA
-        __ALLLED_ON_H        = 0xFB
-        __ALLLED_OFF_L       = 0xFC
-        __ALLLED_OFF_H       = 0xFD
-        logger.debug("Reseting PCA9685")
-        self.write(self.__MODE1, 0x00)
+    def __init__(self):
+        # Initialise the PCA9685 using the default address (0x40).
+        self.pwm = Adafruit_PCA9685.PCA9685()
+        self.max = 600
+        self.min = 150
+        # Alternatively specify a different address and/or bus:
+        # pwm = Adafruit_PCA9685.PCA9685(address=0x41, busnum=2)
 
-    def write(self, reg, value):
-        "Writes an 8-bit value to the specified register/address"
-        self.bus.write_byte_data(self.address, reg, value)
-        logger.debug("I2C: Write 0x%02X to register 0x%02X" % (value, reg))
+        self.pulse_length = 1000000    # 1,000,000 us per second
+        self.pulse_length //= 60       # 60 Hz
+        logger.debug('{0}us per period'.format(self.pulse_length))
+        self.pulse_length //= 4096     # 12 bits of resolution
+        logger.debug('{0}us per bit'.format(self.pulse_length))
+        # Set frequency to 60hz, good for servos.
+        self.pwm.set_pwm_freq(60)
 
-    def read(self, reg):
-        "Read an unsigned byte from the I2C device"
-        result = self.bus.read_byte_data(self.address, reg)
-        logger.debug("I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" % (self.address, result & 0xFF, reg))
-        return result
-
-    def setPWMFreq(self, freq):
-        "Sets the PWM frequency"
-        prescaleval = 25000000.0    # 25MHz
-        prescaleval /= 4096.0       # 12-bit
-        prescaleval /= float(freq)
-        prescaleval -= 1.0
-        logger.debug("Setting PWM frequency to %d Hz" % freq)
-        logger.debug("Estimated pre-scale: %d" % prescaleval)
-        prescale = math.floor(prescaleval + 0.5)
-        logger.debug("Final pre-scale: %d" % prescale)
-
-        oldmode = self.read(self.__MODE1)
-        newmode = (oldmode & 0x7F) | 0x10        # sleep
-        self.write(self.__MODE1, newmode)        # go to sleep
-        self.write(self.__PRESCALE, int(math.floor(prescale)))
-        self.write(self.__MODE1, oldmode)
-        time.sleep(0.005)
-        self.write(self.__MODE1, oldmode | 0x80)
-
-    def setPWM(self, channel, on, off):
-        "Sets a single PWM channel"
-        self.write(self.__LED0_ON_L+4*channel, on & 0xFF)
-        self.write(self.__LED0_ON_H+4*channel, on >> 8)
-        self.write(self.__LED0_OFF_L+4*channel, off & 0xFF)
-        self.write(self.__LED0_OFF_H+4*channel, off >> 8)
-        logger.debug("channel: %d  LED_ON: %d LED_OFF: %d" % (channel, on, off))
-
-    def setServoPulse(self, channel, pulse):
-        "Sets the Servo Pulse,The PWM frequency must be 50HZ"
-        pulse = pulse*4096/20000        # PWM frequency is 50HZ,the period is 20000us
-        self.setPWM(channel, 0, pulse)
-
-    def moveServo(self, HStep=0, VStep=0):
+    def _servo_degrees_to_us(self, angle):
+        """Converts degrees into a servo pulse time in microseconds
+        :param angle: Angle in degrees from -90 to 90
         """
-        this move the servo vertically and/or horizontally by a integer step
-        """
-        if(HStep != 0):
-            self.HPulse += HStep
-            if(self.HPulse >= 2500):
-                self.HPulse = 2500
-            if(self.HPulse <= 500):
-                self.HPulse = 500
-            # set channel 2, the Horizontal servo
-            self.setServoPulse(0, self.HPulse)
 
-        if(VStep != 0):
-            self.VPulse += VStep
-            if(self.VPulse >= 2500):
-                self.VPulse = 2500
-            if(self.VPulse <= 500):
-                self.VPulse = 500
-            # set channel 3, the vertical servo
-            self.setServoPulse(1, self.VPulse)
+        self._check_range(angle, -90, 90)
+
+        angle += 90
+        servo_range = self.max - self.min
+        us = (servo_range / 180.0) * angle
+        return self.min + int(us)
+
+    def _check_range(self, value, value_min, value_max):
+        """Check the type and bounds check an expected int value."""
+
+        if value < value_min or value > value_max:
+            raise ValueError("Value {value} should be between {min} and {max}".format(
+                value=value,
+                min=value_min,
+                max=value_max))
+
+    # Helper function to make setting a servo pulse width simpler.
+    def set_servo_pulse(self, channel, pulse):
+        pulse = self.validate_pulse(channel, pulse)
+        self.pwm.set_pwm(channel, 0, pulse)
+
+    def validate_pulse(self, channel, pulse):
+        return max(self.min, min(self.max, pulse))
+
+    def moveServo(self, HStep=None, VStep=None):
+        if HStep is not None:
+            self.set_servo_pulse(0, self._servo_degrees_to_us(HStep))
+        elif VStep is not None:
+            self.set_servo_pulse(1, self._servo_degrees_to_us(VStep))
+        else:
+            logger.debug("[SERVO] error in input values")
