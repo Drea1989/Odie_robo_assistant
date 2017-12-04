@@ -150,3 +150,9 @@ class AlphaBot(object):
         for led in LedDict:
             strip.setPixelColor(led, LedDict[led].values)
         strip.show()
+
+    def lights(self, r, g, b):
+        ledDict = {}
+        for i in range(4):
+            ledDict[i] = [r, g, b]
+        self.LedLights(ledDict)

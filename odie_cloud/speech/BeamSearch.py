@@ -44,28 +44,37 @@ class CtcBeamSearch(Decoder):
         if y not in beamState.entries:
             beamState.entries[y] = BeamEntry()
 
+    def lm_words(self, sentence):
+        words = ['<s>'] + sentence.split() + ['</s>']
+        probs = 0
+        for i, (prob, length, oov) in enumerate(self.LM.full_scores(sentence)):
+            logger.debug("[CtcBeamSearch] LM prob {0} length {1}: {2}".format(prob, length, ' '.join(words[i+2-length:i+2])))
+            score_multiplier = 1.1
+            if oov:
+                logger.debug('[CtcBeamSearch] \t"{0}" is an OOV'.format(words[i+1]))
+                score_multiplier = 0.1
+            probs += math.pow(10.0, prob)*score_multiplier
+            logger.debug('[CtcBeamSearch] probs: {} score multiplier: {}'.format(probs, score_multiplier))
+        return probs
+
     def calcExtPr(self, k, y, t, mat, beamState, classes):
         "probability for extending labelling y to y+k"
 
-        # language model (kenlm 4-gram)
+        # language model (kenlm 5-gram)
         sentence = ""
         for char in y:
             sentence = sentence + str(classes[char])
         sentence = sentence + str(classes[k])
         sentence = sentence.replace("_", "").lower()
         logger.debug("[CtcBeamSearch] ngram to score: {}".format(sentence))
-        LmLog = self.LM.score(sentence, bos=False, eos=False)
-        logger.debug("[CtcBeamSearch] Lm log score: {0:.15f}".format(LmLog))
-        LmLog = math.pow(10.0, LmLog)
-        logger.debug("[CtcBeamSearch] lm prob score: {0:.15f}".format(LmLog))
-
+        LmProb = self.lm_words(sentence)
         if len(y) and y[-1] == k:
-            prb = mat[t, k]*beamState.entries[y].prBlank+LmLog
-            logger.debug("[CtcBeamSearch] blank score: {0:.12f}".format(prb))
+            prb = mat[t, k]*beamState.entries[y].prBlank*LmProb
+            logger.debug("[CtcBeamSearch] blank score: {0:.15f}".format(prb))
             return prb
         else:
-            prb = mat[t, k]*beamState.entries[y].prTotal+LmLog
-            logger.debug("[CtcBeamSearch] prTotal score: {0:.12f}".format(prb))
+            prb = mat[t, k]*beamState.entries[y].prTotal*LmProb
+            logger.debug("[CtcBeamSearch] prTotal score: {0:.15f}".format(prb))
             return prb
 
     def decode(self, mat, classes):

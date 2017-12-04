@@ -65,6 +65,24 @@ class Servo(object):
     def validate_pulse(self, channel, pulse):
         return max(self.min, min(self.max, pulse))
 
+    def pan(self, angle):
+        """Set position of servo 1 in degrees.
+        :param angle: Angle in degrees from -90 to 90
+        """
+        try:
+            self.set_servo_pulse(0, self._servo_degrees_to_us(angle))
+        except:
+            logger.debug("[SERVO] error in input values")
+
+    def tilt(self, angle):
+        """Set position of servo 1 in degrees.
+        :param angle: Angle in degrees from -90 to 90
+        """
+        try:
+            self.set_servo_pulse(1, self._servo_degrees_to_us(angle))
+        except:
+            logger.debug("[SERVO] error in input values")
+
     def moveServo(self, HStep=None, VStep=None):
         if HStep is not None:
             self.set_servo_pulse(0, self._servo_degrees_to_us(HStep))
