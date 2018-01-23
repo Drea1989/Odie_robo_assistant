@@ -23,7 +23,7 @@ wakeons:
 # ---------------------------
 
 # This is the STT that will be used by default
-default_speech_to_text: "odiestt"
+default_speech_to_text: "google"
 
 # Speech to text options
 recognition_options:
@@ -34,10 +34,14 @@ recognition_options:
 # Speech to Text engines configuration
 # Available engine are:
 # - odie_stt (via remote server)
+# - google (via SpeechRecognition)
 
 speech_to_text:
   - odiestt:
       language: "en-US"
+  - google:
+      language: "en-US"
+      key: "fakekey" # example : "B5JI3YUSLYOYWNIDBINBVM34XUODME2K"
 
 # ---------------------------
 # Text to speech

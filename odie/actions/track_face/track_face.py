@@ -1,6 +1,7 @@
 import numpy as np
 import logging
 import cv2.cv as cv
+import cv2
 from odie.actions.utils.PCA9685 import Servo
 from odie.actions.utils.AlphaBot import AlphaBot
 from odie.core.ActionModule import ActionModule
@@ -16,6 +17,8 @@ class Track_face(ActionModule):
         super(Track_face, self).__init__(**kwargs)
         self.calledback = False
         cascade = cv.Load('/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml')
+        frontalface = cv2.CascadeClassifier('/odie/actions/track_face/haarcascade_frontalface_alt2.xml')     # frontal face pattern detection
+        profileface = cv2.CascadeClassifier("/odie/actions/track_face/haarcascade_profileface.xml")
 
         cam_pan = 90
         cam_tilt = 45
@@ -77,6 +80,19 @@ class Track_face(ActionModule):
                 faces = cv.HaarDetectObjects(small_img, cascade, cv.CreateMemStorage(0),
                                              haar_scale, min_neighbors, haar_flags, min_size)
                 t = cv.GetTickCount() - t
+                if len(faces) == 0:
+                    logger.debug("[FaceTracking] first cascade failed to find face")
+                    t = cv.GetTickCount()
+                    # HaarDetectObjects takes 0.02s
+                    faces = frontalface.detectMultiScale(small_img, 1.3, 4, (cv2.cv.CV_HAAR_DO_CANNY_PRUNING + cv2.cv.CV_HAAR_FIND_BIGGEST_OBJECT + cv2.cv.CV_HAAR_DO_ROUGH_SEARCH), (60, 60))
+                    t = cv.GetTickCount() - t
+                if faces != ():
+                    logger.debug("[FaceTracking] second cascade failed to find face")
+                    t = cv.GetTickCount()
+                    # HaarDetectObjects takes 0.02s
+                    faces = profileface.detectMultiScale(small_img, 1.3, 4, (cv2.cv.CV_HAAR_DO_CANNY_PRUNING + cv2.cv.CV_HAAR_FIND_BIGGEST_OBJECT + cv2.cv.CV_HAAR_DO_ROUGH_SEARCH), (80, 80))
+                    t = cv.GetTickCount() - t
+
                 if faces:
                     bot.lights(200 if len(faces) == 0 else 0, 200 if len(faces) > 0 else 0, 30)
 
