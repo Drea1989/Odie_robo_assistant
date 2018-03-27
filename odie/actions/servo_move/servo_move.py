@@ -2,7 +2,7 @@ import logging
 
 from odie.core.ActionModule import ActionModule, MissingParameterException, InvalidParameterException
 from odie.actions.utils.PCA9685 import Servo
-
+import string
 logging.basicConfig()
 logger = logging.getLogger("odie")
 
@@ -14,7 +14,9 @@ class Servo_move(ActionModule):
         super(Servo_move, self).__init__(**kwargs)
         self.direction = kwargs.get('direction', None)
         servo = Servo()
-
+        # removing optional punctuation
+        table = string.maketrans("", "")
+        self.direction = self.direction.translate(table, string.punctuation)
         if self._is_parameters_ok():
             if self.direction == 'up':
                 servo.moveServo(VStep=45)

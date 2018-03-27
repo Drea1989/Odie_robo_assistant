@@ -33,10 +33,10 @@ class Google(SpeechRecognition):
         called from the background thread
         """
         try:
-            captured_audio = recognizer.recognize_google(audio,
-                                                         key=self.key,
-                                                         language=self.language,
-                                                         show_all=self.show_all)
+            captured_audio = recognizer.recognize_google_cloud(audio,
+                                                               key=self.key,
+                                                               language=self.language,
+                                                               show_all=self.show_all)
             Utils.print_success("Google Speech Recognition thinks you said %s" % captured_audio)
             self._analyse_audio(audio_to_text=captured_audio)
         except sr.UnknownValueError:
