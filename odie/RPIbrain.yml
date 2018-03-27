@@ -3,23 +3,35 @@
     cues:
       - order: "move {{direction}}"
     actions:
-      - alphabot.Setrover:
+      - rover_set:
           direction: "{{direction}}"
 
   - name: "rover-look"
     cues:
       - order: "look {{direction}}"
     actions:
-      - servo.Movecommand:
+      - servo_move:
           direction: "{{direction}}"
 
   - name: "rover-startup"
     cues:
       - order: "initialise"
     actions:
-      - servo.Initialiseservo
-      - alphabot.Initialiserover
+      - rover_initialise
+      - servo_initialise
       - say:
-        message:
+          message:
             - "initialisation completed"
-        
+
+  - name: "caption-this"
+    cues:
+      - order: "what do you see"
+    actions:
+      - caption       
+
+  - name: "track-face"
+    cues:
+      - order: "follow me"
+      - order: "look at me"
+    actions:
+      - track_face   

@@ -23,21 +23,25 @@ wakeons:
 # ---------------------------
 
 # This is the STT that will be used by default
-default_speech_to_text: "odie_stt"
+default_speech_to_text: "google"
 
 # Speech to text options
-#recognition_options:
-#  energy_threshold: 4000
-#  adjust_for_ambient_noise_second: 1
+recognition_options:
+  energy_threshold: 300
+  adjust_for_ambient_noise_second: 1
 
 
 # Speech to Text engines configuration
 # Available engine are:
 # - odie_stt (via remote server)
+# - google (via SpeechRecognition)
 
 speech_to_text:
-  - Odie_stt:
+  - odiestt:
       language: "en-US"
+  - google:
+      language: "en-US"
+      key: "fakekey" # example : "B5JI3YUSLYOYWNIDBINBVM34XUODME2K"
 
 # ---------------------------
 # Text to speech
@@ -45,7 +49,7 @@ speech_to_text:
 # This is the default TTS that will be used by odie to talk.
 default_text_to_speech: "pico2wave"
 # where we store generated audio files from TTS engine to reuse them
-cache_path: "/tmp/odie_tts_cache"
+cache_path: "/tmp/odie_cache"
 
 # Text to Speech engines configuration
 # Available engine are:
@@ -141,7 +145,7 @@ on_ready_sounds:
 rest_api:
   active: False
   port: 5000
-  password_protected: True
+  password_protected: False
   login: admin
   password: secret
   allowed_cors_origin: False
@@ -168,17 +172,17 @@ postgres:
 # ---------------------------
 # Specify parameters
 alphabot:
-  enable: True 
+  enable: True
 # ---------------------------
 # Cloud settings
 # ---------------------------
 # Specify parameters
 cloud:
   - speech:
-    model: "/usr/home/odie_cloud/models/speech.pmld"
+      model: "/home/drea/odie_cloud/deepspeech/speech_step7744.prm"
   - caption:
-    TFhost: "localhost"
-    TFport: 9001
+      TFhost: "localhost"
+      TFport: 9000
 
 
 # ---------------------------

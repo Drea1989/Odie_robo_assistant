@@ -37,7 +37,7 @@ def signal_handler(signal, frame):
 
 
 # actions available
-ACTION_LIST = ["start", "gui", "install", "uninstall", "cloud"]
+ACTION_LIST = ["start", "gui", "install", "uninstall", "cloud", "stt"]
 
 
 def parse_args(args):
@@ -48,7 +48,7 @@ def parse_args(args):
     """
     # create arguments
     parser = argparse.ArgumentParser(description='odie')
-    parser.add_argument("action", help="[start|gui|install|uninstall]")
+    parser.add_argument("action", help="[start|gui|install|uninstall|cloud|stt]")
     parser.add_argument("--run-neuron",
                         help="Name of a neuron to load surrounded by quote")
     parser.add_argument("--run-order", help="order surrounded by a quote")
@@ -201,12 +201,6 @@ def main():
             flask_api.start()
         except (KeyboardInterrupt, SystemExit):
             Utils.print_info("Ctrl+C pressed. Killing odie Cloud")
-        finally:
-            # we need to switch GPIO pin to default status if we are using a Rpi
-            if settings.rpi_settings:
-                logger.debug("Clean GPIO")
-                import RPi.GPIO as GPIO
-                GPIO.cleanup()
 
 
 class AppFilter(logging.Filter):

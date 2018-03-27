@@ -89,7 +89,9 @@ setup(
         'pyalsaaudio>=0.8.4',
         'RPi.GPIO>=0.6.3',
         'tensorflow_serving_client=>0.0.8',
-        'sox>=1.3.0'
+        'sox>=1.3.0',
+        'python-levenshtein==0.12.0',
+        'tqdm==4.8.4'
     ],
 
     # additional files

@@ -141,16 +141,22 @@ class ConfigurationChecker:
                 composite_action_module = action_module_name.strip().split(".")
                 package_name = "odie.actions" + "." + composite_action_module[0].lower() + "." + composite_action_module[1].lower()
                 action_module_name = composite_action_module[1]
+                if settings.resources.action_folder is not None:
+                    action_resource_path = settings.resources.action_folder + \
+                                           os.sep + composite_action_module[0].lower() + os.sep + \
+                                           action_module_name.lower()+".py"
+                    if os.path.exists(action_resource_path):
+                        imp.load_source(action_module_name.capitalize(), action_resource_path)
+                        package_name = action_module_name.capitalize()
             else:
                 package_name = "odie.actions" + "." + action_module_name.lower() + "." + action_module_name.lower()
-
-            if settings.resources.action_folder is not None:
-                action_resource_path = settings.resources.action_folder + \
-                                       os.sep + action_module_name.lower() + os.sep + \
-                                       action_module_name.lower()+".py"
-                if os.path.exists(action_resource_path):
-                    imp.load_source(action_module_name.capitalize(), action_resource_path)
-                    package_name = action_module_name.capitalize()
+                if settings.resources.action_folder is not None:
+                    action_resource_path = settings.resources.action_folder + \
+                                           os.sep + action_module_name.lower() + os.sep + \
+                                           action_module_name.lower()+".py"
+                    if os.path.exists(action_resource_path):
+                        imp.load_source(action_module_name.capitalize(), action_resource_path)
+                        package_name = action_module_name.capitalize()
 
             try:
                 mod = __import__(package_name, fromlist=[action_module_name.capitalize()])

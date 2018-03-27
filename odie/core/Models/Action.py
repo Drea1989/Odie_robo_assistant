@@ -5,7 +5,7 @@ class Action(object):
     .. note:: Actions are defined in the brain file
     """
 
-    def __init__(self, name=None, parameters=None):
+    def __init__(self, name=None, parameters={}):
         self.name = name
         self.parameters = parameters
 
