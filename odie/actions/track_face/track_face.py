@@ -1,4 +1,3 @@
-import numpy as np
 import logging
 import cv2.cv as cv
 import cv2

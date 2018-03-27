@@ -47,6 +47,7 @@ class Caption(ActionModule):
             camera.start_preview()
             # Camera warm-up time
             time.sleep(0.1)
+            logger.debug("[Caption]Camera warm-up")
             camera.capture(self.save_path)
         logger.debug("[Caption]picture taken at: {}".format(self.save_path))
         caption_file = open(self.save_path, 'rb')
@@ -71,7 +72,8 @@ class Caption(ActionModule):
         # ignore any blank blocks
         if err_code in [200, 201]:
             logger.debug("[Caption] returning result")
-            self.message = {str(response.keys()[0])}
+            response_list = list(response.keys())
+            self.message = str(response_list[0])
             logger.debug("[Caption] returned message: %s" % str(self.message))
 
             self.say(self.message)

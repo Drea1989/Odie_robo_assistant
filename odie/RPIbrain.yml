@@ -28,3 +28,10 @@
       - order: "what do you see"
     actions:
       - caption       
+
+  - name: "track-face"
+    cues:
+      - order: "follow me"
+      - order: "look at me"
+    actions:
+      - track_face   
