@@ -13,9 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ----------------------------------------------------------------------------
-
+import logging
 import numpy as np
 import Levenshtein as Lev
+import math
+import collections
+from autocorrect import spell
+import kenlm
+
+
+logging.basicConfig()
+logger = logging.getLogger("odie")
 
 
 class Decoder(object):
@@ -33,8 +41,13 @@ class Decoder(object):
         # e.g. alphabet = "_'ABCDEFGHIJKLMNOPQRSTUVWXYZ#"
         self.alphabet = alphabet
         self.int_to_char = dict([(i, c) for (i, c) in enumerate(alphabet)])
+        self.char_to_int = dict([(c, i) for (i, c) in enumerate(alphabet)])
         self.blank_index = blank_index
         self.space_index = space_index
+        self.NEG_INF = -float("inf")
+        # self.LM = kenlm.Model('/home/drea/odie_cloud/deepspeech/4-gram.arpa')
+        self.LM = kenlm.Model('/home/drea/odie_cloud/tensorflow/DeepSpeech/data/lm/lm.binary')
+        logger.debug("[Decoder] {0}-gram model".format(self.LM.order))
 
     def convert_to_string(self, sequence):
         "Given a numeric sequence, returns the corresponding string"
@@ -128,4 +141,10 @@ class ArgMaxDecoder(Decoder):
         repeated elements in the sequence, as well as blanks.
         """
         string = self.convert_to_string(np.argmax(probs, axis=0))
-        return self.process_string(string, remove_repetitions=True)
+        string = self.process_string(string, remove_repetitions=True)
+        logger.debug("[ArgMaxDecoder] string: {}".format(string))
+        correct = ''
+        for word in string.split():
+            correct = correct + spell(word) + ' '
+        logger.debug("[ArgMaxDecoder] autocorrect: {}".format(correct))
+        return correct.rstrip()

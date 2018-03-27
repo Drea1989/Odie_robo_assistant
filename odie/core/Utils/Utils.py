@@ -112,16 +112,30 @@ class Utils(object):
         :param resources_dir: the resource directory to check for external resources
         :return:
         """
-        package_path = "odie." + package_name + "." + module_name.lower() + "." + module_name.lower()
-        logger.debug("[Utils]-> get_dynamic_class_instantiation : package path : %s" % (package_path))
-        if resources_dir is not None:
-            neuron_resource_path = resources_dir + os.sep + module_name.lower() \
-                                   + os.sep + module_name.lower() + ".py"
-            if os.path.exists(neuron_resource_path):
-                imp.load_source(module_name.capitalize(), neuron_resource_path)
-                package_path = module_name.capitalize()
-                logger.debug("[Utils]-> get_dynamic_class_instantiation : loading path : %s, as package %s" % (
-                    neuron_resource_path, package_path))
+        composite_action_module = []
+        if '.' in module_name:
+            composite_action_module = module_name.strip().split(".")
+            package_path = "odie.actions" + "." + composite_action_module[0].lower() + "." + composite_action_module[1].lower()
+            action_module_name = composite_action_module[1]
+            logger.debug("[Utils]-> get_dynamic_class_instantiation : package path : %s" % (package_path))
+            if resources_dir is not None:
+                action_resource_path = resources_dir + \
+                                       os.sep + composite_action_module[0].lower() + os.sep + \
+                                       action_module_name.lower()+".py"
+                if os.path.exists(action_resource_path):
+                    imp.load_source(action_module_name.capitalize(), action_resource_path)
+                    package_name = action_module_name.capitalize()
+        else:
+            package_path = "odie." + package_name + "." + module_name.lower() + "." + module_name.lower()
+            logger.debug("[Utils]-> get_dynamic_class_instantiation : package path : %s" % (package_path))
+            if resources_dir is not None:
+                neuron_resource_path = resources_dir + os.sep + module_name.lower() \
+                                       + os.sep + module_name.lower() + ".py"
+                if os.path.exists(neuron_resource_path):
+                    imp.load_source(module_name.capitalize(), neuron_resource_path)
+                    package_path = module_name.capitalize()
+                    logger.debug("[Utils]-> get_dynamic_class_instantiation : loading path : %s, as package %s" % (
+                        neuron_resource_path, package_path))
 
         mod = __import__(package_path, fromlist=[module_name.capitalize()])
 
